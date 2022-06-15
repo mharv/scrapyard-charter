@@ -20,5 +20,5 @@ func (o *OverworldScene) Update(state *GameState, deltaTime float64) error {
 }
 
 func (o *OverworldScene) Draw(screen *ebiten.Image) {
-	screen.Fill(color.RGBA{255, 0, 0, 255})
+	screen.Fill(color.RGBA{255, 0, 255, 255})
 }

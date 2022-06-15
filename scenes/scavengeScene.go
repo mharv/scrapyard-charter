@@ -20,5 +20,5 @@ func (s *ScavengeScene) Update(state *GameState, deltaTime float64) error {
 }
 
 func (s *ScavengeScene) Draw(screen *ebiten.Image) {
-	screen.Fill(color.RGBA{255, 0, 0, 255})
+	screen.Fill(color.RGBA{255, 255, 0, 255})
 }
