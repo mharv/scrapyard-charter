@@ -4,7 +4,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/mharv/scrapyard-charter/game"
+	"github.com/mharv/scrapyard-charter/scenes"
 )
 
 type TemplateScene struct {
@@ -16,7 +16,7 @@ func (t *TemplateScene) Init() {
 func (t *TemplateScene) ReadInput() {
 }
 
-func (t *TemplateScene) Update(state *game.GameState, deltaTime float64) error {
+func (t *TemplateScene) Update(state *scenes.GameState, deltaTime float64) error {
 	return nil
 }
 
