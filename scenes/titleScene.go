@@ -12,15 +12,15 @@ import (
 )
 
 type TitleScene struct {
-	play        bool
-	options     bool
+	owrld       bool
+	scav        bool
 	esc         bool
 	txtRenderer *etxt.Renderer
 }
 
 func (t *TitleScene) Init() {
-	t.play = false
-	t.options = false
+	t.owrld = false
+	t.scav = false
 	t.esc = false
 
 	fontLib := etxt.NewFontLibrary()
@@ -43,16 +43,16 @@ func (t *TitleScene) Init() {
 }
 
 func (t *TitleScene) ReadInput() {
-	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-		t.play = true
+	if inpututil.IsKeyJustPressed(ebiten.KeyO) {
+		t.owrld = true
 	} else {
-		t.play = false
+		t.owrld = false
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyO) {
-		t.options = true
+	if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		t.scav = true
 	} else {
-		t.options = false
+		t.scav = false
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
@@ -63,13 +63,13 @@ func (t *TitleScene) ReadInput() {
 }
 
 func (t *TitleScene) Update(state *GameState, deltaTime float64) error {
-	if t.play {
-		g := &OverworldScene{}
-		state.SceneManager.GoTo(g, 2)
+	if t.owrld {
+		o := &OverworldScene{}
+		state.SceneManager.GoTo(o, 5)
 	}
-	if t.options {
-		// o := &OptionsScene{}
-		// state.SceneManager.GoTo(o, 10)
+	if t.scav {
+		s := &ScavengeScene{}
+		state.SceneManager.GoTo(s, 5)
 	}
 	if t.esc {
 		os.Exit(0)
@@ -82,5 +82,5 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 
 	t.txtRenderer.SetTarget(screen)
 	t.txtRenderer.SetColor(color.RGBA{255, 255, 255, 255})
-	t.txtRenderer.Draw("Press SPACE to play\nPress O for options\nPress ESC to quit", globals.ScreenWidth/2, globals.ScreenHeight/2)
+	t.txtRenderer.Draw("Press O to go to the overworld.\nPress S to scavenge\nPress ESC to quit", globals.ScreenWidth/2, globals.ScreenHeight/2)
 }
