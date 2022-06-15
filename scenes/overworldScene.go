@@ -1,4 +1,4 @@
-package game
+package scenes
 
 import (
 	"image/color"
