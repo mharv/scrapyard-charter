@@ -18,6 +18,10 @@ type TitleScene struct {
 	txtRenderer *etxt.Renderer
 }
 
+const (
+	transitionTime = 1
+)
+
 func (t *TitleScene) Init() {
 	t.owrld = false
 	t.scav = false
@@ -65,11 +69,11 @@ func (t *TitleScene) ReadInput() {
 func (t *TitleScene) Update(state *GameState, deltaTime float64) error {
 	if t.owrld {
 		o := &OverworldScene{}
-		state.SceneManager.GoTo(o, 5)
+		state.SceneManager.GoTo(o, transitionTime)
 	}
 	if t.scav {
 		s := &ScavengeScene{}
-		state.SceneManager.GoTo(s, 5)
+		state.SceneManager.GoTo(s, transitionTime)
 	}
 	if t.esc {
 		os.Exit(0)
