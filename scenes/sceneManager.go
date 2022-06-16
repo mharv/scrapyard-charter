@@ -17,12 +17,11 @@ type Scene interface {
 	Draw(screen *ebiten.Image)
 }
 
-const transitionMaxCount = 50
-
 type SceneManager struct {
-	current         Scene
-	next            Scene
-	transitionCount float64
+	current            Scene
+	next               Scene
+	transitionCount    float64
+	transitionMaxCount float64
 }
 
 type GameState struct {
@@ -67,7 +66,7 @@ func (s *SceneManager) Draw(screen *ebiten.Image) {
 
 	screen.DrawImage(transitionFrom, nil)
 
-	alpha := 1 - float64(s.transitionCount)/float64(transitionMaxCount)
+	alpha := 1 - float64(s.transitionCount)/float64(s.transitionMaxCount)
 	op := &ebiten.DrawImageOptions{}
 	op.ColorM.Scale(1, 1, 1, alpha)
 	screen.DrawImage(transitionTo, op)
@@ -75,14 +74,12 @@ func (s *SceneManager) Draw(screen *ebiten.Image) {
 
 func (s *SceneManager) GoTo(scene Scene, fadeTime float64) {
 	scene.Init()
-	if fadeTime > transitionMaxCount {
-		fadeTime = transitionMaxCount
-	}
 
 	if s.current == nil {
 		s.current = scene
 	} else {
 		s.next = scene
 		s.transitionCount = fadeTime
+		s.transitionMaxCount = fadeTime
 	}
 }

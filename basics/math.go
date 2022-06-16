@@ -2,38 +2,38 @@ package basics
 
 //Floats
 type Vector2f struct {
-	x float64
-	y float64
+	X float64
+	Y float64
 }
 
 type Vector3f struct {
-	x float64
-	y float64
-	z float64
+	X float64
+	Y float64
+	Z float64
 }
 
 type FloatRect struct {
-	x      float64
-	y      float64
-	width  float64
-	height float64
+	X      float64
+	Y      float64
+	Width  float64
+	Height float64
 }
 
 //Ints
 type Vector2i struct {
-	x int
-	y int
+	X int
+	Y int
 }
 
 type Vector3i struct {
-	x int
-	y int
-	z int
+	X int
+	Y int
+	Z int
 }
 
 type IntRect struct {
-	x      int
-	y      int
-	width  int
-	height int
+	X      int
+	Y      int
+	Width  int
+	Height int
 }

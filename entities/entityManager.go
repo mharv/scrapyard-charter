@@ -8,7 +8,7 @@ import (
 // once we've decided what all the game entities
 // need to have
 type Entity interface {
-	Init()
+	Init(ImageFilepath string)
 	ReadInput()
 	Update(deltaTime float64)
 	Draw(screen *ebiten.Image)
@@ -19,7 +19,6 @@ type EntityManager struct {
 }
 
 func (e *EntityManager) Init() {
-	//Add all your required entities can be initialized here
 }
 
 func (e *EntityManager) ReadInput() {
@@ -38,4 +37,9 @@ func (e *EntityManager) Draw(screen *ebiten.Image) {
 	for i := range e.entities {
 		e.entities[i].Draw(screen)
 	}
+}
+
+// Ensure entities are initialised before calling this method
+func (e *EntityManager) AddEntity(entity Entity) {
+	e.entities = append(e.entities, entity)
 }
