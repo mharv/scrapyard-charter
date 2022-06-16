@@ -55,6 +55,7 @@ func (s *ScavengeScene) Init() {
 	p := &entities.ScavPlayerObject{}
 	p.Init("images/player.png")
 	s.physSpace.Add(p.GetPhysObj())
+	s.physSpace.Add(p.GetPhysObj())
 	p.SetPosition(basics.Vector2f{X: s.spawnZone.X, Y: (s.spawnZone.Y - p.GetPhysObj().H)})
 	s.entitiyManager.AddEntity(p)
 
@@ -62,6 +63,7 @@ func (s *ScavengeScene) Init() {
 	m := &entities.MagnetObject{}
 	m.Init("images/magnet.png")
 	s.physSpace.Add(m.GetPhysObj())
+	s.physSpace.Add(m.GetFieldPhysObj())
 	s.entitiyManager.AddEntity(m)
 
 	s.menuBtn = false

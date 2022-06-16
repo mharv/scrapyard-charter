@@ -15,14 +15,14 @@ import (
 type ScavPlayerObject struct {
 	sprite           *ebiten.Image
 	physObj          *resolv.Object
-	magnet           MagnetObject
+	magnet           *MagnetObject
 	left, right      bool
 	moveSpeed        float64
 	fishingLinePoint basics.Vector2f
 }
 
 const (
-	initialMoveSpeed = 100
+	initialMoveSpeed = 200
 )
 
 func (s *ScavPlayerObject) GetPhysObj() *resolv.Object {

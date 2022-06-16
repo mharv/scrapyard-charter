@@ -37,3 +37,11 @@ type IntRect struct {
 	Width  int
 	Height int
 }
+
+func FloatLerp(a, b, t float64) float64 {
+	return (1-t)*a + t*b
+}
+
+func Vec2FLerp(v1, v2 Vector2f, t float64) Vector2f {
+	return Vector2f{X: FloatLerp(v1.X, v2.X, t), Y: FloatLerp(v1.Y, v2.Y, t)}
+}
