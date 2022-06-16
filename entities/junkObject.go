@@ -16,6 +16,14 @@ type JunkObject struct {
 	physObj *resolv.Object
 }
 
+func (j *JunkObject) GetPhysObj() *resolv.Object {
+	return j.physObj
+}
+
+func (j *JunkObject) GetSprite() *ebiten.Image {
+	return j.sprite
+}
+
 func (j *JunkObject) Init(ImageFilepath string) {
 	// Load an image given a filepath
 	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
@@ -33,7 +41,7 @@ func (j *JunkObject) ReadInput() {
 }
 
 func (j *JunkObject) Update(deltaTime float64) {
-	j.SetPosition(basics.Vector2f{X: j.physObj.X + 5*deltaTime, Y: j.physObj.Y + 2*deltaTime})
+	j.physObj.Update()
 }
 
 func (j *JunkObject) Draw(screen *ebiten.Image) {
@@ -51,6 +59,29 @@ func (j *JunkObject) Draw(screen *ebiten.Image) {
 }
 
 func (j *JunkObject) SetPosition(position basics.Vector2f) {
-	j.physObj.X = position.X
-	j.physObj.Y = position.Y
+	x := position.X
+	y := position.Y
+
+	j.physObj.X = x
+	j.physObj.Y = y
+
+	if len(j.physObj.Space.Objects()) > 1 {
+		for _, obj := range j.physObj.Space.Objects() {
+			if obj != j.physObj {
+				if j.physObj.Overlaps(obj) {
+					if j.physObj.X > obj.X {
+						j.physObj.X += ((obj.X + obj.W) - j.physObj.X)
+					} else {
+						j.physObj.X += (obj.X - (j.physObj.X + j.physObj.W))
+					}
+
+					if j.physObj.Y > obj.Y {
+						j.physObj.Y += ((obj.Y + obj.H) - j.physObj.Y)
+					} else {
+						j.physObj.Y += (obj.Y - (j.physObj.Y + j.physObj.H))
+					}
+				}
+			}
+		}
+	}
 }
