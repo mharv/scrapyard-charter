@@ -44,6 +44,6 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (g *Game) Init() {
-	ebiten.SetWindowSize(640, 480)
+	ebiten.SetWindowSize(globals.ScreenWidth, globals.ScreenHeight)
 	ebiten.SetWindowTitle("Scrapyard Charter")
 }

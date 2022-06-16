@@ -1,7 +1,7 @@
 package globals
 
 const (
-	ScreenWidth  = 640
-	ScreenHeight = 480
+	ScreenWidth  = 1366
+	ScreenHeight = 768
 	Debug        = false
 )
