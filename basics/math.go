@@ -52,6 +52,10 @@ func FloatDistance(v1, v2 Vector2f) float64 {
 	return math.Sqrt(((v2.X - v1.X) * (v2.X - v1.X)) + ((v2.Y - v1.Y) * (v2.Y - v1.Y)))
 }
 
+func FloatNormalise(v Vector2f) Vector2f {
+	return Vector2f{}
+}
+
 func FloatClamp(value, min, max float64) float64 {
 	if value < min {
 		return min

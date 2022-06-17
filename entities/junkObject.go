@@ -55,7 +55,7 @@ func (j *JunkObject) Draw(screen *ebiten.Image) {
 
 	// Debug drawing of the physics object
 	if globals.Debug {
-		ebitenutil.DrawRect(screen, j.physObj.X, j.physObj.Y, j.physObj.W, j.physObj.H, color.RGBA{0, 80, 255, 255})
+		ebitenutil.DrawRect(screen, j.physObj.X, j.physObj.Y, j.physObj.W, j.physObj.H, color.RGBA{0, 80, 255, 64})
 	}
 
 	// Draw the image (comment this out to see the above resolv rect ^^^)
