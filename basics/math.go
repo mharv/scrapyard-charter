@@ -1,5 +1,7 @@
 package basics
 
+import "math"
+
 //Floats
 type Vector2f struct {
 	X float64
@@ -44,4 +46,18 @@ func FloatLerp(a, b, t float64) float64 {
 
 func Vec2FLerp(v1, v2 Vector2f, t float64) Vector2f {
 	return Vector2f{X: FloatLerp(v1.X, v2.X, t), Y: FloatLerp(v1.Y, v2.Y, t)}
+}
+
+func FloatDistance(v1, v2 Vector2f) float64 {
+	return math.Sqrt(((v2.X - v1.X) * (v2.X - v1.X)) + ((v2.Y - v1.Y) * (v2.Y - v1.Y)))
+}
+
+func FloatClamp(value, min, max float64) float64 {
+	if value < min {
+		return min
+	}
+	if value > max {
+		return max
+	}
+	return value
 }

@@ -3,6 +3,7 @@ package entities
 import (
 	"image/color"
 	"log"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -18,6 +19,7 @@ type MagnetObject struct {
 	magFieldPhysObj    *resolv.Object
 	connectedJunk      *resolv.Object
 	attractedJunk      []*resolv.Object
+	rotation           float64
 	attractionStrength float64
 	magneticFieldSize  float64
 	magneticPoint      basics.Vector2f
@@ -31,7 +33,8 @@ type MagnetObject struct {
 const (
 	dropReactivationTimer     = 0.5
 	initialMagneticFieldSize  = 50
-	initialAttractionStrength = 10
+	initialAttractionStrength = 20
+	magPhysObjSizeDiff        = 20
 )
 
 func (m *MagnetObject) GetPhysObj() *resolv.Object {
@@ -55,20 +58,21 @@ func (m *MagnetObject) Init(ImageFilepath string) {
 
 	m.sprite = img
 
-	m.physObj = resolv.NewObject(0, 0, float64(m.sprite.Bounds().Dx()), float64(m.sprite.Bounds().Dy()), "magnet")
+	m.physObj = resolv.NewObject(0, 0, float64(m.sprite.Bounds().Dx())-magPhysObjSizeDiff, float64(m.sprite.Bounds().Dy())-magPhysObjSizeDiff, "magnet")
 
 	m.magneticFieldSize = initialMagneticFieldSize
 	m.attractionStrength = initialAttractionStrength
 
 	m.magFieldPhysObj = resolv.NewObject(-m.magneticFieldSize, -m.magneticFieldSize, float64(m.sprite.Bounds().Dx())+(m.magneticFieldSize*2), float64(m.sprite.Bounds().Dy())+(m.magneticFieldSize*2), "magneticField")
 
-	m.magneticPoint.X = float64(m.sprite.Bounds().Dx() / 2)
-	m.magneticPoint.Y = float64(m.sprite.Bounds().Dy())
+	m.magneticPoint.X = float64(magPhysObjSizeDiff / 2)
+	m.magneticPoint.Y = float64(m.sprite.Bounds().Dy() - (magPhysObjSizeDiff))
 
 	m.touch = false
 	m.connected = false
 	m.dropConnected = false
 	m.dropCounter = 0
+	m.rotation = float64(float64(90) / float64(180) * math.Pi)
 }
 
 func (m *MagnetObject) ReadInput() {
@@ -102,6 +106,8 @@ func (m *MagnetObject) Update(deltaTime float64) {
 				m.linkDistance.Y = m.connectedJunk.Y - m.physObj.Y
 				m.touch = true
 				m.connected = true
+				v := basics.Vector2f{X: m.connectedJunk.X, Y: m.connectedJunk.Y}
+				m.rotation = m.RotateTo(v)
 			} else {
 				m.touch = false
 			}
@@ -118,7 +124,7 @@ func (m *MagnetObject) Update(deltaTime float64) {
 	m.physObj.X = m.targetPos.X
 	m.physObj.Y = m.targetPos.Y
 
-	fieldOffset := basics.Vector2f{X: -m.magneticFieldSize, Y: -m.magneticFieldSize}
+	fieldOffset := basics.Vector2f{X: -m.magneticFieldSize - (magPhysObjSizeDiff / 2), Y: -m.magneticFieldSize - (magPhysObjSizeDiff / 2)}
 
 	m.magFieldPhysObj.X = m.physObj.X + fieldOffset.X
 	m.magFieldPhysObj.Y = m.physObj.Y + fieldOffset.Y
@@ -134,6 +140,8 @@ func (m *MagnetObject) Update(deltaTime float64) {
 		m.connected = false
 		m.touch = false
 		m.dropCounter = dropReactivationTimer
+		v := basics.Vector2f{X: m.physObj.X, Y: m.physObj.Y + 1}
+		m.rotation = m.RotateTo(v)
 	}
 
 	m.physObj.Update()
@@ -142,8 +150,12 @@ func (m *MagnetObject) Update(deltaTime float64) {
 
 func (m *MagnetObject) Draw(screen *ebiten.Image) {
 	options := &ebiten.DrawImageOptions{}
+	options.GeoM.Translate(-float64(m.sprite.Bounds().Dx())/2, -float64(m.sprite.Bounds().Dy())/2)
+	options.GeoM.Rotate(m.rotation - float64(float64(90)/float64(180)*math.Pi))
+	options.GeoM.Translate(+float64(m.sprite.Bounds().Dx())/2, +float64(m.sprite.Bounds().Dy())/2)
+
 	// Sprite is put over the top of the phys object
-	options.GeoM.Translate(m.physObj.X, m.physObj.Y)
+	options.GeoM.Translate(m.physObj.X-(magPhysObjSizeDiff/2), m.physObj.Y-(magPhysObjSizeDiff/2))
 
 	if m.touch {
 		options.ColorM.Scale(0.5, 1, 1, 1)
@@ -162,4 +174,9 @@ func (m *MagnetObject) Draw(screen *ebiten.Image) {
 func (m *MagnetObject) SetPosition(position basics.Vector2f) {
 	m.physObj.X = position.X
 	m.physObj.Y = position.Y
+}
+
+func (m *MagnetObject) RotateTo(position basics.Vector2f) float64 {
+	var angle = math.Atan2(position.Y-m.physObj.Y, position.X-m.physObj.X)
+	return angle //* (180 / math.Pi)
 }

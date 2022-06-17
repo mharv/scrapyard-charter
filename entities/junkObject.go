@@ -16,6 +16,10 @@ type JunkObject struct {
 	physObj *resolv.Object
 }
 
+const (
+	junkPhysObjSizeDiff = 15
+)
+
 func (j *JunkObject) GetPhysObj() *resolv.Object {
 	return j.physObj
 }
@@ -34,7 +38,7 @@ func (j *JunkObject) Init(ImageFilepath string) {
 	j.sprite = img
 
 	// Setup resolv object to be size of the sprite
-	j.physObj = resolv.NewObject(0, 0, float64(j.sprite.Bounds().Dx()), float64(j.sprite.Bounds().Dy()), "junk")
+	j.physObj = resolv.NewObject(0, 0, float64(j.sprite.Bounds().Dx())-junkPhysObjSizeDiff, float64(j.sprite.Bounds().Dy())-junkPhysObjSizeDiff, "junk")
 }
 
 func (j *JunkObject) ReadInput() {
@@ -47,7 +51,7 @@ func (j *JunkObject) Update(deltaTime float64) {
 func (j *JunkObject) Draw(screen *ebiten.Image) {
 	options := &ebiten.DrawImageOptions{}
 	// Sprite is put over the top of the phys object
-	options.GeoM.Translate(j.physObj.X, j.physObj.Y)
+	options.GeoM.Translate(j.physObj.X-(junkPhysObjSizeDiff/2), j.physObj.Y-(junkPhysObjSizeDiff/2))
 
 	// Debug drawing of the physics object
 	if globals.Debug {
