@@ -10,31 +10,31 @@ import (
 )
 
 type ScavengeScene struct {
-	entitiyManager entities.EntityManager
-	physSpace      *resolv.Space
+	entityManager entities.EntityManager
+	physSpace     *resolv.Space
 }
 
 func (s *ScavengeScene) Init() {
 	s.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, 16, 16)
 
-	s.entitiyManager.Init()
+	s.entityManager.Init()
 
 	j := &entities.JunkObject{}
 	j.Init("images/oldpc.png")
 
-	s.entitiyManager.AddEntity(j)
+	s.entityManager.AddEntity(j)
 }
 
 func (s *ScavengeScene) ReadInput() {
-	s.entitiyManager.ReadInput()
+	s.entityManager.ReadInput()
 }
 
 func (s *ScavengeScene) Update(state *GameState, deltaTime float64) error {
-	s.entitiyManager.Update(deltaTime)
+	s.entityManager.Update(deltaTime)
 	return nil
 }
 
 func (s *ScavengeScene) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{0, 0, 0, 255})
-	s.entitiyManager.Draw(screen)
+	s.entityManager.Draw(screen)
 }
