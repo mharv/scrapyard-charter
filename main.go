@@ -7,6 +7,7 @@ import (
 
 func main() {
 	game := &game.Game{}
+	game.Init()
 	if err := ebiten.RunGame(game); err != nil {
 		panic(err)
 	}
