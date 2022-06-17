@@ -65,3 +65,15 @@ func FloatClamp(value, min, max float64) float64 {
 	}
 	return value
 }
+
+func FloatRotAroundPoint(point, center Vector2f, angle float64) Vector2f {
+	vec1 := Vector2f{X: point.X - center.X, Y: point.Y - center.Y}
+	vec2 := Vector2f{
+		X: vec1.X*math.Cos(angle) - vec1.Y*math.Sin(angle),
+		Y: vec1.X*math.Sin(angle) + vec1.Y*math.Cos(angle),
+	}
+
+	// translate point back:
+	value := Vector2f{X: vec2.X + center.X, Y: vec2.Y + center.Y}
+	return value
+}

@@ -32,6 +32,8 @@ type MagnetObject struct {
 	touch, connected   bool
 	magnetActive       bool
 	dropConnected      bool
+	retract            bool
+	syncToRod          bool
 	dropCounter        float64
 }
 
@@ -39,11 +41,15 @@ const (
 	dropReactivationTimer     = 0.5
 	initialMagneticFieldSize  = 50
 	initialAttractionStrength = 10
+	initialLineLength         = 200
+	initialMagnetCastSpeed    = 5
+	initialMagnetReelSpeed    = 5
 	magPhysObjSizeDiff        = 20
 )
 
 func (m *MagnetObject) GetFishingLinePoint() basics.Vector2f {
 	value := basics.Vector2f{X: m.physObj.X + (m.physObj.W / 2), Y: m.physObj.Y}
+	value = basics.FloatRotAroundPoint(value, basics.Vector2f{X: m.physObj.X + (m.physObj.W / 2), Y: m.physObj.Y + (m.physObj.H / 2)}, m.rotation-(float64(90)/float64(180)*math.Pi))
 	return value
 }
 
@@ -93,6 +99,8 @@ func (m *MagnetObject) Init(ImageFilepath string) {
 	m.connected = false
 	m.dropConnected = false
 	m.magnetActive = false
+	m.retract = false
+	m.syncToRod = true
 	m.dropCounter = 0
 	m.rotation = float64(float64(90) / float64(180) * math.Pi)
 }
@@ -104,6 +112,8 @@ func (m *MagnetObject) ReadInput() {
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		m.magnetActive = true
+		m.retract = false
+		m.syncToRod = false
 	}
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
@@ -114,13 +124,28 @@ func (m *MagnetObject) ReadInput() {
 }
 
 func (m *MagnetObject) Update(deltaTime float64) {
-	m.magnetPos.X = m.magnetStartPos.X - (m.physObj.W / 2)
-	m.magnetPos.Y = m.magnetStartPos.Y
+	tackingPoint := basics.Vector2f{}
+
+	tackingPoint.X = m.magnetStartPos.X - (m.physObj.W / 2)
+	tackingPoint.Y = m.magnetStartPos.Y
+
+	if m.syncToRod {
+		m.magnetPos.X = tackingPoint.X
+		m.magnetPos.Y = tackingPoint.Y
+	}
 
 	dx := m.magnetPos.X - m.physObj.X
 	dy := m.magnetPos.Y - m.physObj.Y
 
 	if m.magnetActive {
+		if basics.FloatDistance(m.magnetPos, tackingPoint) < initialLineLength && !m.retract {
+			m.magnetPos.X += initialMagnetCastSpeed * math.Cos(m.rotation)
+			m.magnetPos.Y += initialMagnetCastSpeed * math.Sin(m.rotation)
+		} else {
+			m.retract = true
+			m.magnetActive = false
+		}
+
 		if m.dropCounter > 0 {
 			m.dropCounter -= deltaTime
 		} else {
@@ -146,10 +171,23 @@ func (m *MagnetObject) Update(deltaTime float64) {
 	} else {
 		m.targetObj.X = m.targetPos.X
 		m.targetObj.Y = m.targetPos.Y
+
+		if basics.FloatDistance(m.magnetPos, tackingPoint) >= 5 && m.retract {
+			m.rotation = m.RotateTo(tackingPoint) + (180 * (180 / math.Pi))
+			m.magnetPos.X -= initialMagnetReelSpeed * math.Cos(m.rotation)
+			m.magnetPos.Y -= initialMagnetReelSpeed * math.Sin(m.rotation)
+		} else {
+			m.syncToRod = true
+		}
 	}
 
-	r := basics.Vector2f{X: m.targetObj.X, Y: m.targetObj.Y}
-	m.rotation = m.RotateTo(r)
+	if !m.connected {
+		r := basics.Vector2f{X: m.targetObj.X, Y: m.targetObj.Y}
+		m.rotation = m.RotateTo(r)
+	} else {
+		r := basics.Vector2f{X: m.connectedJunk.X, Y: m.connectedJunk.Y}
+		m.rotation = m.RotateTo(r)
+	}
 
 	if len(m.attractedJunk) > 0 {
 		for _, junk := range m.attractedJunk {
@@ -225,5 +263,5 @@ func (m *MagnetObject) SetPosition(position basics.Vector2f) {
 
 func (m *MagnetObject) RotateTo(position basics.Vector2f) float64 {
 	var angle = math.Atan2(position.Y-m.physObj.Y, position.X-m.physObj.X)
-	return angle //* (180 / math.Pi)
+	return angle
 }
