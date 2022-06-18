@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -38,7 +39,7 @@ func (p *OverworldPlayerObject) Init(ImageFilepath string) {
 	p.sprite = img
 
 	// Setup resolv object to be size of the sprite
-	p.physObj = resolv.NewObject(globals.ScreenWidth/4, globals.ScreenHeight/4, float64(p.sprite.Bounds().Dx()), float64(p.sprite.Bounds().Dy()), "player")
+	p.physObj = resolv.NewObject(globals.ScreenWidth, globals.ScreenHeight, float64(p.sprite.Bounds().Dx()), float64(p.sprite.Bounds().Dy()/2), "player")
 }
 
 func (p *OverworldPlayerObject) ReadInput() {
@@ -74,21 +75,36 @@ func (p *OverworldPlayerObject) ReadInput() {
 }
 
 func (p *OverworldPlayerObject) Update(deltaTime float64) {
+
+	var dx, dy float64
+
 	if p.moveLeft {
-		p.physObj.X -= p.moveSpeed * deltaTime
+		dx = p.moveSpeed * deltaTime * -1
 	}
 
 	if p.moveRight {
-		p.physObj.X += p.moveSpeed * deltaTime
+		dx = p.moveSpeed * deltaTime
 	}
 
 	if p.moveDown {
-		p.physObj.Y += p.moveSpeed * deltaTime
+		dy = p.moveSpeed * deltaTime
 	}
 
 	if p.moveUp {
-		p.physObj.Y -= p.moveSpeed * deltaTime
+		dy = p.moveSpeed * deltaTime * -1
 	}
+
+	if col := p.physObj.Check(dx, 0, "solid"); col != nil {
+		dx = 0
+	}
+
+	p.physObj.X += dx
+
+	if col := p.physObj.Check(0, dy, "solid"); col != nil {
+		dy = 0
+	}
+
+	p.physObj.Y += dy
 
 	p.physObj.Update()
 }
@@ -96,9 +112,13 @@ func (p *OverworldPlayerObject) Update(deltaTime float64) {
 func (p *OverworldPlayerObject) Draw(screen *ebiten.Image) {
 	options := &ebiten.DrawImageOptions{}
 	// Sprite is put over the top of the phys object
-	options.GeoM.Translate(p.physObj.X, p.physObj.Y)
 
-	// Draw the image (comment this out to see the above resolv rect ^^^)
+	// Debug drawing of the physics object
+	if globals.Debug {
+		ebitenutil.DrawRect(screen, p.physObj.X, p.physObj.Y, p.physObj.W, p.physObj.H, color.RGBA{0, 80, 255, 64})
+	}
+
+	options.GeoM.Translate(p.physObj.X, p.physObj.Y-p.physObj.H)
 	screen.DrawImage(p.sprite, options)
 }
 
