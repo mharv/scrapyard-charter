@@ -3,6 +3,7 @@ package scenes
 import (
 	"fmt"
 	"image/color"
+	"log"
 	"math/rand"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/mharv/scrapyard-charter/entities"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/solarlune/resolv"
+	"github.com/tinne26/etxt"
 )
 
 type ScavengeScene struct {
@@ -21,14 +23,40 @@ type ScavengeScene struct {
 	menuBtn                 bool
 	spawnZone               basics.FloatRect
 	distanceOfOverworldCast float64
+	txtRenderer             *etxt.Renderer
+	countdownTimer          float64
 }
 
-const spawnZoneEdgeBorder = 128
+const (
+	spawnZoneEdgeBorder = 128
+	defaultTimerStart   = 60
+	timerPositionOffset = 100
+)
 
 func (s *ScavengeScene) Init() {
 	s.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, 16, 16)
 
 	s.entityManager.Init()
+
+	s.countdownTimer = defaultTimerStart
+
+	fontLib := etxt.NewFontLibrary()
+
+	_, _, err := fontLib.ParseDirFonts("fonts")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if !fontLib.HasFont("Rajdhani Regular") {
+		log.Fatal("missing font Rajdhani-Regular.ttf")
+	}
+
+	s.txtRenderer = etxt.NewStdRenderer()
+	glyphsCache := etxt.NewDefaultCache(10 * 1024 * 1024) // 10MB
+	s.txtRenderer.SetCacheHandler(glyphsCache.NewHandler())
+	s.txtRenderer.SetFont(fontLib.GetFont("Rajdhani Regular"))
+	s.txtRenderer.SetAlign(etxt.Top, etxt.Left)
+	s.txtRenderer.SetSizePx(24)
 
 	s.spawnZone.Width = globals.ScreenWidth - (spawnZoneEdgeBorder * 4)
 	s.spawnZone.Height = globals.ScreenHeight - (spawnZoneEdgeBorder * 2)
@@ -87,6 +115,12 @@ func (s *ScavengeScene) ReadInput() {
 func (s *ScavengeScene) Update(state *GameState, deltaTime float64) error {
 	s.entityManager.Update(deltaTime)
 
+	s.countdownTimer -= deltaTime
+	if s.countdownTimer <= 0 {
+		o := &OverworldScene{}
+		state.SceneManager.GoTo(o, transitionTime)
+	}
+
 	if s.menuBtn {
 		t := &TitleScene{}
 		state.SceneManager.GoTo(t, transitionTime)
@@ -102,7 +136,16 @@ func (s *ScavengeScene) Draw(screen *ebiten.Image) {
 		ebitenutil.DrawRect(screen, s.spawnZone.X, s.spawnZone.Y, s.spawnZone.Width, s.spawnZone.Height, color.RGBA{128, 96, 64, 255})
 	}
 
+	timer := fmt.Sprintf("%.2f", s.countdownTimer)
+
 	s.entityManager.Draw(screen)
+	s.txtRenderer.SetTarget(screen)
+	if s.countdownTimer > 10 {
+		s.txtRenderer.SetColor(color.RGBA{255, 255, 255, 255})
+	} else {
+		s.txtRenderer.SetColor(color.RGBA{255, 0, 0, 255})
+	}
+	s.txtRenderer.Draw(timer, globals.ScreenWidth-timerPositionOffset, 0)
 
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("cast available: %f", s.distanceOfOverworldCast))
 }
