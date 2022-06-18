@@ -1,56 +1,108 @@
 package entities
 
 import (
-	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/solarlune/resolv"
 )
 
 type OverworldPlayerObject struct {
-	sprite  *ebiten.Image
-	physObj *resolv.Object
+	sprite                                *ebiten.Image
+	physObj                               *resolv.Object
+	entityManager                         EntityManager
+	moveUp, moveDown, moveRight, moveLeft bool
+	moveSpeed                             float64
 }
 
-func (j *OverworldPlayerObject) Init(ImageFilepath string) {
+const (
+	moveSpeed = 200
+)
+
+func (p *OverworldPlayerObject) GetPhysObj() *resolv.Object {
+	return p.physObj
+}
+
+func (p *OverworldPlayerObject) Init(ImageFilepath string) {
 	// Load an image given a filepath
 	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	j.sprite = img
+	p.moveSpeed = moveSpeed
+	p.sprite = img
 
 	// Setup resolv object to be size of the sprite
-	j.physObj = resolv.NewObject(0, 0, float64(j.sprite.Bounds().Dx()), float64(j.sprite.Bounds().Dy()), "junk")
+	p.physObj = resolv.NewObject(globals.ScreenWidth/4, globals.ScreenHeight/4, float64(p.sprite.Bounds().Dx()), float64(p.sprite.Bounds().Dy()), "player")
 }
 
-func (j *OverworldPlayerObject) ReadInput() {
-}
+func (p *OverworldPlayerObject) ReadInput() {
+	p.entityManager.ReadInput()
 
-func (j *OverworldPlayerObject) Update(deltaTime float64) {
-	j.SetPosition(basics.Vector2f{X: j.physObj.X + 5*deltaTime, Y: j.physObj.Y + 2*deltaTime})
-}
-
-func (j *OverworldPlayerObject) Draw(screen *ebiten.Image) {
-	options := &ebiten.DrawImageOptions{}
-	// Sprite is put over the top of the phys object
-	options.GeoM.Translate(j.physObj.X, j.physObj.Y)
-
-	// Debug drawing of the physics object
-	if globals.Debug {
-		ebitenutil.DrawRect(screen, j.physObj.X, j.physObj.Y, j.physObj.W, j.physObj.H, color.RGBA{0, 80, 255, 255})
+	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
+		p.moveUp = true
+	}
+	if inpututil.IsKeyJustReleased(ebiten.KeyW) {
+		p.moveUp = false
 	}
 
-	// Draw the image (comment this out to see the above resolv rect ^^^)
-	screen.DrawImage(j.sprite, options)
+	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		p.moveLeft = true
+	}
+	if inpututil.IsKeyJustReleased(ebiten.KeyA) {
+		p.moveLeft = false
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		p.moveDown = true
+	}
+	if inpututil.IsKeyJustReleased(ebiten.KeyS) {
+		p.moveDown = false
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyD) {
+		p.moveRight = true
+	}
+	if inpututil.IsKeyJustReleased(ebiten.KeyD) {
+		p.moveRight = false
+	}
 }
 
-func (j *OverworldPlayerObject) SetPosition(position basics.Vector2f) {
-	j.physObj.X = position.X
-	j.physObj.Y = position.Y
+func (p *OverworldPlayerObject) Update(deltaTime float64) {
+	if p.moveLeft {
+		p.physObj.X -= p.moveSpeed * deltaTime
+	}
+
+	if p.moveRight {
+		p.physObj.X += p.moveSpeed * deltaTime
+	}
+
+	if p.moveDown {
+		p.physObj.Y += p.moveSpeed * deltaTime
+	}
+
+	if p.moveUp {
+		p.physObj.Y -= p.moveSpeed * deltaTime
+	}
+
+	p.physObj.Update()
+}
+
+func (p *OverworldPlayerObject) Draw(screen *ebiten.Image) {
+	options := &ebiten.DrawImageOptions{}
+	// Sprite is put over the top of the phys object
+	options.GeoM.Translate(p.physObj.X, p.physObj.Y)
+
+	// Draw the image (comment this out to see the above resolv rect ^^^)
+	screen.DrawImage(p.sprite, options)
+}
+
+func (p *OverworldPlayerObject) SetPosition(position basics.Vector2f) {
+	p.physObj.X = position.X
+	p.physObj.Y = position.Y
 }
