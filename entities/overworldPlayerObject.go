@@ -18,6 +18,7 @@ type OverworldPlayerObject struct {
 	entityManager                         EntityManager
 	moveUp, moveDown, moveRight, moveLeft bool
 	moveSpeed                             float64
+	CastDistanceLimit                     float64
 }
 
 const (
@@ -125,4 +126,8 @@ func (p *OverworldPlayerObject) Draw(screen *ebiten.Image) {
 func (p *OverworldPlayerObject) SetPosition(position basics.Vector2f) {
 	p.physObj.X = position.X
 	p.physObj.Y = position.Y
+}
+
+func (p *OverworldPlayerObject) GetCellPosition() (x, y int) {
+	return p.physObj.CellPosition()
 }

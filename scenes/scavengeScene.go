@@ -1,6 +1,7 @@
 package scenes
 
 import (
+	"fmt"
 	"image/color"
 	"math/rand"
 	"time"
@@ -15,10 +16,11 @@ import (
 )
 
 type ScavengeScene struct {
-	entityManager entities.EntityManager
-	physSpace     *resolv.Space
-	menuBtn       bool
-	spawnZone     basics.FloatRect
+	entityManager           entities.EntityManager
+	physSpace               *resolv.Space
+	menuBtn                 bool
+	spawnZone               basics.FloatRect
+	distanceOfOverworldCast float64
 }
 
 const spawnZoneEdgeBorder = 128
@@ -101,4 +103,6 @@ func (s *ScavengeScene) Draw(screen *ebiten.Image) {
 	}
 
 	s.entityManager.Draw(screen)
+
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("cast available: %f", s.distanceOfOverworldCast))
 }
