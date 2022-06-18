@@ -8,6 +8,18 @@ type Vector2f struct {
 	Y float64
 }
 
+type Vector2[T interface{}] struct {
+	X T
+	Y T
+}
+
+type Rect[T interface{}] struct {
+	X      T
+	Y      T
+	Width  T
+	Height T
+}
+
 type Vector3f struct {
 	X float64
 	Y float64
@@ -52,8 +64,18 @@ func FloatDistance(v1, v2 Vector2f) float64 {
 	return math.Sqrt(((v2.X - v1.X) * (v2.X - v1.X)) + ((v2.Y - v1.Y) * (v2.Y - v1.Y)))
 }
 
+func FloatMagnitude(v1 Vector2f) float64 {
+	return math.Sqrt(v1.X*v1.X + v1.Y*v1.Y)
+}
+
 func FloatNormalise(v Vector2f) Vector2f {
-	return Vector2f{}
+	m := FloatMagnitude(v)
+	value := Vector2f{}
+	if m > 0 {
+		value.X = v.X / m
+		value.Y = v.Y / m
+	}
+	return value
 }
 
 func FloatClamp(value, min, max float64) float64 {
@@ -76,4 +98,10 @@ func FloatRotAroundPoint(point, center Vector2f, angle float64) Vector2f {
 	// translate point back:
 	value := Vector2f{X: vec2.X + center.X, Y: vec2.Y + center.Y}
 	return value
+}
+
+func AngleBetweenFloatVec(v1, v2 Vector2f) float64 {
+	dot := v1.X*v2.X + v1.Y*v2.Y
+	det := v1.X*v2.Y - v1.Y*v2.X
+	return math.Atan2(det, dot)
 }

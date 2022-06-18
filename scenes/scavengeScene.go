@@ -15,10 +15,10 @@ import (
 )
 
 type ScavengeScene struct {
-	entitiyManager entities.EntityManager
-	physSpace      *resolv.Space
-	menuBtn        bool
-	spawnZone      basics.FloatRect
+	entityManager entities.EntityManager
+	physSpace     *resolv.Space
+	menuBtn       bool
+	spawnZone     basics.FloatRect
 }
 
 const spawnZoneEdgeBorder = 128
@@ -26,7 +26,7 @@ const spawnZoneEdgeBorder = 128
 func (s *ScavengeScene) Init() {
 	s.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, 16, 16)
 
-	s.entitiyManager.Init()
+	s.entityManager.Init()
 
 	s.spawnZone.Width = globals.ScreenWidth - (spawnZoneEdgeBorder * 4)
 	s.spawnZone.Height = globals.ScreenHeight - (spawnZoneEdgeBorder * 2)
@@ -48,7 +48,7 @@ func (s *ScavengeScene) Init() {
 		y += s.spawnZone.Y - float64(j.GetPhysObj().Y)
 
 		j.SetPosition(basics.Vector2f{X: x, Y: y})
-		s.entitiyManager.AddEntity(j)
+		s.entityManager.AddEntity(j)
 	}
 
 	// Create magnet
@@ -56,7 +56,7 @@ func (s *ScavengeScene) Init() {
 	m.Init("images/magnet.png")
 	s.physSpace.Add(m.GetPhysObj())
 	s.physSpace.Add(m.GetFieldPhysObj())
-	s.entitiyManager.AddEntity(m)
+	s.entityManager.AddEntity(m)
 
 	// Create player
 	p := &entities.ScavPlayerObject{}
@@ -65,7 +65,7 @@ func (s *ScavengeScene) Init() {
 	s.physSpace.Add(p.GetPhysObj())
 	s.physSpace.Add(p.GetPhysObj())
 	p.SetPosition(basics.Vector2f{X: s.spawnZone.X, Y: (s.spawnZone.Y - p.GetPhysObj().H)})
-	s.entitiyManager.AddEntity(p)
+	s.entityManager.AddEntity(p)
 
 	m.SetMagnetStartPos(p.GetFishingLinePoint())
 
@@ -73,7 +73,7 @@ func (s *ScavengeScene) Init() {
 }
 
 func (s *ScavengeScene) ReadInput() {
-	s.entitiyManager.ReadInput()
+	s.entityManager.ReadInput()
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		s.menuBtn = true
@@ -83,7 +83,7 @@ func (s *ScavengeScene) ReadInput() {
 }
 
 func (s *ScavengeScene) Update(state *GameState, deltaTime float64) error {
-	s.entitiyManager.Update(deltaTime)
+	s.entityManager.Update(deltaTime)
 
 	if s.menuBtn {
 		t := &TitleScene{}
@@ -100,5 +100,5 @@ func (s *ScavengeScene) Draw(screen *ebiten.Image) {
 		ebitenutil.DrawRect(screen, s.spawnZone.X, s.spawnZone.Y, s.spawnZone.Width, s.spawnZone.Height, color.RGBA{128, 96, 64, 255})
 	}
 
-	s.entitiyManager.Draw(screen)
+	s.entityManager.Draw(screen)
 }

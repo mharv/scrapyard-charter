@@ -22,12 +22,14 @@ type MagnetObject struct {
 	connectedJunk      *resolv.Object
 	attractedJunk      []*resolv.Object
 	rotation           float64
+	imageRotation      float64
 	attractionStrength float64
 	magneticFieldSize  float64
 	magneticPoint      basics.Vector2f
 	linkDistance       basics.Vector2f
 	magnetPos          basics.Vector2f
 	magnetStartPos     *basics.Vector2f
+	magnetEndPos       basics.Vector2f
 	targetPos          basics.Vector2f
 	touch, connected   bool
 	magnetActive       bool
@@ -42,8 +44,8 @@ const (
 	initialMagneticFieldSize  = 50
 	initialAttractionStrength = 10
 	initialLineLength         = 200
-	initialMagnetCastSpeed    = 5
-	initialMagnetReelSpeed    = 5
+	initialMagnetCastSpeed    = 100
+	initialMagnetReelSpeed    = 150
 	magPhysObjSizeDiff        = 20
 )
 
@@ -103,6 +105,7 @@ func (m *MagnetObject) Init(ImageFilepath string) {
 	m.syncToRod = true
 	m.dropCounter = 0
 	m.rotation = float64(float64(90) / float64(180) * math.Pi)
+	m.imageRotation = m.rotation
 }
 
 func (m *MagnetObject) ReadInput() {
@@ -111,6 +114,7 @@ func (m *MagnetObject) ReadInput() {
 	m.targetPos.Y = float64(y)
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		m.magnetEndPos = m.targetPos
 		m.magnetActive = true
 		m.retract = false
 		m.syncToRod = false
@@ -124,23 +128,23 @@ func (m *MagnetObject) ReadInput() {
 }
 
 func (m *MagnetObject) Update(deltaTime float64) {
-	tackingPoint := basics.Vector2f{}
-
-	tackingPoint.X = m.magnetStartPos.X - (m.physObj.W / 2)
-	tackingPoint.Y = m.magnetStartPos.Y
+	trackingPoint := basics.Vector2f{}
+	trackingPoint.X = m.magnetStartPos.X - (m.physObj.W / 2)
+	trackingPoint.Y = m.magnetStartPos.Y
 
 	if m.syncToRod {
-		m.magnetPos.X = tackingPoint.X
-		m.magnetPos.Y = tackingPoint.Y
+		m.magnetPos.X = trackingPoint.X
+		m.magnetPos.Y = trackingPoint.Y
 	}
 
 	dx := m.magnetPos.X - m.physObj.X
 	dy := m.magnetPos.Y - m.physObj.Y
 
 	if m.magnetActive {
-		if basics.FloatDistance(m.magnetPos, tackingPoint) < initialLineLength && !m.retract {
-			m.magnetPos.X += initialMagnetCastSpeed * math.Cos(m.rotation)
-			m.magnetPos.Y += initialMagnetCastSpeed * math.Sin(m.rotation)
+		if basics.FloatDistance(m.magnetPos, trackingPoint) < initialLineLength && !m.retract {
+			newPos := m.MoveTowards(m.magnetPos, m.magnetEndPos, initialMagnetCastSpeed*deltaTime)
+			m.magnetPos.X += newPos.X
+			m.magnetPos.Y += newPos.Y
 		} else {
 			m.retract = true
 			m.magnetActive = false
@@ -169,13 +173,12 @@ func (m *MagnetObject) Update(deltaTime float64) {
 			}
 		}
 	} else {
-		m.targetObj.X = m.targetPos.X
-		m.targetObj.Y = m.targetPos.Y
+		m.SetObjPos(m.targetObj, m.targetPos)
 
-		if basics.FloatDistance(m.magnetPos, tackingPoint) >= 5 && m.retract {
-			m.rotation = m.RotateTo(tackingPoint) + (180 * (180 / math.Pi))
-			m.magnetPos.X -= initialMagnetReelSpeed * math.Cos(m.rotation)
-			m.magnetPos.Y -= initialMagnetReelSpeed * math.Sin(m.rotation)
+		if basics.FloatDistance(m.magnetPos, trackingPoint) >= 5 && m.retract {
+			newPos := m.MoveTowards(m.magnetPos, trackingPoint, initialMagnetReelSpeed*deltaTime)
+			m.magnetPos.X += newPos.X
+			m.magnetPos.Y += newPos.Y
 		} else {
 			m.syncToRod = true
 		}
@@ -196,17 +199,13 @@ func (m *MagnetObject) Update(deltaTime float64) {
 		}
 	}
 
-	m.physObj.X = m.magnetPos.X
-	m.physObj.Y = m.magnetPos.Y
-
 	fieldOffset := basics.Vector2f{X: -m.magneticFieldSize - (magPhysObjSizeDiff / 2), Y: -m.magneticFieldSize - (magPhysObjSizeDiff / 2)}
 
-	m.magFieldPhysObj.X = m.physObj.X + fieldOffset.X
-	m.magFieldPhysObj.Y = m.physObj.Y + fieldOffset.Y
+	m.SetObjPos(m.physObj, m.magnetPos)
+	m.SetObjPos(m.magFieldPhysObj, m.magnetPos, fieldOffset)
 
 	if m.connected {
-		m.connectedJunk.X = m.physObj.X + m.linkDistance.X
-		m.connectedJunk.Y = m.physObj.Y + m.linkDistance.Y
+		m.SetObjPos(m.connectedJunk, m.magnetPos, m.linkDistance)
 	}
 
 	if m.dropConnected {
@@ -264,4 +263,23 @@ func (m *MagnetObject) SetPosition(position basics.Vector2f) {
 func (m *MagnetObject) RotateTo(position basics.Vector2f) float64 {
 	var angle = math.Atan2(position.Y-m.physObj.Y, position.X-m.physObj.X)
 	return angle
+}
+
+func (m *MagnetObject) MoveTowards(from, to basics.Vector2f, distance float64) basics.Vector2f {
+	dir := basics.Vector2f{X: to.X - from.X, Y: to.Y - from.Y}
+	dir = basics.FloatNormalise(dir)
+
+	return basics.Vector2f{X: dir.X * distance, Y: dir.Y * distance}
+}
+
+func (m *MagnetObject) SetObjPos(obj *resolv.Object, vec ...basics.Vector2f) {
+	newPos := basics.Vector2f{X: 0, Y: 0}
+
+	for _, item := range vec {
+		newPos.X += item.X
+		newPos.Y += item.Y
+	}
+
+	obj.X = newPos.X
+	obj.Y = newPos.Y
 }
