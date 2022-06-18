@@ -34,14 +34,14 @@ func (t *TitleScene) Init() {
 		log.Fatal(err)
 	}
 
-	if !fontLib.HasFont("Blaka Regular") {
-		log.Fatal("missing font Blaka-Regular.ttf")
+	if !fontLib.HasFont("Rajdhani Regular") {
+		log.Fatal("missing font Rajdhani-Regular.ttf")
 	}
 
 	t.txtRenderer = etxt.NewStdRenderer()
 	glyphsCache := etxt.NewDefaultCache(10 * 1024 * 1024) // 10MB
 	t.txtRenderer.SetCacheHandler(glyphsCache.NewHandler())
-	t.txtRenderer.SetFont(fontLib.GetFont("Blaka Regular"))
+	t.txtRenderer.SetFont(fontLib.GetFont("Rajdhani Regular"))
 	t.txtRenderer.SetAlign(etxt.YCenter, etxt.XCenter)
 	t.txtRenderer.SetSizePx(24)
 }
