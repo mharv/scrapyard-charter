@@ -46,6 +46,13 @@ func (p *OverworldPlayerObject) Init(ImageFilepath string) {
 func (p *OverworldPlayerObject) ReadInput() {
 	p.entityManager.ReadInput()
 
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		p.moveSpeed *= 2
+	}
+	if inpututil.IsKeyJustReleased(ebiten.KeySpace) {
+		p.moveSpeed = moveSpeed
+	}
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
 		p.moveUp = true
 	}
