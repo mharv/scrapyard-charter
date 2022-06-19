@@ -63,15 +63,15 @@ func (o *OverworldScene) Init() {
 
 	o.spawnZone.Width = globals.ScreenWidth
 	o.spawnZone.Height = globals.ScreenHeight
-	o.spawnZone.X = 0
-	o.spawnZone.Y = 0
+	o.spawnZone.X = o.spawnZone.Width / 2
+	o.spawnZone.Y = o.spawnZone.Height / 2
 
 	// create homeBase
 
 	t := &entities.HomeBaseObject{}
 	t.Init("images/homeBase.png")
 	t.GetPhysObj().AddTags("home", "solid")
-	t.SetPosition(basics.Vector2f{X: o.spawnZone.Width / 2, Y: o.spawnZone.Height / 2})
+	t.SetPosition(basics.Vector2f{X: o.spawnZone.X, Y: o.spawnZone.Y})
 	o.physSpace.Add(t.GetPhysObj())
 	o.entityManager.AddEntity(t)
 	// Create player
@@ -80,7 +80,7 @@ func (o *OverworldScene) Init() {
 	p := &entities.OverworldPlayerObject{CastDistanceLimit: 200.0}
 	p.Init("images/placeholderOverworldPlayerAssetTransparent.png")
 	o.physSpace.Add(p.GetPhysObj())
-	p.SetPosition(basics.Vector2f{X: o.spawnZone.X + p.GetPhysObj().W, Y: (o.spawnZone.Y + p.GetPhysObj().H)})
+	p.SetPosition(basics.Vector2f{X: o.spawnZone.X, Y: (o.spawnZone.Y + t.GetPhysObj().H)})
 	o.entityManager.AddEntity(p)
 	o.player = *p
 }
