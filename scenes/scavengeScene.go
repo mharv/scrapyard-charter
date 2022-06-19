@@ -93,11 +93,17 @@ func (s *ScavengeScene) Init() {
 	p.Init("images/player.png")
 	p.SetMagnet(m)
 	s.physSpace.Add(p.GetPhysObj())
-	s.physSpace.Add(p.GetPhysObj())
 	p.SetPosition(basics.Vector2f{X: s.spawnZone.X, Y: (s.spawnZone.Y - p.GetPhysObj().H)})
 	s.entityManager.AddEntity(p)
 
-	m.SetMagnetStartPos(p.GetFishingLinePoint())
+	r := &entities.ScavRodObject{}
+	r.Init("images/rodSection.png")
+	r.SetRoot(p.GetFishingRodStartPoint())
+	r.SetTip(p.GetFishingRodEndPoint())
+	r.SetMagnetPosition(m.GetMagnetPos())
+	s.entityManager.AddEntity(r)
+
+	m.SetMagnetStartPos(p.GetFishingRodEndPoint())
 
 	s.menuBtn = false
 }

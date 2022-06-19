@@ -13,18 +13,22 @@ import (
 )
 
 type ScavPlayerObject struct {
-	sprite           *ebiten.Image
-	physObj          *resolv.Object
-	magnet           *MagnetObject
-	left, right      bool
-	moveSpeed        float64
-	fishingLinePoint basics.Vector2f
+	sprite               *ebiten.Image
+	physObj              *resolv.Object
+	magnet               *MagnetObject
+	left, right          bool
+	moveSpeed            float64
+	fishingRodEndPoint   basics.Vector2f
+	fishingRodStartPoint basics.Vector2f
 }
 
 const (
 	initialMoveSpeed = 100
 	rodEndX          = 121
 	rodEndY          = 58
+
+	rodStartX = 52
+	rodStartY = 52
 )
 
 func (s *ScavPlayerObject) SetMagnet(m *MagnetObject) {
@@ -35,8 +39,12 @@ func (s *ScavPlayerObject) GetPhysObj() *resolv.Object {
 	return s.physObj
 }
 
-func (s *ScavPlayerObject) GetFishingLinePoint() *basics.Vector2f {
-	return &s.fishingLinePoint
+func (s *ScavPlayerObject) GetFishingRodEndPoint() *basics.Vector2f {
+	return &s.fishingRodEndPoint
+}
+
+func (s *ScavPlayerObject) GetFishingRodStartPoint() *basics.Vector2f {
+	return &s.fishingRodStartPoint
 }
 
 func (s *ScavPlayerObject) Init(ImageFilepath string) {
@@ -54,8 +62,11 @@ func (s *ScavPlayerObject) Init(ImageFilepath string) {
 	s.left = false
 	s.right = false
 
-	s.fishingLinePoint.X = rodEndX + s.physObj.X
-	s.fishingLinePoint.Y = rodEndY + s.physObj.Y
+	s.fishingRodEndPoint.X = rodEndX + s.physObj.X
+	s.fishingRodEndPoint.Y = rodEndY + s.physObj.Y
+
+	s.fishingRodStartPoint.X = rodStartX + s.physObj.X
+	s.fishingRodStartPoint.Y = rodStartY + s.physObj.Y
 
 	s.moveSpeed = initialMoveSpeed
 }
@@ -85,8 +96,11 @@ func (s *ScavPlayerObject) Update(deltaTime float64) {
 		s.physObj.X += s.moveSpeed * deltaTime
 	}
 
-	s.fishingLinePoint.X = rodEndX + s.physObj.X
-	s.fishingLinePoint.Y = rodEndY + s.physObj.Y
+	s.fishingRodEndPoint.X = rodEndX + s.physObj.X
+	s.fishingRodEndPoint.Y = rodEndY + s.physObj.Y
+
+	s.fishingRodStartPoint.X = rodStartX + s.physObj.X
+	s.fishingRodStartPoint.Y = rodStartY + s.physObj.Y
 
 	s.physObj.Update()
 }
@@ -101,7 +115,7 @@ func (s *ScavPlayerObject) Draw(screen *ebiten.Image) {
 		ebitenutil.DrawRect(screen, s.physObj.X, s.physObj.Y, s.physObj.W, s.physObj.H, color.RGBA{0, 80, 255, 64})
 	}
 
-	ebitenutil.DrawLine(screen, s.fishingLinePoint.X, s.fishingLinePoint.Y, s.magnet.GetFishingLinePoint().X, s.magnet.GetFishingLinePoint().Y, color.RGBA{197, 204, 184, 255})
+	ebitenutil.DrawLine(screen, s.fishingRodEndPoint.X, s.fishingRodEndPoint.Y, s.magnet.GetFishingLinePoint().X, s.magnet.GetFishingLinePoint().Y, color.RGBA{197, 204, 184, 255})
 
 	// Draw the image (comment this out to see the above resolv rect ^^^)
 	screen.DrawImage(s.sprite, options)
