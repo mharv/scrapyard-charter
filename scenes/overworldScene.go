@@ -51,7 +51,7 @@ func (o *OverworldScene) Init() {
 	o.physSpace.Add(geometry...)
 
 	for _, o := range o.physSpace.Objects() {
-		o.AddTags("solid")
+		o.AddTags("scrap", "solid")
 	}
 
 	img, _, err := ebitenutil.NewImageFromFile("images/overworldTerrainPlaceholderGrass.png")
@@ -63,15 +63,15 @@ func (o *OverworldScene) Init() {
 
 	o.spawnZone.Width = globals.ScreenWidth
 	o.spawnZone.Height = globals.ScreenHeight
-	o.spawnZone.X = 0
-	o.spawnZone.Y = 0
+	o.spawnZone.X = o.spawnZone.Width / 2
+	o.spawnZone.Y = o.spawnZone.Height / 2
 
 	// create homeBase
 
 	t := &entities.HomeBaseObject{}
 	t.Init("images/homeBase.png")
-	t.GetPhysObj().AddTags("solid")
-	t.SetPosition(basics.Vector2f{X: o.spawnZone.Width / 2, Y: o.spawnZone.Height / 2})
+	t.GetPhysObj().AddTags("home", "solid")
+	t.SetPosition(basics.Vector2f{X: o.spawnZone.X, Y: o.spawnZone.Y})
 	o.physSpace.Add(t.GetPhysObj())
 	o.entityManager.AddEntity(t)
 	// Create player
@@ -80,7 +80,7 @@ func (o *OverworldScene) Init() {
 	p := &entities.OverworldPlayerObject{CastDistanceLimit: 200.0}
 	p.Init("images/placeholderOverworldPlayerAssetTransparent.png")
 	o.physSpace.Add(p.GetPhysObj())
-	p.SetPosition(basics.Vector2f{X: o.spawnZone.X + p.GetPhysObj().W, Y: (o.spawnZone.Y + p.GetPhysObj().H)})
+	p.SetPosition(basics.Vector2f{X: o.spawnZone.X, Y: (o.spawnZone.Y + t.GetPhysObj().H)})
 	o.entityManager.AddEntity(p)
 	o.player = *p
 }
@@ -130,7 +130,7 @@ func (o *OverworldScene) Draw(screen *ebiten.Image) {
 
 	cellAtMouse := o.physSpace.Cell(mx, my)
 	if cellAtMouse != nil {
-		if cellAtMouse.ContainsTags("solid") && o.castDistance < o.player.CastDistanceLimit {
+		if cellAtMouse.ContainsTags("scrap") && o.castDistance < o.player.CastDistanceLimit {
 			drawColor = color.RGBA{0, 255, 0, 255}
 			o.castAvailable = true
 		} else {
