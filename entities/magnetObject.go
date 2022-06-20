@@ -44,9 +44,9 @@ const (
 	dropReactivationTimer     = 0.5
 	initialMagneticFieldSize  = 50
 	initialAttractionStrength = 20
-	initialLineLength         = 200.0
-	initialMagnetCastSpeed    = 200
-	initialMagnetReelSpeed    = 300
+	initialLineLength         = 800.0
+	initialMagnetCastSpeed    = 400
+	initialMagnetReelSpeed    = 600
 	magPhysObjSizeDiff        = 20
 )
 

@@ -66,10 +66,18 @@ func (s *ScavengeScene) Init() {
 	src := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(src)
 
+	names := []string{
+		"images/oldpc.png",
+		"images/cog.png",
+		"images/monitor.png",
+		"images/pipe.png",
+		"images/toaster.png",
+		"images/tyre.png",
+	}
 	// Create junk
 	for i := 0; i < 10; i++ {
 		j := &entities.JunkObject{}
-		j.Init("images/oldpc.png")
+		j.Init(names[rnd.Intn(6)])
 		s.physSpace.Add(j.GetPhysObj())
 
 		x := (rnd.Float64() * (s.spawnZone.Width))

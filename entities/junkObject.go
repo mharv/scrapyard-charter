@@ -3,6 +3,8 @@ package entities
 import (
 	"image/color"
 	"log"
+	"math/rand"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -14,6 +16,7 @@ import (
 type JunkObject struct {
 	sprite  *ebiten.Image
 	physObj *resolv.Object
+	rot     float64
 }
 
 const (
@@ -39,6 +42,10 @@ func (j *JunkObject) Init(ImageFilepath string) {
 
 	// Setup resolv object to be size of the sprite
 	j.physObj = resolv.NewObject(0, 0, float64(j.sprite.Bounds().Dx())-junkPhysObjSizeDiff, float64(j.sprite.Bounds().Dy())-junkPhysObjSizeDiff, "junk")
+
+	src := rand.NewSource(time.Now().UnixNano())
+	rnd := rand.New(src)
+	j.rot = float64(rnd.Intn(360))
 }
 
 func (j *JunkObject) ReadInput() {
@@ -50,6 +57,9 @@ func (j *JunkObject) Update(deltaTime float64) {
 
 func (j *JunkObject) Draw(screen *ebiten.Image) {
 	options := &ebiten.DrawImageOptions{}
+	options.GeoM.Translate(-float64(j.sprite.Bounds().Dx())/2, -float64(j.sprite.Bounds().Dy())/2)
+	options.GeoM.Rotate(j.rot)
+	options.GeoM.Translate(float64(j.sprite.Bounds().Dx())/2, float64(j.sprite.Bounds().Dy())/2)
 	// Sprite is put over the top of the phys object
 	options.GeoM.Translate(j.physObj.X-(junkPhysObjSizeDiff/2), j.physObj.Y-(junkPhysObjSizeDiff/2))
 
