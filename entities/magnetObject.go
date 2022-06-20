@@ -25,6 +25,7 @@ type MagnetObject struct {
 	imageRotation      float64
 	attractionStrength float64
 	magneticFieldSize  float64
+	lineLength         *float64
 	magneticPoint      basics.Vector2f
 	linkDistance       basics.Vector2f
 	magnetPos          *basics.Vector2f
@@ -43,9 +44,9 @@ const (
 	dropReactivationTimer     = 0.5
 	initialMagneticFieldSize  = 50
 	initialAttractionStrength = 10
-	initialLineLength         = 200
-	initialMagnetCastSpeed    = 100
-	initialMagnetReelSpeed    = 150
+	initialLineLength         = 200.0
+	initialMagnetCastSpeed    = 200
+	initialMagnetReelSpeed    = 300
 	magPhysObjSizeDiff        = 20
 )
 
@@ -53,6 +54,14 @@ func (m *MagnetObject) GetFishingLinePoint() basics.Vector2f {
 	value := basics.Vector2f{X: m.physObj.X + (m.physObj.W / 2), Y: m.physObj.Y}
 	value = basics.FloatRotAroundPoint(value, basics.Vector2f{X: m.physObj.X + (m.physObj.W / 2), Y: m.physObj.Y + (m.physObj.H / 2)}, m.rotation-(float64(90)/float64(180)*math.Pi))
 	return value
+}
+
+func (m *MagnetObject) GetMagnetOffset() basics.Vector2f {
+	return basics.Vector2f{X: m.physObj.W / 2, Y: 0}
+}
+
+func (m *MagnetObject) GetLineLength() *float64 {
+	return m.lineLength
 }
 
 func (m *MagnetObject) SetMagnetStartPos(pos *basics.Vector2f) {
@@ -114,6 +123,8 @@ func (m *MagnetObject) Init(ImageFilepath string) {
 	m.dropCounter = 0
 	m.rotation = float64(float64(90) / float64(180) * math.Pi)
 	m.imageRotation = m.rotation
+	ll := initialLineLength
+	m.lineLength = &ll
 }
 
 func (m *MagnetObject) ReadInput() {
@@ -122,7 +133,12 @@ func (m *MagnetObject) ReadInput() {
 	m.targetPos.Y = float64(y)
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		m.magnetEndPos = m.targetPos
+		end := basics.Vector2f{X: m.targetPos.X - m.magnetStartPos.X, Y: m.targetPos.Y - m.magnetStartPos.Y}
+		basics.FloatNormalise(end)
+		end.X *= *m.lineLength
+		end.Y *= *m.lineLength
+
+		m.magnetEndPos = end
 		m.magnetActive = true
 		m.retract = false
 		m.syncToRod = false
@@ -136,9 +152,7 @@ func (m *MagnetObject) ReadInput() {
 }
 
 func (m *MagnetObject) Update(deltaTime float64) {
-	trackingPoint := basics.Vector2f{}
-	trackingPoint.X = m.magnetStartPos.X - (m.physObj.W / 2)
-	trackingPoint.Y = m.magnetStartPos.Y
+	trackingPoint := basics.Vector2f{X: m.magnetStartPos.X - (m.physObj.W / 2), Y: m.magnetStartPos.Y}
 
 	if m.syncToRod {
 		m.magnetPos.X = trackingPoint.X
@@ -193,19 +207,19 @@ func (m *MagnetObject) Update(deltaTime float64) {
 	}
 
 	if !m.connected {
-		r := basics.Vector2f{X: m.targetObj.X, Y: m.targetObj.Y}
-		m.rotation = m.RotateTo(r)
+		if !m.magnetActive || m.retract {
+			r := basics.Vector2f{X: m.targetObj.X, Y: m.targetObj.Y}
+			m.rotation = m.RotateTo(r)
+		} else {
+			r := basics.Vector2f{X: m.magnetEndPos.X, Y: m.magnetEndPos.Y}
+			m.rotation = m.RotateTo(r)
+		}
 	} else {
 		r := basics.Vector2f{X: m.connectedJunk.X, Y: m.connectedJunk.Y}
 		m.rotation = m.RotateTo(r)
 	}
 
-	if len(m.attractedJunk) > 0 {
-		for _, junk := range m.attractedJunk {
-			junk.X = basics.FloatLerp(junk.X, m.magneticPoint.X+m.physObj.X, m.attractionStrength*deltaTime)
-			junk.Y = basics.FloatLerp(junk.Y, m.magneticPoint.Y+m.physObj.Y, m.attractionStrength*deltaTime)
-		}
-	}
+	m.MoveAttractedJunk(deltaTime)
 
 	fieldOffset := basics.Vector2f{X: -m.magneticFieldSize - (magPhysObjSizeDiff / 2), Y: -m.magneticFieldSize - (magPhysObjSizeDiff / 2)}
 
@@ -217,13 +231,7 @@ func (m *MagnetObject) Update(deltaTime float64) {
 	}
 
 	if m.dropConnected {
-		m.connectedJunk = nil
-		m.linkDistance = basics.Vector2f{X: 0, Y: 0}
-		m.connected = false
-		m.touch = false
-		m.dropCounter = dropReactivationTimer
-		v := basics.Vector2f{X: m.physObj.X, Y: m.physObj.Y + 1}
-		m.rotation = m.RotateTo(v)
+		m.Drop()
 	}
 
 	m.physObj.Update()
@@ -260,6 +268,25 @@ func (m *MagnetObject) Draw(screen *ebiten.Image) {
 	screen.DrawImage(m.sprite, sop)
 	if !m.magnetActive {
 		screen.DrawImage(m.targetSprite, top)
+	}
+}
+
+func (m *MagnetObject) Drop() {
+	m.connectedJunk = nil
+	m.linkDistance = basics.Vector2f{X: 0, Y: 0}
+	m.connected = false
+	m.touch = false
+	m.dropCounter = dropReactivationTimer
+	v := basics.Vector2f{X: m.physObj.X, Y: m.physObj.Y + 1}
+	m.rotation = m.RotateTo(v)
+}
+
+func (m *MagnetObject) MoveAttractedJunk(deltaTime float64) {
+	if len(m.attractedJunk) > 0 {
+		for _, junk := range m.attractedJunk {
+			junk.X = basics.FloatLerp(junk.X, m.magneticPoint.X+m.physObj.X, m.attractionStrength*deltaTime)
+			junk.Y = basics.FloatLerp(junk.Y, m.magneticPoint.Y+m.physObj.Y, m.attractionStrength*deltaTime)
+		}
 	}
 }
 

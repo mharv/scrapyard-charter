@@ -20,6 +20,7 @@ type ScavPlayerObject struct {
 	moveSpeed            float64
 	fishingRodEndPoint   basics.Vector2f
 	fishingRodStartPoint basics.Vector2f
+	currentRodEndPoint   *basics.Vector2f
 }
 
 const (
@@ -45,6 +46,10 @@ func (s *ScavPlayerObject) GetFishingRodEndPoint() *basics.Vector2f {
 
 func (s *ScavPlayerObject) GetFishingRodStartPoint() *basics.Vector2f {
 	return &s.fishingRodStartPoint
+}
+
+func (s *ScavPlayerObject) SetFishingRodEndPoint(rodEndPoint *basics.Vector2f) {
+	s.currentRodEndPoint = rodEndPoint
 }
 
 func (s *ScavPlayerObject) Init(ImageFilepath string) {
@@ -115,7 +120,7 @@ func (s *ScavPlayerObject) Draw(screen *ebiten.Image) {
 		ebitenutil.DrawRect(screen, s.physObj.X, s.physObj.Y, s.physObj.W, s.physObj.H, color.RGBA{0, 80, 255, 64})
 	}
 
-	ebitenutil.DrawLine(screen, s.fishingRodEndPoint.X, s.fishingRodEndPoint.Y, s.magnet.GetFishingLinePoint().X, s.magnet.GetFishingLinePoint().Y, color.RGBA{197, 204, 184, 255})
+	ebitenutil.DrawLine(screen, s.currentRodEndPoint.X, s.currentRodEndPoint.Y, s.magnet.GetFishingLinePoint().X, s.magnet.GetFishingLinePoint().Y, color.RGBA{197, 204, 184, 255})
 
 	// Draw the image (comment this out to see the above resolv rect ^^^)
 	screen.DrawImage(s.sprite, options)

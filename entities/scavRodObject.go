@@ -22,12 +22,14 @@ type ScavRodObject struct {
 	sprite            *ebiten.Image
 	rodSections       []RodSection
 	root              *basics.Vector2f
-	tip               *basics.Vector2f
+	tip               basics.Vector2f
 	magnetPosition    *basics.Vector2f
+	initialTipPos     *basics.Vector2f
 	rootController    basics.Vector2f
 	tipController     basics.Vector2f
 	maxMagnetDistance *float64
 	lineOffset        float64
+	magnetOffset      basics.Vector2f
 	rodBaseFlex       float64
 	rodTipFlex        float64
 	rodTipMaxSlop     float64
@@ -38,9 +40,9 @@ type ScavRodObject struct {
 const (
 	rodResolution  = 20
 	lineResolution = 5
-	rodBaseFlex    = 75
-	rodTipFlex     = 25
-	rodTipMaxSlop  = 5
+	rodBaseFlex    = 50
+	rodTipFlex     = 50
+	rodTipMaxSlop  = 25
 )
 
 func (s *ScavRodObject) GetSprite() *ebiten.Image {
@@ -51,20 +53,25 @@ func (s *ScavRodObject) SetRoot(rootPos *basics.Vector2f) {
 	s.root = rootPos
 }
 
+func (s *ScavRodObject) GetTip() *basics.Vector2f {
+	return &s.tip
+}
+
 func (s *ScavRodObject) SetTip(tipPos *basics.Vector2f) {
-	s.tip = tipPos
+	s.initialTipPos = tipPos
+	s.tip = *s.initialTipPos
 }
 
 func (s *ScavRodObject) SetMagnetPosition(magnetPosition *basics.Vector2f) {
 	s.magnetPosition = magnetPosition
 }
 
-func (s *ScavRodObject) GetMaxMagnetDistance(magnetDistance *float64) {
+func (s *ScavRodObject) SetMaxMagnetDistance(magnetDistance *float64) {
 	s.maxMagnetDistance = magnetDistance
 }
 
-func (s *ScavRodObject) GetCurrentTipPos() *basics.Vector2f {
-	return s.tip
+func (s *ScavRodObject) SetMagnetOffset(magnetOffset basics.Vector2f) {
+	s.magnetOffset = magnetOffset
 }
 
 func (s *ScavRodObject) Init(ImageFilepath string) {
@@ -76,9 +83,12 @@ func (s *ScavRodObject) Init(ImageFilepath string) {
 
 	s.sprite = img
 	s.lineOffset = float64(s.sprite.Bounds().Dy())
-	s.root = &basics.Vector2f{X: 250, Y: 250}
-	s.tip = &basics.Vector2f{X: s.root.X + 250, Y: s.root.Y}
-	s.rootController = basics.Vector2f{X: s.root.X + rodBaseFlex, Y: s.root.Y - rodBaseFlex}
+	s.root = &basics.Vector2f{X: 0, Y: 0}
+	s.initialTipPos = &basics.Vector2f{X: s.root.X, Y: s.root.Y}
+	s.tip = *s.initialTipPos
+	magDist := 1.0
+	s.maxMagnetDistance = &magDist
+	s.rootController = basics.Vector2f{X: s.root.X + (rodBaseFlex / 2), Y: s.root.Y - rodBaseFlex}
 	s.tipController = basics.Vector2f{X: s.tip.X, Y: s.tip.Y - rodTipFlex}
 	s.CalculatePoints()
 	for i := 0; i < rodResolution; i++ {
@@ -91,10 +101,9 @@ func (s *ScavRodObject) ReadInput() {
 }
 
 func (s *ScavRodObject) Update(deltaTime float64) {
-	s.rootController = basics.Vector2f{X: s.root.X + rodBaseFlex, Y: s.root.Y - rodBaseFlex}
+	s.rootController = basics.Vector2f{X: s.root.X + (rodBaseFlex / 2), Y: s.root.Y - rodBaseFlex}
+	s.UpdateTipPosition()
 	s.AngleRodTip()
-	//s.tipController = basics.Vector2f{X: s.tip.X, Y: s.tip.Y - rodTipFlex}
-
 	s.UpdatePoints()
 	s.UpdateRodSections()
 }
@@ -104,7 +113,7 @@ func (s *ScavRodObject) Draw(screen *ebiten.Image) {
 
 	for i := range s.linePoints {
 		if i > 0 {
-			ebitenutil.DrawLine(screen, s.linePoints[i-1].X, s.linePoints[i-1].Y, s.linePoints[i].X, s.linePoints[i].Y, color.RGBA{255, 255, 255, 255})
+			ebitenutil.DrawLine(screen, s.linePoints[i-1].X, s.linePoints[i-1].Y, s.linePoints[i].X, s.linePoints[i].Y, color.RGBA{197, 204, 184, 255})
 		}
 	}
 
@@ -143,8 +152,8 @@ func (s *ScavRodObject) CalculatePoints() {
 		}
 	}
 
-	s.rodPoints = append(s.rodPoints, *s.tip)
-	s.linePoints = append(s.linePoints, *s.tip)
+	s.rodPoints = append(s.rodPoints, s.tip)
+	s.linePoints = append(s.linePoints, s.tip)
 }
 
 func (s *ScavRodObject) UpdatePoints() {
@@ -175,8 +184,8 @@ func (s *ScavRodObject) UpdatePoints() {
 		}
 	}
 
-	s.rodPoints[len(s.rodPoints)-1] = *s.tip
-	s.linePoints[len(s.linePoints)-1] = *s.tip
+	s.rodPoints[len(s.rodPoints)-1] = s.tip
+	s.linePoints[len(s.linePoints)-1] = s.tip
 }
 
 func (s *ScavRodObject) UpdateRodSections() {
@@ -209,15 +218,23 @@ func (s *ScavRodObject) DrawRodSections(screen *ebiten.Image) {
 	}
 }
 
-func (s *ScavRodObject) UpdateTipPosition(screen *ebiten.Image) {
-	//dist := basics.FloatDistance(*s.magnetPosition, *s.tip)
+func (s *ScavRodObject) UpdateTipPosition() {
+	magpos := basics.Vector2f{X: s.magnetPosition.X + s.magnetOffset.X, Y: s.magnetPosition.Y + s.magnetOffset.Y + 10}
 
-	//percentage := dist / *s.maxMagnetDistance
+	dist := basics.FloatDistance(magpos, *s.initialTipPos)
 
+	ang := basics.AngleFromFVecToFVec(*s.initialTipPos, magpos)
+
+	percentage := (dist / *s.maxMagnetDistance) * rodTipMaxSlop
+
+	mod := basics.Vector2f{X: -(percentage * math.Cos(ang)), Y: -(percentage * math.Sin(ang))}
+
+	s.tip = basics.Vector2f{X: s.initialTipPos.X + mod.X, Y: s.initialTipPos.Y + mod.Y}
 }
 
 func (s *ScavRodObject) AngleRodTip() {
-	ang := basics.AngleBetweenFloatVec(*s.tip, *s.magnetPosition)
+	magpos := basics.Vector2f{X: s.magnetPosition.X + s.magnetOffset.X, Y: s.magnetPosition.Y + s.magnetOffset.Y + 10}
+	ang := basics.AngleFromFVecToFVec(s.tip, magpos)
 
-	s.tipController = basics.FloatRotAroundPoint(basics.Vector2f{X: s.tip.X, Y: s.tip.Y - rodTipFlex}, *s.tip, ang)
+	s.tipController = basics.FloatRotAroundPoint(basics.Vector2f{X: s.tip.X - s.rodTipFlex, Y: s.tip.Y - rodTipFlex}, s.tip, ang+(float64(90)/float64(180)*math.Pi))
 }
