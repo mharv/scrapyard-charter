@@ -5,7 +5,9 @@ import (
 	"image/color"
 	"log"
 	"math"
+	"math/rand"
 
+	"github.com/aquilax/go-perlin"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -23,6 +25,7 @@ type OverworldScene struct {
 	spawnZone                       basics.FloatRect
 	player                          entities.OverworldPlayerObject
 	castDistance                    float64
+	fallOffMap                      [globals.ScreenWidth][globals.ScreenHeight]float64
 }
 
 const (
@@ -33,26 +36,84 @@ func (o *OverworldScene) Init() {
 	o.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, cellSize, cellSize)
 	o.entityManager.Init()
 
-	// Construct geometry
-	geometry := []*resolv.Object{
-		// left wall
-		// resolv.NewObject(0, 0, 16, globals.ScreenHeight),
-		// right wall
-		resolv.NewObject(globals.ScreenWidth-16, 0, 16, globals.ScreenHeight),
-		// top wall
-		resolv.NewObject(0, 0, globals.ScreenWidth, 16),
-		// bottom wall
-		resolv.NewObject(0, globals.ScreenHeight-16, globals.ScreenWidth, 16),
+	// object array
+	geometry := []*resolv.Object{}
 
-		// middle wall
-		resolv.NewObject(400, 0, 80, globals.ScreenHeight/2),
+	// 1366 * 768
+	var terrain [globals.ScreenWidth][globals.ScreenHeight]int
+	var fallOffMap [globals.ScreenWidth][globals.ScreenHeight]float64
+
+	// generate fall off map
+	fallOffMapWidth := globals.ScreenWidth
+	fallOffMapHeight := globals.ScreenHeight
+
+	for i := 0; i < fallOffMapWidth; i++ {
+		for j := 0; j < fallOffMapHeight; j++ {
+			x := float64(i)/float64(fallOffMapWidth)*2 - 1
+			y := float64(j)/float64(fallOffMapHeight)*2 - 1
+
+			v := math.Max(math.Abs(x), math.Abs(y))
+			fallOffMap[i][j] = math.Pow(v, 3) / (math.Pow(v, 3) + math.Pow(3-3*v, 3))
+		}
+	}
+	// we can access and visualize the fall off map in the draw function
+	// if needed
+	// o.fallOffMap = fallOffMap
+
+	// we create 16 x 16 pixel blocks
+	tempCellSize := cellSize * 2
+	// 16 does not fit into 1366, we need an offset
+	offsetForGrid := 1366 % 16
+
+	// setup perlin noise gen -- probably wrong useage
+	var iterations int32 = 2
+	perlinNoise := perlin.NewPerlin(2, 3, iterations, int64(rand.Int()))
+	scale := 0.2
+
+	// used for determining if something is scrap or land
+	threshold := 0.7
+
+	for x := 0; x < len(terrain); x += tempCellSize {
+		for y := 0; y < len(terrain[x]); y += tempCellSize {
+			xOffset := (rand.Float64()*2 - 1) * 5000
+			yOffset := (rand.Float64()*2 - 1) * 5000
+			randomChanceToAdd := perlinNoise.Noise2D(float64(x)*scale+xOffset, float64(y)*scale+yOffset)
+
+			// forms hard border around edge of screen
+			if x == globals.ScreenWidth-tempCellSize-offsetForGrid || x == 0 {
+				randomChanceToAdd = 1
+			}
+			if y == globals.ScreenHeight-tempCellSize || y == 0 {
+				randomChanceToAdd = 1
+			}
+
+			// use fall off map to reduce the chance of scrap spawning in the middle
+			// creating an island like terrain
+			randomChanceToAdd += fallOffMap[x][y]
+
+			if randomChanceToAdd <= threshold {
+				tempCellObject := resolv.NewObject(float64(x), float64(y), float64(tempCellSize), float64(tempCellSize), "land")
+				geometry = append(geometry, tempCellObject)
+			}
+			if randomChanceToAdd > threshold {
+				tempCellObject := resolv.NewObject(float64(x), float64(y), float64(tempCellSize), float64(tempCellSize), "scrap", "solid")
+				geometry = append(geometry, tempCellObject)
+			}
+		}
 	}
 
+	// smoother
+	// 	if x != globals.ScreenWidth-tempCellSize-offsetForGrid &&
+	// 	x != 0 &&
+	// 	y != globals.ScreenHeight-tempCellSize &&
+	// 	y != 0 {
+
+	// 	randomChanceToAdd = 1
+
+	// }
+
+	// add generated objects to scene space
 	o.physSpace.Add(geometry...)
-
-	for _, o := range o.physSpace.Objects() {
-		o.AddTags("scrap", "solid")
-	}
 
 	img, _, err := ebitenutil.NewImageFromFile("images/overworldTerrainPlaceholderGrass.png")
 	if err != nil {
@@ -120,8 +181,7 @@ func (o *OverworldScene) Update(state *GameState, deltaTime float64) error {
 
 func (o *OverworldScene) Draw(screen *ebiten.Image) {
 
-	// options := &ebiten.DrawImageOptions{}
-
+	// cursor to player drawline and cast valid checks
 	mouseX, mouseY := ebiten.CursorPosition()
 	mx, my := o.physSpace.WorldToSpace(float64(mouseX), float64(mouseY))
 	cx, cy := o.player.GetCellPosition()
@@ -137,18 +197,36 @@ func (o *OverworldScene) Draw(screen *ebiten.Image) {
 			o.castAvailable = false
 		}
 	}
-	ebitenutil.DrawLine(screen, float64(cx)*cellSize, float64(cy)*cellSize, float64(mx)*cellSize, float64(my)*cellSize, drawColor)
 
-	// screen.DrawImage(o.background, options)
-
+	// draws the color depending on the tags for each object belonging to space
 	for _, o := range o.physSpace.Objects() {
-		drawColor := color.RGBA{60, 60, 60, 255}
-		if !o.HasTags("player") {
+		if o.HasTags("scrap") {
+			drawColor := color.RGBA{60, 60, 60, 255}
+			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
+		}
+		if o.HasTags("beach") {
+			drawColor := color.RGBA{222, 130, 22, 255}
+			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
+		}
+		if o.HasTags("land") {
+			drawColor := color.RGBA{119, 174, 74, 255}
 			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
 		}
 	}
 
+	// visualize the fall off map
+
+	// for x := 0; x < len(o.fallOffMap); x++ {
+	// 	for y := 0; y < len(o.fallOffMap[x]); y++ {
+
+	// 		drawColor := color.RGBA{uint8(o.fallOffMap[x][y] * 255), uint8(o.fallOffMap[x][y] * 255), uint8(o.fallOffMap[x][y] * 255), 255}
+	// 		ebitenutil.DrawRect(screen, float64(x), float64(y), 1, 1, drawColor)
+	// 	}
+	// }
+
 	o.entityManager.Draw(screen)
 
+	// draw the mouse to character distance check line
+	ebitenutil.DrawLine(screen, float64(cx)*cellSize, float64(cy)*cellSize, float64(mx)*cellSize, float64(my)*cellSize, drawColor)
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("cast available: %t", o.castAvailable))
 }
