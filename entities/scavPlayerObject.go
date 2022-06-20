@@ -25,8 +25,8 @@ type ScavPlayerObject struct {
 
 const (
 	initialMoveSpeed = 100
-	rodEndX          = 121
-	rodEndY          = 58
+	rodEndX          = 150
+	rodEndY          = 25
 
 	rodStartX = 52
 	rodStartY = 52

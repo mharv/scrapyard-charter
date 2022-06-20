@@ -40,9 +40,9 @@ type ScavRodObject struct {
 const (
 	rodResolution  = 20
 	lineResolution = 5
-	rodBaseFlex    = 50
+	rodBaseFlex    = 75
 	rodTipFlex     = 50
-	rodTipMaxSlop  = 25
+	rodTipMaxSlop  = 50
 )
 
 func (s *ScavRodObject) GetSprite() *ebiten.Image {

@@ -43,7 +43,7 @@ type MagnetObject struct {
 const (
 	dropReactivationTimer     = 0.5
 	initialMagneticFieldSize  = 50
-	initialAttractionStrength = 10
+	initialAttractionStrength = 20
 	initialLineLength         = 200.0
 	initialMagnetCastSpeed    = 200
 	initialMagnetReelSpeed    = 300
