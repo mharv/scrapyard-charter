@@ -32,6 +32,14 @@ const (
 	cellSize = 8
 )
 
+func sum(numbers []float64) float64 {
+	total := 0.0
+	for i := range numbers {
+		total += numbers[i]
+	}
+	return total
+}
+
 func (o *OverworldScene) Init() {
 	o.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, cellSize, cellSize)
 	o.entityManager.Init()
@@ -40,7 +48,7 @@ func (o *OverworldScene) Init() {
 	geometry := []*resolv.Object{}
 
 	// 1366 * 768
-	var terrain [globals.ScreenWidth][globals.ScreenHeight]int
+	var terrain [globals.ScreenWidth][globals.ScreenHeight]float64
 	var fallOffMap [globals.ScreenWidth][globals.ScreenHeight]float64
 
 	// generate fall off map
@@ -58,38 +66,65 @@ func (o *OverworldScene) Init() {
 	}
 	// we can access and visualize the fall off map in the draw function
 	// if needed
-	// o.fallOffMap = fallOffMap
+	o.fallOffMap = fallOffMap
 
 	// we create 16 x 16 pixel blocks
-	tempCellSize := cellSize * 2
-	// 16 does not fit into 1366, we need an offset
-	offsetForGrid := 1366 % 16
+	tempCellSize := cellSize * 4
+	// 16 does not fit into 1366 without remainder, we need an offset
+	offsetForGrid := 1366 % (cellSize * 2)
 
 	// setup perlin noise gen -- probably wrong useage
 	var iterations int32 = 2
 	perlinNoise := perlin.NewPerlin(2, 3, iterations, int64(rand.Int()))
 	scale := 0.2
 
-	// used for determining if something is scrap or land
-	threshold := 0.7
+	// apply fall off map to perlin noise
+	for x := 0; x < fallOffMapWidth; x++ {
+		for y := 0; y < fallOffMapHeight; y++ {
 
-	for x := 0; x < len(terrain); x += tempCellSize {
-		for y := 0; y < len(terrain[x]); y += tempCellSize {
 			xOffset := (rand.Float64()*2 - 1) * 5000
 			yOffset := (rand.Float64()*2 - 1) * 5000
 			randomChanceToAdd := perlinNoise.Noise2D(float64(x)*scale+xOffset, float64(y)*scale+yOffset)
 
 			// forms hard border around edge of screen
-			if x == globals.ScreenWidth-tempCellSize-offsetForGrid || x == 0 {
+			if x == globals.ScreenWidth-offsetForGrid || x == 0 {
 				randomChanceToAdd = 1
 			}
-			if y == globals.ScreenHeight-tempCellSize || y == 0 {
+			if y == globals.ScreenHeight || y == 0 {
 				randomChanceToAdd = 1
 			}
-
 			// use fall off map to reduce the chance of scrap spawning in the middle
 			// creating an island like terrain
 			randomChanceToAdd += fallOffMap[x][y]
+
+			terrain[x][y] = randomChanceToAdd
+
+		}
+	}
+
+	// smooth out values using filter to reduce noise
+
+	for i := 0; i < 10; i++ {
+		for x := 0; x < fallOffMapWidth; x++ {
+			for y := 0; y < fallOffMapHeight; y++ {
+				// if not the edge, apply 3x3 filter
+				if x != globals.ScreenWidth-1 &&
+					x != 0 &&
+					y != globals.ScreenHeight-1 &&
+					y != 0 {
+					median := (sum(terrain[x-1][y-1:y+2]) + sum(terrain[x][y-1:y+2]) + sum(terrain[x+1][y-1:y+2])) / 9
+					terrain[x][y] = median
+				}
+			}
+		}
+	}
+
+	// used for determining if something is scrap or land
+	threshold := 0.8
+	// create objects based off smoothed map
+	for x := 0; x < len(terrain); x += tempCellSize {
+		for y := 0; y < len(terrain[x]); y += tempCellSize {
+			randomChanceToAdd := terrain[x][y]
 
 			if randomChanceToAdd <= threshold {
 				tempCellObject := resolv.NewObject(float64(x), float64(y), float64(tempCellSize), float64(tempCellSize), "land")
@@ -101,16 +136,6 @@ func (o *OverworldScene) Init() {
 			}
 		}
 	}
-
-	// smoother
-	// 	if x != globals.ScreenWidth-tempCellSize-offsetForGrid &&
-	// 	x != 0 &&
-	// 	y != globals.ScreenHeight-tempCellSize &&
-	// 	y != 0 {
-
-	// 	randomChanceToAdd = 1
-
-	// }
 
 	// add generated objects to scene space
 	o.physSpace.Add(geometry...)
