@@ -100,8 +100,9 @@ func FloatRotAroundPoint(point, center Vector2f, angle float64) Vector2f {
 	return value
 }
 
-func AngleBetweenFloatVec(v1, v2 Vector2f) float64 {
-	dot := v1.X*v2.X + v1.Y*v2.Y
-	det := v1.X*v2.Y - v1.Y*v2.X
-	return math.Atan2(det, dot)
+func AngleFromFVecToFVec(v1, v2 Vector2f) float64 {
+	angleVec := Vector2f{X: v2.X - v1.X, Y: v2.Y - v1.Y}
+	ang := math.Atan2(-angleVec.Y, -angleVec.X)
+
+	return ang
 }

@@ -66,10 +66,18 @@ func (s *ScavengeScene) Init() {
 	src := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(src)
 
+	names := []string{
+		"images/oldpc.png",
+		"images/cog.png",
+		"images/monitor.png",
+		"images/pipe.png",
+		"images/toaster.png",
+		"images/tyre.png",
+	}
 	// Create junk
 	for i := 0; i < 10; i++ {
 		j := &entities.JunkObject{}
-		j.Init("images/oldpc.png")
+		j.Init(names[rnd.Intn(6)])
 		s.physSpace.Add(j.GetPhysObj())
 
 		x := (rnd.Float64() * (s.spawnZone.Width))
@@ -93,11 +101,20 @@ func (s *ScavengeScene) Init() {
 	p.Init("images/player.png")
 	p.SetMagnet(m)
 	s.physSpace.Add(p.GetPhysObj())
-	s.physSpace.Add(p.GetPhysObj())
 	p.SetPosition(basics.Vector2f{X: s.spawnZone.X, Y: (s.spawnZone.Y - p.GetPhysObj().H)})
 	s.entityManager.AddEntity(p)
 
-	m.SetMagnetStartPos(p.GetFishingLinePoint())
+	r := &entities.ScavRodObject{}
+	r.Init("images/rodSection.png")
+	r.SetRoot(p.GetFishingRodStartPoint())
+	r.SetTip(p.GetFishingRodEndPoint())
+	r.SetMagnetPosition(m.GetMagnetPos())
+	r.SetMaxMagnetDistance(m.GetLineLength())
+	r.SetMagnetOffset(m.GetMagnetOffset())
+	s.entityManager.AddEntity(r)
+	p.SetFishingRodEndPoint(r.GetTip())
+
+	m.SetMagnetStartPos(p.GetFishingRodEndPoint())
 
 	s.menuBtn = false
 }
