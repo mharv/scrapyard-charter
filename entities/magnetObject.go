@@ -25,7 +25,6 @@ type MagnetObject struct {
 	imageRotation      float64
 	attractionStrength float64
 	magneticFieldSize  float64
-	lineLength         *float64
 	magneticPoint      basics.Vector2f
 	linkDistance       basics.Vector2f
 	magnetPos          *basics.Vector2f
@@ -41,13 +40,7 @@ type MagnetObject struct {
 }
 
 const (
-	dropReactivationTimer     = 0.5
-	initialMagneticFieldSize  = 50
-	initialAttractionStrength = 20
-	initialLineLength         = 800.0
-	initialMagnetCastSpeed    = 400
-	initialMagnetReelSpeed    = 600
-	magPhysObjSizeDiff        = 20
+	magPhysObjSizeDiff = 20
 )
 
 func (m *MagnetObject) GetFishingLinePoint() basics.Vector2f {
@@ -58,10 +51,6 @@ func (m *MagnetObject) GetFishingLinePoint() basics.Vector2f {
 
 func (m *MagnetObject) GetMagnetOffset() basics.Vector2f {
 	return basics.Vector2f{X: m.physObj.W / 2, Y: 0}
-}
-
-func (m *MagnetObject) GetLineLength() *float64 {
-	return m.lineLength
 }
 
 func (m *MagnetObject) SetMagnetStartPos(pos *basics.Vector2f) {
@@ -106,8 +95,8 @@ func (m *MagnetObject) Init(ImageFilepath string) {
 	m.targetSprite = tar
 	m.targetObj = resolv.NewObject(0, 0, float64(m.targetSprite.Bounds().Dx()), float64(m.targetSprite.Bounds().Dy()), "target")
 
-	m.magneticFieldSize = initialMagneticFieldSize
-	m.attractionStrength = initialAttractionStrength
+	m.magneticFieldSize = globals.GetPlayerData().GetMagneticFieldSize()
+	m.attractionStrength = globals.GetPlayerData().GetAttractionStrength()
 
 	m.magFieldPhysObj = resolv.NewObject(-m.magneticFieldSize, -m.magneticFieldSize, float64(m.sprite.Bounds().Dx())+(m.magneticFieldSize*2), float64(m.sprite.Bounds().Dy())+(m.magneticFieldSize*2), "magneticField")
 
@@ -123,8 +112,6 @@ func (m *MagnetObject) Init(ImageFilepath string) {
 	m.dropCounter = 0
 	m.rotation = float64(float64(90) / float64(180) * math.Pi)
 	m.imageRotation = m.rotation
-	ll := initialLineLength
-	m.lineLength = &ll
 }
 
 func (m *MagnetObject) ReadInput() {
@@ -135,8 +122,8 @@ func (m *MagnetObject) ReadInput() {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		end := basics.Vector2f{X: m.targetPos.X - m.magnetStartPos.X, Y: m.targetPos.Y - m.magnetStartPos.Y}
 		basics.FloatNormalise(end)
-		end.X *= *m.lineLength
-		end.Y *= *m.lineLength
+		end.X *= globals.GetPlayerData().GetLineLength()
+		end.Y *= globals.GetPlayerData().GetLineLength()
 
 		m.magnetEndPos = end
 		m.magnetActive = true
@@ -163,8 +150,8 @@ func (m *MagnetObject) Update(deltaTime float64) {
 	dy := m.magnetPos.Y - m.physObj.Y
 
 	if m.magnetActive {
-		if basics.FloatDistance(*m.magnetPos, trackingPoint) < initialLineLength && !m.retract {
-			newPos := m.MoveTowards(*m.magnetPos, m.magnetEndPos, initialMagnetCastSpeed*deltaTime)
+		if basics.FloatDistance(*m.magnetPos, trackingPoint) < globals.GetPlayerData().GetLineLength() && !m.retract {
+			newPos := m.MoveTowards(*m.magnetPos, m.magnetEndPos, globals.GetPlayerData().GetMagnetCastSpeed()*deltaTime)
 			m.magnetPos.X += newPos.X
 			m.magnetPos.Y += newPos.Y
 		} else {
@@ -198,7 +185,7 @@ func (m *MagnetObject) Update(deltaTime float64) {
 		m.SetObjPos(m.targetObj, m.targetPos)
 
 		if basics.FloatDistance(*m.magnetPos, trackingPoint) >= 5 && m.retract {
-			newPos := m.MoveTowards(*m.magnetPos, trackingPoint, initialMagnetReelSpeed*deltaTime)
+			newPos := m.MoveTowards(*m.magnetPos, trackingPoint, globals.GetPlayerData().GetMagnetReelSpeed()*deltaTime)
 			m.magnetPos.X += newPos.X
 			m.magnetPos.Y += newPos.Y
 		} else {
@@ -276,7 +263,7 @@ func (m *MagnetObject) Drop() {
 	m.linkDistance = basics.Vector2f{X: 0, Y: 0}
 	m.connected = false
 	m.touch = false
-	m.dropCounter = dropReactivationTimer
+	m.dropCounter = globals.GetPlayerData().GetDropReactivationTimer()
 	v := basics.Vector2f{X: m.physObj.X, Y: m.physObj.Y + 1}
 	m.rotation = m.RotateTo(v)
 }
