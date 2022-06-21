@@ -109,7 +109,6 @@ func (s *ScavengeScene) Init() {
 	r.SetRoot(p.GetFishingRodStartPoint())
 	r.SetTip(p.GetFishingRodEndPoint())
 	r.SetMagnetPosition(m.GetMagnetPos())
-	r.SetMaxMagnetDistance(m.GetLineLength())
 	r.SetMagnetOffset(m.GetMagnetOffset())
 	s.entityManager.AddEntity(r)
 	p.SetFishingRodEndPoint(r.GetTip())

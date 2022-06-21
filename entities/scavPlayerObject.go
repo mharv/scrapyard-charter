@@ -23,15 +23,6 @@ type ScavPlayerObject struct {
 	currentRodEndPoint   *basics.Vector2f
 }
 
-const (
-	initialMoveSpeed = 300
-	rodEndX          = 150
-	rodEndY          = 25
-
-	rodStartX = 52
-	rodStartY = 52
-)
-
 func (s *ScavPlayerObject) SetMagnet(m *MagnetObject) {
 	s.magnet = m
 }
@@ -67,13 +58,13 @@ func (s *ScavPlayerObject) Init(ImageFilepath string) {
 	s.left = false
 	s.right = false
 
-	s.fishingRodEndPoint.X = rodEndX + s.physObj.X
-	s.fishingRodEndPoint.Y = rodEndY + s.physObj.Y
+	s.fishingRodEndPoint.X = globals.GetPlayerData().GetRodEndX() + s.physObj.X
+	s.fishingRodEndPoint.Y = globals.GetPlayerData().GetRodEndY() + s.physObj.Y
 
-	s.fishingRodStartPoint.X = rodStartX + s.physObj.X
-	s.fishingRodStartPoint.Y = rodStartY + s.physObj.Y
+	s.fishingRodStartPoint.X = globals.GetPlayerData().GetRodStartX() + s.physObj.X
+	s.fishingRodStartPoint.Y = globals.GetPlayerData().GetRodStartY() + s.physObj.Y
 
-	s.moveSpeed = initialMoveSpeed
+	s.moveSpeed = globals.GetPlayerData().GetScavMoveSpeed()
 }
 
 func (s *ScavPlayerObject) ReadInput() {
@@ -101,11 +92,11 @@ func (s *ScavPlayerObject) Update(deltaTime float64) {
 		s.physObj.X += s.moveSpeed * deltaTime
 	}
 
-	s.fishingRodEndPoint.X = rodEndX + s.physObj.X
-	s.fishingRodEndPoint.Y = rodEndY + s.physObj.Y
+	s.fishingRodEndPoint.X = globals.GetPlayerData().GetRodEndX() + s.physObj.X
+	s.fishingRodEndPoint.Y = globals.GetPlayerData().GetRodEndY() + s.physObj.Y
 
-	s.fishingRodStartPoint.X = rodStartX + s.physObj.X
-	s.fishingRodStartPoint.Y = rodStartY + s.physObj.Y
+	s.fishingRodStartPoint.X = globals.GetPlayerData().GetRodStartX() + s.physObj.X
+	s.fishingRodStartPoint.Y = globals.GetPlayerData().GetRodStartY() + s.physObj.Y
 
 	s.physObj.Update()
 }
