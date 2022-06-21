@@ -8,15 +8,61 @@ import (
 	"github.com/mharv/scrapyard-charter/globals"
 )
 
-func GenerateMap() [globals.ScreenWidth][globals.ScreenHeight]float64 {
-	const w = globals.ScreenWidth
-	const h = globals.ScreenHeight
-	// generate fall off map
+const w = globals.ScreenWidth
+const h = globals.ScreenHeight
 
-	// var terrain [w][h]float64
+func GenerateMap(l_open, r_open, u_open, d_open bool) [w][h]float64 {
+
+	// generate fall off map and return terrain map
 	var fallOffMap [w][h]float64
 	var terrain [w][h]float64
 
+	fallOffMap = createSquareFallOffMap(fallOffMap)
+
+	// generate fall off map with sides open
+	fallOffMap = openFallOffMapSide(fallOffMap, l_open, r_open, u_open, d_open)
+
+	terrain = applyPerlinNoise(terrain, fallOffMap)
+	// smooth out values using filter to reduce noise
+	terrain = applyMedianFilterNTime(terrain, 10)
+
+	return terrain
+}
+
+func sum(numbers []float64) float64 {
+	total := 0.0
+	for i := range numbers {
+		total += numbers[i]
+	}
+	return total
+}
+
+func applyPerlinNoise(terrain, fallOffMap [w][h]float64) [w][h]float64 {
+	// setup perlin noise gen -- probably wrong useage
+	var iterations int32 = 2
+	perlinNoise := perlin.NewPerlin(2, 3, iterations, int64(rand.Int()))
+	scale := 0.2
+
+	// apply fall off map to perlin noise
+	for x := 0; x < w; x++ {
+		for y := 0; y < h; y++ {
+			// try pure random - nah, looks too boring
+			// randomChanceToAdd = rand.Float64()
+
+			xOffset := (rand.Float64()*2 - 1) * 5000
+			yOffset := (rand.Float64()*2 - 1) * 5000
+			randomChanceToAdd := perlinNoise.Noise2D(float64(x)*scale+xOffset, float64(y)*scale+yOffset)
+
+			// use fall off map to reduce the chance of scrap spawning in the middle
+			// creating an island like terrain
+			randomChanceToAdd += fallOffMap[x][y]
+			terrain[x][y] = randomChanceToAdd
+		}
+	}
+	return terrain
+}
+
+func createSquareFallOffMap(fallOffMap [w][h]float64) [w][h]float64 {
 	for i := 0; i < w; i++ {
 		for j := 0; j < h; j++ {
 			x := float64(i)/float64(w)*2 - 1
@@ -26,12 +72,29 @@ func GenerateMap() [globals.ScreenWidth][globals.ScreenHeight]float64 {
 			fallOffMap[i][j] = math.Pow(v, 3) / (math.Pow(v, 3) + math.Pow(3-3*v, 3))
 		}
 	}
+	return fallOffMap
+}
 
-	// generate fall off map with sides open
-	l_fallOffMap := false
-	r_fallOffMap := false
-	u_fallOffMap := false
-	d_fallOffMap := true
+func applyMedianFilterNTime(terrain [w][h]float64, n int) [w][h]float64 {
+	// 3x3 variant
+	for i := 0; i < n; i++ {
+		for x := 0; x < w; x++ {
+			for y := 0; y < h; y++ {
+				// if not the edge, apply 3x3 filter
+				if x != w-1 &&
+					x != 0 &&
+					y != h-1 &&
+					y != 0 {
+					median := (sum(terrain[x-1][y-1:y+2]) + sum(terrain[x][y-1:y+2]) + sum(terrain[x+1][y-1:y+2])) / 9
+					terrain[x][y] = median
+				}
+			}
+		}
+	}
+	return terrain
+}
+
+func openFallOffMapSide(fallOffMap [w][h]float64, l_fallOffMap, r_fallOffMap, u_fallOffMap, d_fallOffMap bool) [w][h]float64 {
 
 	if l_fallOffMap {
 		l_offset := w/2 - 1
@@ -68,63 +131,5 @@ func GenerateMap() [globals.ScreenWidth][globals.ScreenHeight]float64 {
 			}
 		}
 	}
-
-	// setup perlin noise gen -- probably wrong useage
-	var iterations int32 = 2
-	perlinNoise := perlin.NewPerlin(2, 3, iterations, int64(rand.Int()))
-	scale := 0.2
-
-	// apply fall off map to perlin noise
-	for x := 0; x < w; x++ {
-		for y := 0; y < h; y++ {
-
-			xOffset := (rand.Float64()*2 - 1) * 5000
-			yOffset := (rand.Float64()*2 - 1) * 5000
-			randomChanceToAdd := perlinNoise.Noise2D(float64(x)*scale+xOffset, float64(y)*scale+yOffset)
-			// try pure random - nah, looks too boring
-			// randomChanceToAdd = rand.Float64()
-
-			// forms hard border around edge of screen
-			// if x == globals.ScreenWidth-offsetForGrid || x == 0 {
-			// 	randomChanceToAdd = 1
-			// }
-			// if y == globals.ScreenHeight || y == 0 {
-			// 	randomChanceToAdd = 1
-			// }
-
-			// use fall off map to reduce the chance of scrap spawning in the middle
-			// creating an island like terrain
-			randomChanceToAdd += fallOffMap[x][y]
-
-			terrain[x][y] = randomChanceToAdd
-
-		}
-	}
-
-	// smooth out values using filter to reduce noise
-
-	for i := 0; i < 10; i++ {
-		for x := 0; x < w; x++ {
-			for y := 0; y < h; y++ {
-				// if not the edge, apply 3x3 filter
-				if x != globals.ScreenWidth-1 &&
-					x != 0 &&
-					y != globals.ScreenHeight-1 &&
-					y != 0 {
-					median := (sum(terrain[x-1][y-1:y+2]) + sum(terrain[x][y-1:y+2]) + sum(terrain[x+1][y-1:y+2])) / 9
-					terrain[x][y] = median
-				}
-			}
-		}
-	}
-
-	return terrain
-}
-
-func sum(numbers []float64) float64 {
-	total := 0.0
-	for i := range numbers {
-		total += numbers[i]
-	}
-	return total
+	return fallOffMap
 }

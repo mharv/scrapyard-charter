@@ -3,7 +3,6 @@ package scenes
 import (
 	"fmt"
 	"image/color"
-	"log"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -24,7 +23,6 @@ type OverworldScene struct {
 	spawnZone                       basics.FloatRect
 	player                          entities.OverworldPlayerObject
 	castDistance                    float64
-	fallOffMap                      [globals.ScreenWidth][globals.ScreenHeight]float64
 }
 
 const (
@@ -44,8 +42,8 @@ func (o *OverworldScene) Init() {
 	// we create 16 x 16 pixel blocks
 	tempCellSize := cellSize * 4
 
-	// create a terrain map
-	terrain = mapgen.GenerateMap()
+	// create a terrain map L, R, U, D - if true, side is open
+	terrain = mapgen.GenerateMap(true, false, false, true)
 
 	// used for determining if something is scrap or land
 	threshold := 0.8
@@ -68,12 +66,12 @@ func (o *OverworldScene) Init() {
 	// add generated objects to scene space
 	o.physSpace.Add(geometry...)
 
-	img, _, err := ebitenutil.NewImageFromFile("images/overworldTerrainPlaceholderGrass.png")
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		o.background = img
-	}
+	// img, _, err := ebitenutil.NewImageFromFile("images/overworldTerrainPlaceholderGrass.png")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// } else {
+	// 	o.background = img
+	// }
 
 	o.spawnZone.Width = globals.ScreenWidth
 	o.spawnZone.Height = globals.ScreenHeight
@@ -166,16 +164,6 @@ func (o *OverworldScene) Draw(screen *ebiten.Image) {
 			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
 		}
 	}
-
-	// visualize the fall off map
-
-	// for x := 0; x < len(o.fallOffMap); x++ {
-	// 	for y := 0; y < len(o.fallOffMap[x]); y++ {
-
-	// 		drawColor := color.RGBA{uint8(o.fallOffMap[x][y] * 255), uint8(o.fallOffMap[x][y] * 255), uint8(o.fallOffMap[x][y] * 255), 255}
-	// 		ebitenutil.DrawRect(screen, float64(x), float64(y), 1, 1, drawColor)
-	// 	}
-	// }
 
 	o.entityManager.Draw(screen)
 
