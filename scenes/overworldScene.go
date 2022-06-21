@@ -64,6 +64,49 @@ func (o *OverworldScene) Init() {
 			fallOffMap[i][j] = math.Pow(v, 3) / (math.Pow(v, 3) + math.Pow(3-3*v, 3))
 		}
 	}
+
+	// generate fall off map with sides open
+	l_fallOffMap := false
+	r_fallOffMap := false
+	u_fallOffMap := false
+	d_fallOffMap := true
+
+	if l_fallOffMap {
+		l_offset := fallOffMapWidth/2 - 1
+		for i := 0; i < fallOffMapWidth/4; i++ {
+			for j := 0; j < fallOffMapHeight; j++ {
+				fallOffMap[i][j] = fallOffMap[i+l_offset][j]
+			}
+		}
+	}
+	if r_fallOffMap {
+		r_offset := fallOffMapWidth/2 - 1
+		for i := fallOffMapWidth/2 + fallOffMapWidth/4; i < fallOffMapWidth; i++ {
+			for j := 0; j < fallOffMapHeight; j++ {
+
+				fallOffMap[i][j] = fallOffMap[i-r_offset][j]
+			}
+		}
+	}
+	if u_fallOffMap {
+		u_offset := fallOffMapHeight/2 - 1
+		for i := 0; i < fallOffMapWidth; i++ {
+			for j := 0; j < fallOffMapHeight/4; j++ {
+
+				fallOffMap[i][j] = fallOffMap[i][j+u_offset]
+			}
+		}
+	}
+	if d_fallOffMap {
+		d_offset := fallOffMapHeight/2 - 1
+		for i := 0; i < fallOffMapWidth; i++ {
+			for j := fallOffMapHeight/2 + fallOffMapHeight/4; j < fallOffMapHeight; j++ {
+
+				fallOffMap[i][j] = fallOffMap[i][j-d_offset]
+			}
+		}
+	}
+
 	// we can access and visualize the fall off map in the draw function
 	// if needed
 	o.fallOffMap = fallOffMap
@@ -71,7 +114,7 @@ func (o *OverworldScene) Init() {
 	// we create 16 x 16 pixel blocks
 	tempCellSize := cellSize * 4
 	// 16 does not fit into 1366 without remainder, we need an offset
-	offsetForGrid := 1366 % (cellSize * 2)
+	// offsetForGrid := 1366 % (cellSize * 2)
 
 	// setup perlin noise gen -- probably wrong useage
 	var iterations int32 = 2
@@ -85,14 +128,17 @@ func (o *OverworldScene) Init() {
 			xOffset := (rand.Float64()*2 - 1) * 5000
 			yOffset := (rand.Float64()*2 - 1) * 5000
 			randomChanceToAdd := perlinNoise.Noise2D(float64(x)*scale+xOffset, float64(y)*scale+yOffset)
+			// try pure random - nah, looks too boring
+			// randomChanceToAdd = rand.Float64()
 
 			// forms hard border around edge of screen
-			if x == globals.ScreenWidth-offsetForGrid || x == 0 {
-				randomChanceToAdd = 1
-			}
-			if y == globals.ScreenHeight || y == 0 {
-				randomChanceToAdd = 1
-			}
+			// if x == globals.ScreenWidth-offsetForGrid || x == 0 {
+			// 	randomChanceToAdd = 1
+			// }
+			// if y == globals.ScreenHeight || y == 0 {
+			// 	randomChanceToAdd = 1
+			// }
+
 			// use fall off map to reduce the chance of scrap spawning in the middle
 			// creating an island like terrain
 			randomChanceToAdd += fallOffMap[x][y]
