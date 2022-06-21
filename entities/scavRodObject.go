@@ -19,22 +19,19 @@ type RodSection struct {
 }
 
 type ScavRodObject struct {
-	sprite            *ebiten.Image
-	rodSections       []RodSection
-	root              *basics.Vector2f
-	tip               basics.Vector2f
-	magnetPosition    *basics.Vector2f
-	initialTipPos     *basics.Vector2f
-	rootController    basics.Vector2f
-	tipController     basics.Vector2f
-	maxMagnetDistance *float64
-	lineOffset        float64
-	magnetOffset      basics.Vector2f
-	rodBaseFlex       float64
-	rodTipFlex        float64
-	rodTipMaxSlop     float64
-	rodPoints         []basics.Vector2f
-	linePoints        []basics.Vector2f
+	sprite         *ebiten.Image
+	rodSections    []RodSection
+	root           *basics.Vector2f
+	tip            basics.Vector2f
+	magnetPosition *basics.Vector2f
+	initialTipPos  *basics.Vector2f
+	rootController basics.Vector2f
+	tipController  basics.Vector2f
+	lineOffset     float64
+	magnetOffset   basics.Vector2f
+	rodTipFlex     float64
+	rodPoints      []basics.Vector2f
+	linePoints     []basics.Vector2f
 }
 
 const (
@@ -66,10 +63,6 @@ func (s *ScavRodObject) SetMagnetPosition(magnetPosition *basics.Vector2f) {
 	s.magnetPosition = magnetPosition
 }
 
-func (s *ScavRodObject) SetMaxMagnetDistance(magnetDistance *float64) {
-	s.maxMagnetDistance = magnetDistance
-}
-
 func (s *ScavRodObject) SetMagnetOffset(magnetOffset basics.Vector2f) {
 	s.magnetOffset = magnetOffset
 }
@@ -86,8 +79,6 @@ func (s *ScavRodObject) Init(ImageFilepath string) {
 	s.root = &basics.Vector2f{X: 0, Y: 0}
 	s.initialTipPos = &basics.Vector2f{X: s.root.X, Y: s.root.Y}
 	s.tip = *s.initialTipPos
-	magDist := 1.0
-	s.maxMagnetDistance = &magDist
 	s.rootController = basics.Vector2f{X: s.root.X + (rodBaseFlex / 2), Y: s.root.Y - rodBaseFlex}
 	s.tipController = basics.Vector2f{X: s.tip.X, Y: s.tip.Y - rodTipFlex}
 	s.CalculatePoints()
@@ -225,7 +216,7 @@ func (s *ScavRodObject) UpdateTipPosition() {
 
 	ang := basics.AngleFromFVecToFVec(*s.initialTipPos, magpos)
 
-	percentage := (dist / *s.maxMagnetDistance) * rodTipMaxSlop
+	percentage := (dist / globals.GetPlayerData().GetLineLength()) * rodTipMaxSlop
 
 	mod := basics.Vector2f{X: -(percentage * math.Cos(ang)), Y: -(percentage * math.Sin(ang))}
 
