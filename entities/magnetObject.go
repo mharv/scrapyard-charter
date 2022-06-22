@@ -36,7 +36,10 @@ type MagnetObject struct {
 	dropConnected      bool
 	retract            bool
 	syncToRod          bool
+	turnedOn           bool
+	alive              bool
 	dropCounter        float64
+	junkLookup         map[*resolv.Object]*JunkObject
 }
 
 const (
@@ -77,6 +80,7 @@ func (m *MagnetObject) GetSprite() *ebiten.Image {
 }
 
 func (m *MagnetObject) Init(ImageFilepath string) {
+	m.alive = true
 	// Load an image given a filepath
 	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
 	if err != nil {
@@ -109,6 +113,7 @@ func (m *MagnetObject) Init(ImageFilepath string) {
 	m.magnetActive = false
 	m.retract = false
 	m.syncToRod = true
+	m.turnedOn = true
 	m.dropCounter = 0
 	m.rotation = float64(float64(90) / float64(180) * math.Pi)
 	m.imageRotation = m.rotation
@@ -125,6 +130,8 @@ func (m *MagnetObject) ReadInput() {
 		end.X *= globals.GetPlayerData().GetLineLength()
 		end.Y *= globals.GetPlayerData().GetLineLength()
 
+		m.attractedJunk = nil
+
 		m.magnetEndPos = end
 		m.magnetActive = true
 		m.retract = false
@@ -136,6 +143,7 @@ func (m *MagnetObject) ReadInput() {
 	} else {
 		m.dropConnected = false
 	}
+
 }
 
 func (m *MagnetObject) Update(deltaTime float64) {
@@ -159,8 +167,6 @@ func (m *MagnetObject) Update(deltaTime float64) {
 		}
 	}
 	if m.retract {
-		m.SetObjPos(m.targetObj, m.targetPos)
-
 		if basics.FloatDistance(*m.magnetPos, trackingPoint) >= 5 && m.retract {
 			newPos := m.MoveTowards(*m.magnetPos, trackingPoint, globals.GetPlayerData().GetMagnetReelSpeed()*deltaTime)
 			m.magnetPos.X += newPos.X
@@ -168,21 +174,30 @@ func (m *MagnetObject) Update(deltaTime float64) {
 		} else {
 			m.syncToRod = true
 			m.magnetActive = false
+			if m.connected {
+				//ADD m.connectedJunk ITEM TO INVENTORY HERE
+				if val, ok := m.junkLookup[m.connectedJunk]; ok {
+					globals.GetPlayerData().GetInventory().AddItem(*val.GetItemData())
+
+					val.Kill()
+					m.connected = false
+					m.connectedJunk = nil
+				}
+			}
 		}
 	}
 
 	if m.dropCounter > 0 {
 		m.dropCounter -= deltaTime
 	} else {
-		if !m.connected {
-
+		if !m.connected && m.turnedOn {
 			if collision := m.physObj.Check(dx, dy, "junk"); collision != nil {
-				m.attractedJunk = nil
 				m.connectedJunk = collision.Objects[0]
 				m.linkDistance.X = m.connectedJunk.X - m.physObj.X
 				m.linkDistance.Y = m.connectedJunk.Y - m.physObj.Y
 				m.touch = true
 				m.connected = true
+				m.retract = true
 				v := basics.Vector2f{X: m.connectedJunk.X, Y: m.connectedJunk.Y}
 				m.rotation = m.RotateTo(v)
 			} else {
@@ -213,6 +228,7 @@ func (m *MagnetObject) Update(deltaTime float64) {
 
 	fieldOffset := basics.Vector2f{X: -m.magneticFieldSize - (magPhysObjSizeDiff / 2), Y: -m.magneticFieldSize - (magPhysObjSizeDiff / 2)}
 
+	m.SetObjPos(m.targetObj, m.targetPos)
 	m.SetObjPos(m.physObj, *m.magnetPos)
 	m.SetObjPos(m.magFieldPhysObj, *m.magnetPos, fieldOffset)
 
@@ -256,9 +272,19 @@ func (m *MagnetObject) Draw(screen *ebiten.Image) {
 
 	// Draw the image (comment this out to see the above resolv rect ^^^)
 	screen.DrawImage(m.sprite, sop)
-	if !m.magnetActive {
-		screen.DrawImage(m.targetSprite, top)
-	}
+	screen.DrawImage(m.targetSprite, top)
+}
+
+func (m *MagnetObject) IsAlive() bool {
+	return m.alive
+}
+
+func (m *MagnetObject) Kill() {
+	m.alive = false
+}
+
+func (m *MagnetObject) RemovePhysObj(space *resolv.Space) {
+	space.Remove(m.physObj)
 }
 
 func (m *MagnetObject) Drop() {
@@ -273,11 +299,20 @@ func (m *MagnetObject) Drop() {
 
 func (m *MagnetObject) MoveAttractedJunk(deltaTime float64) {
 	if len(m.attractedJunk) > 0 {
-		for _, junk := range m.attractedJunk {
+		for i, junk := range m.attractedJunk {
+
+			if !junk.Overlaps(m.magFieldPhysObj) {
+				m.attractedJunk = append(m.attractedJunk[:i], m.attractedJunk[i+1:]...)
+			}
+
 			junk.X = basics.FloatLerp(junk.X, m.magneticPoint.X+m.physObj.X-1, m.attractionStrength*deltaTime)
 			junk.Y = basics.FloatLerp(junk.Y, m.magneticPoint.Y+m.physObj.Y-1, m.attractionStrength*deltaTime)
 		}
 	}
+}
+
+func (m *MagnetObject) SetJunkLookup(Lookup map[*resolv.Object]*JunkObject) {
+	m.junkLookup = Lookup
 }
 
 func (m *MagnetObject) SetPosition(position basics.Vector2f) {

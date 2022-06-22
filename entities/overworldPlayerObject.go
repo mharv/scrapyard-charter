@@ -19,6 +19,7 @@ type OverworldPlayerObject struct {
 	moveUp, moveDown, moveRight, moveLeft bool
 	moveSpeed                             float64
 	CastDistanceLimit                     float64
+	alive                                 bool
 }
 
 func (p *OverworldPlayerObject) GetPhysObj() *resolv.Object {
@@ -26,6 +27,7 @@ func (p *OverworldPlayerObject) GetPhysObj() *resolv.Object {
 }
 
 func (p *OverworldPlayerObject) Init(ImageFilepath string) {
+	p.alive = true
 	// Load an image given a filepath
 	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
 	if err != nil {
@@ -137,4 +139,16 @@ func (p *OverworldPlayerObject) SetPosition(position basics.Vector2f) {
 
 func (p *OverworldPlayerObject) GetCellPosition() (x, y int) {
 	return p.physObj.CellPosition()
+}
+
+func (p *OverworldPlayerObject) IsAlive() bool {
+	return p.alive
+}
+
+func (p *OverworldPlayerObject) Kill() {
+	p.alive = false
+}
+
+func (p *OverworldPlayerObject) RemovePhysObj(space *resolv.Space) {
+	space.Remove(p.physObj)
 }

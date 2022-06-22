@@ -21,6 +21,7 @@ type ScavPlayerObject struct {
 	fishingRodEndPoint   basics.Vector2f
 	fishingRodStartPoint basics.Vector2f
 	currentRodEndPoint   *basics.Vector2f
+	alive                bool
 }
 
 func (s *ScavPlayerObject) SetMagnet(m *MagnetObject) {
@@ -44,6 +45,7 @@ func (s *ScavPlayerObject) SetFishingRodEndPoint(rodEndPoint *basics.Vector2f) {
 }
 
 func (s *ScavPlayerObject) Init(ImageFilepath string) {
+	s.alive = true
 	// Load an image given a filepath
 	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
 	if err != nil {
@@ -115,6 +117,18 @@ func (s *ScavPlayerObject) Draw(screen *ebiten.Image) {
 
 	// Draw the image (comment this out to see the above resolv rect ^^^)
 	screen.DrawImage(s.sprite, options)
+}
+
+func (s *ScavPlayerObject) IsAlive() bool {
+	return s.alive
+}
+
+func (s *ScavPlayerObject) Kill() {
+	s.alive = false
+}
+
+func (s *ScavPlayerObject) RemovePhysObj(space *resolv.Space) {
+	space.Remove(s.physObj)
 }
 
 func (s *ScavPlayerObject) SetPosition(position basics.Vector2f) {

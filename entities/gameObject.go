@@ -13,9 +13,11 @@ import (
 type GameObject struct {
 	sprite  *ebiten.Image
 	physObj *resolv.Object
+	alive   bool
 }
 
 func (g *GameObject) Init(ImageFilepath string) {
+	g.alive = true
 	// Load an image given a filepath
 	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
 	if err != nil {
@@ -44,4 +46,16 @@ func (g *GameObject) Draw(screen *ebiten.Image) {
 
 	// Draw the image (comment this out to see the above resolv rect ^^^)
 	screen.DrawImage(g.sprite, options)
+}
+
+func (g *GameObject) IsAlive() bool {
+	return g.alive
+}
+
+func (g *GameObject) Kill() {
+	g.alive = false
+}
+
+func (g *GameObject) RemovePhysObj(space *resolv.Space) {
+	space.Remove(g.physObj)
 }

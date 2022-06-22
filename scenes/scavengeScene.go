@@ -68,6 +68,8 @@ func (s *ScavengeScene) Init() {
 	rnd := rand.New(src)
 
 	s.InitJunkList()
+
+	junkLookup := make(map[*resolv.Object]*entities.JunkObject)
 	// Create junk
 	for i := 0; i < 10; i++ {
 		index := rnd.Intn(len(s.junkList))
@@ -83,11 +85,13 @@ func (s *ScavengeScene) Init() {
 
 		j.SetPosition(basics.Vector2f{X: x, Y: y})
 		s.entityManager.AddEntity(&j)
+		junkLookup[j.GetPhysObj()] = &j
 	}
 
 	// Create magnet
 	m := &entities.MagnetObject{}
 	m.Init("images/magnet.png")
+	m.SetJunkLookup(junkLookup)
 	s.physSpace.Add(m.GetPhysObj())
 	s.physSpace.Add(m.GetFieldPhysObj())
 	s.entityManager.AddEntity(m)
@@ -137,6 +141,8 @@ func (s *ScavengeScene) Update(state *GameState, deltaTime float64) error {
 		t := &TitleScene{}
 		state.SceneManager.GoTo(t, transitionTime)
 	}
+
+	s.entityManager.RemoveDead(s.physSpace)
 
 	return nil
 }

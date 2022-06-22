@@ -10,6 +10,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/globals"
+	"github.com/solarlune/resolv"
 )
 
 type RodSection struct {
@@ -32,6 +33,7 @@ type ScavRodObject struct {
 	rodTipFlex     float64
 	rodPoints      []basics.Vector2f
 	linePoints     []basics.Vector2f
+	alive          bool
 }
 
 const (
@@ -68,6 +70,7 @@ func (s *ScavRodObject) SetMagnetOffset(magnetOffset basics.Vector2f) {
 }
 
 func (s *ScavRodObject) Init(ImageFilepath string) {
+	s.alive = true
 	// Load an image given a filepath
 	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
 	if err != nil {
@@ -112,6 +115,17 @@ func (s *ScavRodObject) Draw(screen *ebiten.Image) {
 		ebitenutil.DrawLine(screen, s.root.X, s.root.Y, s.rootController.X, s.rootController.Y, color.RGBA{255, 0, 0, 255})
 		ebitenutil.DrawLine(screen, s.tip.X, s.tip.Y, s.tipController.X, s.tipController.Y, color.RGBA{255, 0, 0, 255})
 	}
+}
+
+func (s *ScavRodObject) IsAlive() bool {
+	return s.alive
+}
+
+func (s *ScavRodObject) Kill() {
+	s.alive = false
+}
+
+func (s *ScavRodObject) RemovePhysObj(space *resolv.Space) {
 }
 
 func (s *ScavRodObject) CalculatePoints() {

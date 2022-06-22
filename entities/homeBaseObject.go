@@ -14,6 +14,7 @@ import (
 type HomeBaseObject struct {
 	sprite  *ebiten.Image
 	physObj *resolv.Object
+	alive   bool
 }
 
 func (h *HomeBaseObject) GetPhysObj() *resolv.Object {
@@ -26,6 +27,7 @@ func (h *HomeBaseObject) SetPosition(position basics.Vector2f) {
 }
 
 func (h *HomeBaseObject) Init(ImageFilepath string) {
+	h.alive = true
 	// Load an image given a filepath
 	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
 	if err != nil {
@@ -54,4 +56,16 @@ func (h *HomeBaseObject) Draw(screen *ebiten.Image) {
 
 	// Draw the image (comment this out to see the above resolv rect ^^^)
 	screen.DrawImage(h.sprite, options)
+}
+
+func (h *HomeBaseObject) IsAlive() bool {
+	return h.alive
+}
+
+func (h *HomeBaseObject) Kill() {
+	h.alive = false
+}
+
+func (h *HomeBaseObject) RemovePhysObj(space *resolv.Space) {
+	space.Remove(h.physObj)
 }
