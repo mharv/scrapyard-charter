@@ -30,7 +30,7 @@ type ScavengeScene struct {
 
 const (
 	spawnZoneEdgeBorder = 128
-	defaultTimerStart   = 60
+	defaultTimerStart   = 10
 	timerPositionOffset = 100
 )
 

@@ -157,6 +157,25 @@ func (m *MagnetObject) Update(deltaTime float64) {
 	dx := m.magnetPos.X - m.physObj.X
 	dy := m.magnetPos.Y - m.physObj.Y
 
+	if m.dropCounter > 0 {
+		m.dropCounter -= deltaTime
+	} else {
+		if !m.connected && m.turnedOn {
+			if collision := m.physObj.Check(dx, dy, "junk"); collision != nil {
+				m.connectedJunk = collision.Objects[0]
+				m.linkDistance.X = m.connectedJunk.X - m.physObj.X
+				m.linkDistance.Y = m.connectedJunk.Y - m.physObj.Y
+				m.touch = true
+				m.connected = true
+				m.retract = true
+				v := basics.Vector2f{X: m.connectedJunk.X, Y: m.connectedJunk.Y}
+				m.rotation = m.RotateTo(v)
+			} else {
+				m.touch = false
+			}
+		}
+	}
+
 	if m.magnetActive && !m.retract {
 		if basics.FloatDistance(*m.magnetPos, trackingPoint) < globals.GetPlayerData().GetLineLength() && !m.retract {
 			newPos := m.MoveTowards(*m.magnetPos, m.magnetEndPos, globals.GetPlayerData().GetMagnetCastSpeed()*deltaTime)
@@ -177,31 +196,14 @@ func (m *MagnetObject) Update(deltaTime float64) {
 			if m.connected {
 				//ADD m.connectedJunk ITEM TO INVENTORY HERE
 				if val, ok := m.junkLookup[m.connectedJunk]; ok {
-					globals.GetPlayerData().GetInventory().AddItem(*val.GetItemData())
+					if val.IsAlive() {
+						globals.GetPlayerData().GetInventory().AddItem(*val.GetItemData())
+					}
 
 					val.Kill()
 					m.connected = false
 					m.connectedJunk = nil
 				}
-			}
-		}
-	}
-
-	if m.dropCounter > 0 {
-		m.dropCounter -= deltaTime
-	} else {
-		if !m.connected && m.turnedOn {
-			if collision := m.physObj.Check(dx, dy, "junk"); collision != nil {
-				m.connectedJunk = collision.Objects[0]
-				m.linkDistance.X = m.connectedJunk.X - m.physObj.X
-				m.linkDistance.Y = m.connectedJunk.Y - m.physObj.Y
-				m.touch = true
-				m.connected = true
-				m.retract = true
-				v := basics.Vector2f{X: m.connectedJunk.X, Y: m.connectedJunk.Y}
-				m.rotation = m.RotateTo(v)
-			} else {
-				m.touch = false
 			}
 		}
 	}
@@ -300,13 +302,16 @@ func (m *MagnetObject) Drop() {
 func (m *MagnetObject) MoveAttractedJunk(deltaTime float64) {
 	if len(m.attractedJunk) > 0 {
 		for i, junk := range m.attractedJunk {
-
 			if !junk.Overlaps(m.magFieldPhysObj) {
-				m.attractedJunk = append(m.attractedJunk[:i], m.attractedJunk[i+1:]...)
+				if i >= len(m.attractedJunk) {
+					m.attractedJunk = m.attractedJunk[:len(m.attractedJunk)-1]
+				} else {
+					m.attractedJunk = append(m.attractedJunk[:i], m.attractedJunk[i+1:]...)
+				}
+			} else {
+				junk.X = basics.FloatLerp(junk.X, m.magneticPoint.X+m.physObj.X-1, m.attractionStrength*deltaTime)
+				junk.Y = basics.FloatLerp(junk.Y, m.magneticPoint.Y+m.physObj.Y-1, m.attractionStrength*deltaTime)
 			}
-
-			junk.X = basics.FloatLerp(junk.X, m.magneticPoint.X+m.physObj.X-1, m.attractionStrength*deltaTime)
-			junk.Y = basics.FloatLerp(junk.Y, m.magneticPoint.Y+m.physObj.Y-1, m.attractionStrength*deltaTime)
 		}
 	}
 }
