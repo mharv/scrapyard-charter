@@ -15,6 +15,13 @@ func GetPlayerData() *data.PlayerData {
 }
 
 var MaterialNamesList []string = []string{
-	"test",
-	"hi",
+	"Iron",
+	"Steel",
+	"Copper",
+	"Rubber",
+	"Plastic",
+	"Nickel",
+	"Cobalt",
+	"Titanium",
+	"Gold",
 }
