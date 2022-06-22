@@ -5,7 +5,7 @@ import "github.com/mharv/scrapyard-charter/data"
 const (
 	ScreenWidth  = 1366
 	ScreenHeight = 768
-	Debug        = false
+	Debug        = true
 )
 
 var playerData = &data.PlayerData{}
