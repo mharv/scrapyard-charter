@@ -39,11 +39,11 @@ func (o *OverworldScene) Init() {
 	// 1366 * 768
 	var terrain [globals.ScreenWidth][globals.ScreenHeight]float64
 
+	// create a terrain map L, R, U, D - if true, side is open
+	terrain = mapgen.GenerateMap(false, true, false, true)
+
 	// we create 16 x 16 pixel blocks
 	tempCellSize := cellSize * 4
-
-	// create a terrain map L, R, U, D - if true, side is open
-	terrain = mapgen.GenerateMap(true, false, false, true)
 
 	// used for determining if something is scrap or land
 	threshold := 0.8
