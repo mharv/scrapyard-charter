@@ -149,39 +149,16 @@ func (m *MagnetObject) Update(deltaTime float64) {
 	dx := m.magnetPos.X - m.physObj.X
 	dy := m.magnetPos.Y - m.physObj.Y
 
-	if m.magnetActive {
+	if m.magnetActive && !m.retract {
 		if basics.FloatDistance(*m.magnetPos, trackingPoint) < globals.GetPlayerData().GetLineLength() && !m.retract {
 			newPos := m.MoveTowards(*m.magnetPos, m.magnetEndPos, globals.GetPlayerData().GetMagnetCastSpeed()*deltaTime)
 			m.magnetPos.X += newPos.X
 			m.magnetPos.Y += newPos.Y
 		} else {
 			m.retract = true
-			m.magnetActive = false
 		}
-
-		if m.dropCounter > 0 {
-			m.dropCounter -= deltaTime
-		} else {
-			if !m.connected {
-				if collision := m.magFieldPhysObj.Check(dx, dy, "junk"); collision != nil {
-					m.attractedJunk = collision.Objects
-				}
-
-				if collision := m.physObj.Check(dx, dy, "junk"); collision != nil {
-					m.attractedJunk = nil
-					m.connectedJunk = collision.Objects[0]
-					m.linkDistance.X = m.connectedJunk.X - m.physObj.X
-					m.linkDistance.Y = m.connectedJunk.Y - m.physObj.Y
-					m.touch = true
-					m.connected = true
-					v := basics.Vector2f{X: m.connectedJunk.X, Y: m.connectedJunk.Y}
-					m.rotation = m.RotateTo(v)
-				} else {
-					m.touch = false
-				}
-			}
-		}
-	} else {
+	}
+	if m.retract {
 		m.SetObjPos(m.targetObj, m.targetPos)
 
 		if basics.FloatDistance(*m.magnetPos, trackingPoint) >= 5 && m.retract {
@@ -190,6 +167,27 @@ func (m *MagnetObject) Update(deltaTime float64) {
 			m.magnetPos.Y += newPos.Y
 		} else {
 			m.syncToRod = true
+			m.magnetActive = false
+		}
+	}
+
+	if m.dropCounter > 0 {
+		m.dropCounter -= deltaTime
+	} else {
+		if !m.connected {
+
+			if collision := m.physObj.Check(dx, dy, "junk"); collision != nil {
+				m.attractedJunk = nil
+				m.connectedJunk = collision.Objects[0]
+				m.linkDistance.X = m.connectedJunk.X - m.physObj.X
+				m.linkDistance.Y = m.connectedJunk.Y - m.physObj.Y
+				m.touch = true
+				m.connected = true
+				v := basics.Vector2f{X: m.connectedJunk.X, Y: m.connectedJunk.Y}
+				m.rotation = m.RotateTo(v)
+			} else {
+				m.touch = false
+			}
 		}
 	}
 
@@ -206,7 +204,12 @@ func (m *MagnetObject) Update(deltaTime float64) {
 		m.rotation = m.RotateTo(r)
 	}
 
-	m.MoveAttractedJunk(deltaTime)
+	if m.magnetActive {
+		if collision := m.magFieldPhysObj.Check(dx, dy, "junk"); collision != nil {
+			m.attractedJunk = collision.Objects
+		}
+		m.MoveAttractedJunk(deltaTime)
+	}
 
 	fieldOffset := basics.Vector2f{X: -m.magneticFieldSize - (magPhysObjSizeDiff / 2), Y: -m.magneticFieldSize - (magPhysObjSizeDiff / 2)}
 
@@ -271,8 +274,8 @@ func (m *MagnetObject) Drop() {
 func (m *MagnetObject) MoveAttractedJunk(deltaTime float64) {
 	if len(m.attractedJunk) > 0 {
 		for _, junk := range m.attractedJunk {
-			junk.X = basics.FloatLerp(junk.X, m.magneticPoint.X+m.physObj.X, m.attractionStrength*deltaTime)
-			junk.Y = basics.FloatLerp(junk.Y, m.magneticPoint.Y+m.physObj.Y, m.attractionStrength*deltaTime)
+			junk.X = basics.FloatLerp(junk.X, m.magneticPoint.X+m.physObj.X-1, m.attractionStrength*deltaTime)
+			junk.Y = basics.FloatLerp(junk.Y, m.magneticPoint.Y+m.physObj.Y-1, m.attractionStrength*deltaTime)
 		}
 	}
 }

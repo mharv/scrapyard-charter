@@ -30,10 +30,10 @@ const (
 	initialRodStartX     = 52
 	initialRodStartY     = 52
 	//MagnetObject
-	initialDropReactivationTimer = 0
+	initialDropReactivationTimer = 1
 	initialMagneticFieldSize     = 100
 	initialAttractionStrength    = 1
-	initialLineLength            = 750
+	initialLineLength            = 400
 	initialMagnetCastSpeed       = 350
 	initialMagnetReelSpeed       = 400
 	//overworldPlayer

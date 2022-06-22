@@ -6,5 +6,28 @@ type Item struct {
 	modifiers    map[string]float64
 }
 
-//WHEN equip or remove an Item
-//check modlist of all items, add that to the player data mod stuff
+func (i *Item) Init() {
+	i.name = ""
+	i.rawMaterials = make(map[string]int)
+	i.modifiers = make(map[string]float64)
+}
+
+func (i *Item) SetName(name string) {
+	i.name = name
+}
+
+func (i *Item) AddRawMaterial(name string, quantity int) {
+	if val, ok := i.rawMaterials[name]; ok {
+		val += quantity
+	} else {
+		i.rawMaterials[name] = quantity
+	}
+}
+
+func (i *Item) AddModifier(name string, amount float64) {
+	if val, ok := i.modifiers[name]; ok {
+		val += amount
+	} else {
+		i.modifiers[name] = amount
+	}
+}
