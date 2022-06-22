@@ -35,6 +35,7 @@ func (p *OverworldPlayerObject) Init(ImageFilepath string) {
 	playerData := globals.GetPlayerData()
 
 	p.moveSpeed = playerData.GetOverworldMoveSpeed()
+	p.CastDistanceLimit = playerData.GetOverworldCastDistance()
 
 	p.sprite = img
 

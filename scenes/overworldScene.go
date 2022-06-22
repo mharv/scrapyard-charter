@@ -88,8 +88,7 @@ func (o *OverworldScene) Init() {
 	o.entityManager.AddEntity(t)
 	// Create player
 
-	// NOTE: the below argument for CastDistanceLimit should be pulled from player stats struct
-	p := &entities.OverworldPlayerObject{CastDistanceLimit: 200.0}
+	p := &entities.OverworldPlayerObject{}
 	p.Init("images/placeholderOverworldPlayerAssetTransparent.png")
 	o.physSpace.Add(p.GetPhysObj())
 	p.SetPosition(basics.Vector2f{X: o.spawnZone.X, Y: (o.spawnZone.Y + t.GetPhysObj().H)})
