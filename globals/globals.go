@@ -13,3 +13,8 @@ var playerData = &data.PlayerData{}
 func GetPlayerData() *data.PlayerData {
 	return playerData
 }
+
+var MaterialNamesList []string = []string{
+	"test",
+	"hi",
+}

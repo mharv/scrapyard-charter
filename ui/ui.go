@@ -8,7 +8,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/mharv/scrapyard-charter/globals"
-	"github.com/mharv/scrapyard-charter/inventory"
 	"github.com/tinne26/etxt"
 )
 
@@ -16,19 +15,24 @@ type Ui struct {
 	openButton       bool
 	xOffset, yOffset int
 	txtRenderer      *etxt.Renderer
+	characterOffset  int
 }
 
 func (u *Ui) Init() {
 	u.xOffset = 50
 	u.yOffset = 50
+	u.characterOffset = 20
 
-	tempItem := inventory.Item{}
+	// tempItem := inventory.Item{}
 
-	tempItem.Init()
-	tempItem.SetName("Iron Pipe")
-	tempItem.AddRawMaterial("Iron", 25)
+	// for i := 0; i < 10; i++ {
+	// 	tempItem.Init()
+	// 	tempItem.SetName("Iron Pipe")
+	// 	tempItem.AddRawMaterial("Iron", 25)
 
-	globals.GetPlayerData().GetInventory().AddItem(tempItem)
+	// 	globals.GetPlayerData().GetInventory().AddItem(tempItem)
+
+	// }
 
 	fontLib := etxt.NewFontLibrary()
 
@@ -45,8 +49,8 @@ func (u *Ui) Init() {
 	glyphsCache := etxt.NewDefaultCache(10 * 1024 * 1024) // 10MB
 	u.txtRenderer.SetCacheHandler(glyphsCache.NewHandler())
 	u.txtRenderer.SetFont(fontLib.GetFont("Rajdhani Regular"))
-	u.txtRenderer.SetAlign(etxt.YCenter, etxt.XCenter)
-	u.txtRenderer.SetSizePx(24)
+	u.txtRenderer.SetAlign(etxt.Top, etxt.Left)
+	u.txtRenderer.SetSizePx(u.characterOffset)
 }
 
 func (u *Ui) ReadInput() {
@@ -65,7 +69,6 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 		screen.Fill(color.RGBA{0, 0, 0, 255})
 
 		// draw item list
-
 		drawColor := color.RGBA{222, 130, 22, 255}
 		// inventory
 		ebitenutil.DrawRect(screen, (0 + float64(u.xOffset)), (0 + float64(u.yOffset)), (globals.ScreenWidth/3)-float64(2*u.xOffset), globals.ScreenHeight-float64(u.yOffset*2), drawColor)
@@ -78,8 +81,19 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 
 		u.txtRenderer.SetTarget(screen)
 		u.txtRenderer.SetColor(color.RGBA{255, 255, 255, 255})
+
+		// render items
+		for i, v := range globals.GetPlayerData().GetInventory().GetItems() {
+
+			u.txtRenderer.Draw(v.GetName(), (0 + u.xOffset*2), (0 + u.yOffset*2 + u.characterOffset*(i+2)))
+		}
+
+		for i, v := range globals.MaterialNamesList {
+
+			u.txtRenderer.Draw(v, ((globals.ScreenWidth/3 + globals.ScreenWidth/3) + u.xOffset*2), (0 + u.yOffset*2 + u.characterOffset*(i+2)))
+		}
+
 		// u.txtRenderer.Draw("globals.GetPlayerData().GetInventory().GetItems()[0].GetName()", globals.ScreenWidth/2, globals.ScreenHeight/2)
-		u.txtRenderer.Draw(globals.GetPlayerData().GetInventory().GetItems()[0].GetName(), globals.ScreenWidth/2, globals.ScreenHeight/2)
 
 	}
 
