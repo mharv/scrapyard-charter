@@ -14,6 +14,9 @@ type PlayerData struct {
 	lineLengthModifier            float64
 	magnetCastSpeedModifier       float64
 	magnetReelSpeedModifier       float64
+	//overworldPlayer
+	overworldMoveSpeedModifier    float64
+	overworldCastDistanceModifier float64
 }
 
 const (
@@ -30,7 +33,18 @@ const (
 	initialLineLength            = 200
 	initialMagnetCastSpeed       = 350
 	initialMagnetReelSpeed       = 400
+	//overworldPlayer
+	initialOverworldMoveSpeed    = 200
+	initialOverworldCastDistance = 200
 )
+
+func (p *PlayerData) GetOverworldCastDistance() float64 {
+	return initialOverworldCastDistance + p.overworldCastDistanceModifier
+}
+
+func (p *PlayerData) GetOverworldMoveSpeed() float64 {
+	return initialOverworldMoveSpeed + p.overworldMoveSpeedModifier
+}
 
 func (p *PlayerData) GetScavMoveSpeed() float64 {
 	return initialScavMoveSpeed + p.scavMoveSpeedModifier

@@ -21,10 +21,6 @@ type OverworldPlayerObject struct {
 	CastDistanceLimit                     float64
 }
 
-const (
-	moveSpeed = 200
-)
-
 func (p *OverworldPlayerObject) GetPhysObj() *resolv.Object {
 	return p.physObj
 }
@@ -36,7 +32,11 @@ func (p *OverworldPlayerObject) Init(ImageFilepath string) {
 		log.Fatal(err)
 	}
 
-	p.moveSpeed = moveSpeed
+	playerData := globals.GetPlayerData()
+
+	p.moveSpeed = playerData.GetOverworldMoveSpeed()
+	p.CastDistanceLimit = playerData.GetOverworldCastDistance()
+
 	p.sprite = img
 
 	// Setup resolv object to be size of the sprite
@@ -50,7 +50,7 @@ func (p *OverworldPlayerObject) ReadInput() {
 		p.moveSpeed *= 2
 	}
 	if inpututil.IsKeyJustReleased(ebiten.KeySpace) {
-		p.moveSpeed = moveSpeed
+		p.moveSpeed = globals.GetPlayerData().GetOverworldMoveSpeed()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyW) {

@@ -3,6 +3,7 @@ module github.com/mharv/scrapyard-charter
 go 1.18
 
 require (
+	github.com/aquilax/go-perlin v1.1.0
 	github.com/hajimehoshi/ebiten/v2 v2.3.4
 	github.com/solarlune/resolv v0.5.1
 	github.com/tinne26/etxt v0.0.1

@@ -3,7 +3,6 @@ package scenes
 import (
 	"fmt"
 	"image/color"
-	"log"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -12,6 +11,7 @@ import (
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/entities"
 	"github.com/mharv/scrapyard-charter/globals"
+	"github.com/mharv/scrapyard-charter/mapgen"
 	"github.com/solarlune/resolv"
 )
 
@@ -33,33 +33,45 @@ func (o *OverworldScene) Init() {
 	o.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, cellSize, cellSize)
 	o.entityManager.Init()
 
-	// Construct geometry
-	geometry := []*resolv.Object{
-		// left wall
-		// resolv.NewObject(0, 0, 16, globals.ScreenHeight),
-		// right wall
-		resolv.NewObject(globals.ScreenWidth-16, 0, 16, globals.ScreenHeight),
-		// top wall
-		resolv.NewObject(0, 0, globals.ScreenWidth, 16),
-		// bottom wall
-		resolv.NewObject(0, globals.ScreenHeight-16, globals.ScreenWidth, 16),
+	// object array
+	geometry := []*resolv.Object{}
 
-		// middle wall
-		resolv.NewObject(400, 0, 80, globals.ScreenHeight/2),
+	// 1366 * 768
+	var terrain [globals.ScreenWidth][globals.ScreenHeight]float64
+
+	// create a terrain map L, R, U, D - if true, side is open
+	terrain = mapgen.GenerateMap(false, false, false, false)
+
+	// we create 16 x 16 pixel blocks
+	tempCellSize := cellSize * 4
+
+	// used for determining if something is scrap or land
+	threshold := 0.8
+	// create objects based off smoothed map
+	for x := 0; x < len(terrain); x += tempCellSize {
+		for y := 0; y < len(terrain[x]); y += tempCellSize {
+			randomChanceToAdd := terrain[x][y]
+
+			if randomChanceToAdd <= threshold {
+				tempCellObject := resolv.NewObject(float64(x), float64(y), float64(tempCellSize), float64(tempCellSize), "land")
+				geometry = append(geometry, tempCellObject)
+			}
+			if randomChanceToAdd > threshold {
+				tempCellObject := resolv.NewObject(float64(x), float64(y), float64(tempCellSize), float64(tempCellSize), "scrap", "solid")
+				geometry = append(geometry, tempCellObject)
+			}
+		}
 	}
 
+	// add generated objects to scene space
 	o.physSpace.Add(geometry...)
 
-	for _, o := range o.physSpace.Objects() {
-		o.AddTags("scrap", "solid")
-	}
-
-	img, _, err := ebitenutil.NewImageFromFile("images/overworldTerrainPlaceholderGrass.png")
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		o.background = img
-	}
+	// img, _, err := ebitenutil.NewImageFromFile("images/overworldTerrainPlaceholderGrass.png")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// } else {
+	// 	o.background = img
+	// }
 
 	o.spawnZone.Width = globals.ScreenWidth
 	o.spawnZone.Height = globals.ScreenHeight
@@ -76,8 +88,7 @@ func (o *OverworldScene) Init() {
 	o.entityManager.AddEntity(t)
 	// Create player
 
-	// NOTE: the below argument for CastDistanceLimit should be pulled from player stats struct
-	p := &entities.OverworldPlayerObject{CastDistanceLimit: 200.0}
+	p := &entities.OverworldPlayerObject{}
 	p.Init("images/placeholderOverworldPlayerAssetTransparent.png")
 	o.physSpace.Add(p.GetPhysObj())
 	p.SetPosition(basics.Vector2f{X: o.spawnZone.X, Y: (o.spawnZone.Y + t.GetPhysObj().H)})
@@ -120,8 +131,7 @@ func (o *OverworldScene) Update(state *GameState, deltaTime float64) error {
 
 func (o *OverworldScene) Draw(screen *ebiten.Image) {
 
-	// options := &ebiten.DrawImageOptions{}
-
+	// cursor to player drawline and cast valid checks
 	mouseX, mouseY := ebiten.CursorPosition()
 	mx, my := o.physSpace.WorldToSpace(float64(mouseX), float64(mouseY))
 	cx, cy := o.player.GetCellPosition()
@@ -137,18 +147,26 @@ func (o *OverworldScene) Draw(screen *ebiten.Image) {
 			o.castAvailable = false
 		}
 	}
-	ebitenutil.DrawLine(screen, float64(cx)*cellSize, float64(cy)*cellSize, float64(mx)*cellSize, float64(my)*cellSize, drawColor)
 
-	// screen.DrawImage(o.background, options)
-
+	// draws the color depending on the tags for each object belonging to space
 	for _, o := range o.physSpace.Objects() {
-		drawColor := color.RGBA{60, 60, 60, 255}
-		if !o.HasTags("player") {
+		if o.HasTags("scrap") {
+			drawColor := color.RGBA{60, 60, 60, 255}
+			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
+		}
+		if o.HasTags("beach") {
+			drawColor := color.RGBA{222, 130, 22, 255}
+			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
+		}
+		if o.HasTags("land") {
+			drawColor := color.RGBA{119, 174, 74, 255}
 			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
 		}
 	}
 
 	o.entityManager.Draw(screen)
 
+	// draw the mouse to character distance check line
+	ebitenutil.DrawLine(screen, float64(cx)*cellSize, float64(cy)*cellSize, float64(mx)*cellSize, float64(my)*cellSize, drawColor)
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("cast available: %t", o.castAvailable))
 }
