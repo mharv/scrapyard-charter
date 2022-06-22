@@ -12,6 +12,7 @@ import (
 	"github.com/mharv/scrapyard-charter/entities"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/mharv/scrapyard-charter/mapgen"
+	"github.com/mharv/scrapyard-charter/ui"
 	"github.com/solarlune/resolv"
 )
 
@@ -23,6 +24,7 @@ type OverworldScene struct {
 	spawnZone                       basics.FloatRect
 	player                          entities.OverworldPlayerObject
 	castDistance                    float64
+	ui                              ui.Ui
 }
 
 const (
@@ -32,7 +34,8 @@ const (
 func (o *OverworldScene) Init() {
 	o.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, cellSize, cellSize)
 	o.entityManager.Init()
-
+	o.ui = ui.Ui{}
+	o.ui.Init()
 	// object array
 	geometry := []*resolv.Object{}
 
@@ -98,6 +101,7 @@ func (o *OverworldScene) Init() {
 
 func (o *OverworldScene) ReadInput() {
 	o.entityManager.ReadInput()
+	o.ui.ReadInput()
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		o.menuBtn = true
@@ -115,6 +119,7 @@ func (o *OverworldScene) ReadInput() {
 
 func (o *OverworldScene) Update(state *GameState, deltaTime float64) error {
 	o.entityManager.Update(deltaTime)
+	o.ui.Update()
 
 	if o.menuBtn {
 		t := &TitleScene{}
@@ -165,6 +170,8 @@ func (o *OverworldScene) Draw(screen *ebiten.Image) {
 	}
 
 	o.entityManager.Draw(screen)
+
+	o.ui.Draw(screen)
 
 	// draw the mouse to character distance check line
 	ebitenutil.DrawLine(screen, float64(cx)*cellSize, float64(cy)*cellSize, float64(mx)*cellSize, float64(my)*cellSize, drawColor)

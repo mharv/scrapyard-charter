@@ -13,6 +13,14 @@ func (i *Inventory) AddMaterial(material Material) {
 	i.materials = append(i.materials, material)
 }
 
+func (i *Inventory) GetItems() []Item {
+	return i.items
+}
+
+func (i *Inventory) GetMaterials() []Material {
+	return i.materials
+}
+
 // func (i *Inventory) RemoveAllItemWithName(name string) {
 // 	for index, element := range i.items {
 // 		if element.name == name {
