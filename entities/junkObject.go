@@ -20,6 +20,7 @@ type JunkObject struct {
 	itemData      inventory.Item
 	imageFilepath string
 	rot           float64
+	alive         bool
 }
 
 const (
@@ -35,6 +36,7 @@ func (j *JunkObject) GetSprite() *ebiten.Image {
 }
 
 func (j *JunkObject) Init(ImageFilepath string) {
+	j.alive = true
 	// Load an image given a filepath
 	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
 	if err != nil {
@@ -75,12 +77,28 @@ func (j *JunkObject) Draw(screen *ebiten.Image) {
 	screen.DrawImage(j.sprite, options)
 }
 
+func (j *JunkObject) IsAlive() bool {
+	return j.alive
+}
+
+func (j *JunkObject) Kill() {
+	j.alive = false
+}
+
+func (j *JunkObject) RemovePhysObj(space *resolv.Space) {
+	space.Remove(j.physObj)
+}
+
 func (j *JunkObject) InitData() {
 	j.itemData.Init()
 }
 
 func (j *JunkObject) SetItemDataName(name string) {
 	j.itemData.SetName(name)
+}
+
+func (j *JunkObject) GetItemData() *inventory.Item {
+	return &j.itemData
 }
 
 func (j *JunkObject) SetImageFilepath(filepath string) {
@@ -94,6 +112,10 @@ func (j *JunkObject) GetImageFilepath() string {
 func (j *JunkObject) AddItemDataMaterial(materialName string, minQuantity, maxQuantity int) {
 	quantity := rand.Intn(maxQuantity-minQuantity) + minQuantity
 	j.itemData.AddRawMaterial(materialName, quantity)
+}
+
+func (j *JunkObject) IsPhysObject(physObjectToCompare *resolv.Object) bool {
+	return j.physObj == physObjectToCompare
 }
 
 func (j *JunkObject) SetPosition(position basics.Vector2f) {
