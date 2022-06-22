@@ -10,13 +10,16 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/globals"
+	"github.com/mharv/scrapyard-charter/inventory"
 	"github.com/solarlune/resolv"
 )
 
 type JunkObject struct {
-	sprite  *ebiten.Image
-	physObj *resolv.Object
-	rot     float64
+	sprite        *ebiten.Image
+	physObj       *resolv.Object
+	itemData      inventory.Item
+	imageFilepath string
+	rot           float64
 }
 
 const (
@@ -70,6 +73,27 @@ func (j *JunkObject) Draw(screen *ebiten.Image) {
 
 	// Draw the image (comment this out to see the above resolv rect ^^^)
 	screen.DrawImage(j.sprite, options)
+}
+
+func (j *JunkObject) InitData() {
+	j.itemData.Init()
+}
+
+func (j *JunkObject) SetItemDataName(name string) {
+	j.itemData.SetName(name)
+}
+
+func (j *JunkObject) SetImageFilepath(filepath string) {
+	j.imageFilepath = filepath
+}
+
+func (j *JunkObject) GetImageFilepath() string {
+	return j.imageFilepath
+}
+
+func (j *JunkObject) AddItemDataMaterial(materialName string, minQuantity, maxQuantity int) {
+	quantity := rand.Intn(maxQuantity-minQuantity) + minQuantity
+	j.itemData.AddRawMaterial(materialName, quantity)
 }
 
 func (j *JunkObject) SetPosition(position basics.Vector2f) {
