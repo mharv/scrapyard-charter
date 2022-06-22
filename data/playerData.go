@@ -3,7 +3,7 @@ package data
 import "github.com/mharv/scrapyard-charter/inventory"
 
 type PlayerData struct {
-	inventory inventory.Inventory
+	inventory *inventory.Inventory
 	//ScavPlayerObject
 	scavMoveSpeedModifier float64
 	rodStartXModifier     float64
@@ -41,7 +41,11 @@ const (
 	initialOverworldCastDistance = 200
 )
 
-func (p *PlayerData) GetInventory() inventory.Inventory {
+func (p *PlayerData) Init() {
+	p.inventory = &inventory.Inventory{}
+}
+
+func (p *PlayerData) GetInventory() *inventory.Inventory {
 	return p.inventory
 }
 
