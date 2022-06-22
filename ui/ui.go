@@ -1,8 +1,10 @@
 package ui
 
 import (
+	"fmt"
 	"image/color"
 	"log"
+	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -12,16 +14,23 @@ import (
 )
 
 type Ui struct {
-	openButton       bool
-	xOffset, yOffset int
-	txtRenderer      *etxt.Renderer
-	characterOffset  int
+	openButton             bool
+	xOffset, yOffset       int
+	txtRenderer            *etxt.Renderer
+	characterOffset        int
+	itemsByCount           map[string]int
+	currentItemStoreLength int
+	sortedItemKeys         []string
 }
 
 func (u *Ui) Init() {
 	u.xOffset = 50
 	u.yOffset = 50
 	u.characterOffset = 20
+
+	u.itemsByCount = make(map[string]int)
+	u.currentItemStoreLength = 0
+	u.sortedItemKeys = []string{}
 
 	// tempItem := inventory.Item{}
 
@@ -61,6 +70,26 @@ func (u *Ui) ReadInput() {
 }
 
 func (u *Ui) Update() error {
+
+	if len(globals.GetPlayerData().GetInventory().GetItems()) != u.currentItemStoreLength {
+		for _, v := range globals.GetPlayerData().GetInventory().GetItems() {
+
+			if val, ok := u.itemsByCount[v.GetName()]; ok {
+				u.itemsByCount[v.GetName()] = val + 1
+			} else {
+				u.itemsByCount[v.GetName()] = 1
+			}
+
+		}
+
+		for k := range u.itemsByCount {
+			u.sortedItemKeys = append(u.sortedItemKeys, k)
+		}
+		sort.Strings(u.sortedItemKeys)
+
+		u.currentItemStoreLength = len(globals.GetPlayerData().GetInventory().GetItems())
+	}
+
 	return nil
 }
 
@@ -83,9 +112,12 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 		u.txtRenderer.SetColor(color.RGBA{255, 255, 255, 255})
 
 		// render items
-		for i, v := range globals.GetPlayerData().GetInventory().GetItems() {
+		// for i, v := range globals.GetPlayerData().GetInventory().GetItems() {
 
-			u.txtRenderer.Draw(v.GetName(), (0 + u.xOffset*2), (0 + u.yOffset*2 + u.characterOffset*(i+2)))
+		// 	u.txtRenderer.Draw(v.GetName(), (0 + u.xOffset*2), (0 + u.yOffset*2 + u.characterOffset*(i+2)))
+		// }
+		for i, k := range u.sortedItemKeys {
+			u.txtRenderer.Draw(fmt.Sprintf("%d x %s", u.itemsByCount[k], k), (0 + u.xOffset*2), (0 + u.yOffset*2 + u.characterOffset*(i+2)))
 		}
 
 		for i, v := range globals.MaterialNamesList {
