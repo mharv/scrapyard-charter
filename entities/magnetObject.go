@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 	"math"
@@ -194,16 +195,18 @@ func (m *MagnetObject) Update(deltaTime float64) {
 			m.syncToRod = true
 			m.magnetActive = false
 			if m.connected {
-				//ADD m.connectedJunk ITEM TO INVENTORY HERE
+				m.connected = false
+
 				if val, ok := m.junkLookup[m.connectedJunk]; ok {
 					if val.IsAlive() {
+						fmt.Println("Adding " + val.itemData.GetName() + " to the bag")
 						globals.GetPlayerData().GetInventory().AddItem(*val.GetItemData())
-					}
 
-					val.Kill()
-					m.connected = false
-					m.connectedJunk = nil
+						val.Kill()
+					}
 				}
+
+				m.connectedJunk = nil
 			}
 		}
 	}

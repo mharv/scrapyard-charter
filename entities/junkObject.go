@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 	"math/rand"
@@ -82,6 +83,9 @@ func (j *JunkObject) IsAlive() bool {
 }
 
 func (j *JunkObject) Kill() {
+	fmt.Println("Removing " + j.itemData.GetName() + "'s phys obj from ")
+	j.RemovePhysObj(j.physObj.Space)
+	fmt.Println("Seeting alive to false for " + j.itemData.GetName())
 	j.alive = false
 }
 
