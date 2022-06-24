@@ -21,13 +21,22 @@ func (i *Inventory) GetMaterials() []Material {
 	return i.materials
 }
 
-// func (i *Inventory) RemoveAllItemWithName(name string) {
-// 	for index, element := range i.items {
-// 		if element.name == name {
-// 			i.items = append(i.items[:index], i.items[index+1:]...)
-// 		}
-// 	}
-// }
+func (i *Inventory) RemoveAllItemWithName(name string) {
+	for index, element := range i.items {
+		if element.name == name {
+			i.items = append(i.items[:index], i.items[index+1:]...)
+		}
+	}
+}
+
+func (i *Inventory) RemoveOneItemWithName(name string) {
+	for index, element := range i.items {
+		if element.name == name {
+			i.items = append(i.items[:index], i.items[index+1:]...)
+			break
+		}
+	}
+}
 
 // func (i *Inventory) RemoveMaterial(name string, quantity int) {
 // }
