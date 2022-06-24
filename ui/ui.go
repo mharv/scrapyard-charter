@@ -122,7 +122,7 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 
 		for i, v := range globals.MaterialNamesList {
 
-			u.txtRenderer.Draw(v, ((globals.ScreenWidth/3 + globals.ScreenWidth/3) + u.xOffset*2), (0 + u.yOffset*2 + u.characterOffset*(i+2)))
+			u.txtRenderer.Draw(fmt.Sprintf("%d x %s", 0, v), ((globals.ScreenWidth/3 + globals.ScreenWidth/3) + u.xOffset*2), (0 + u.yOffset*2 + u.characterOffset*(i+2)))
 		}
 
 		// u.txtRenderer.Draw("globals.GetPlayerData().GetInventory().GetItems()[0].GetName()", globals.ScreenWidth/2, globals.ScreenHeight/2)

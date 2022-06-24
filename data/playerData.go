@@ -43,6 +43,7 @@ const (
 
 func (p *PlayerData) Init() {
 	p.inventory = &inventory.Inventory{}
+	p.inventory.InitMaterials()
 }
 
 func (p *PlayerData) GetInventory() *inventory.Inventory {

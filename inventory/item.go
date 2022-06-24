@@ -20,6 +20,10 @@ func (i *Item) GetName() string {
 	return i.name
 }
 
+func (i *Item) GetMaterials() map[string]int {
+	return i.rawMaterials
+}
+
 func (i *Item) AddRawMaterial(name string, quantity int) {
 	if val, ok := i.rawMaterials[name]; ok {
 		val += quantity

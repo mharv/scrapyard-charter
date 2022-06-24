@@ -1,9 +1,10 @@
 package inventory
 
 type Material struct {
-	name string
+	name   string
+	amount int
 }
 
-func (m *Material) GetName() string {
-	return m.name
+func (m *Material) GetMaterial() Material {
+	return *m
 }
