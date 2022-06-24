@@ -44,10 +44,6 @@ func (e *EntityManager) Update(deltaTime float64) {
 
 func (e *EntityManager) RemoveDead(space *resolv.Space) {
 	if len(e.deadEntities) > 0 {
-		for _, entity := range e.deadEntities {
-			entity.RemovePhysObj(space)
-		}
-
 		newDeadList := &[]Entity{}
 		e.deadEntities = *newDeadList
 	}

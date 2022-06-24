@@ -177,7 +177,7 @@ func (s *ScavengeScene) InitJunkList() {
 	s.junkList = append(s.junkList, *cog)
 
 	ironPipe := &entities.JunkObject{}
-	ironPipe.SetImageFilepath("images/pipe.png")
+	ironPipe.SetImageFilepath("images/ironpipe.png")
 	ironPipe.InitData()
 	ironPipe.SetItemDataName("Iron Pipe")
 	ironPipe.AddItemDataMaterial("Iron", 15, 30)
@@ -192,10 +192,10 @@ func (s *ScavengeScene) InitJunkList() {
 	s.junkList = append(s.junkList, *tyre)
 
 	steelBikeFrame := &entities.JunkObject{}
-	steelBikeFrame.SetImageFilepath("images/tyre.png")
+	steelBikeFrame.SetImageFilepath("images/steelbikeframe.png")
 	steelBikeFrame.InitData()
 	steelBikeFrame.SetItemDataName("Steel Bike Frame")
-	steelBikeFrame.AddItemDataMaterial("Steel", 15, 25)
+	steelBikeFrame.AddItemDataMaterial("Steel", 15, 20)
 	steelBikeFrame.AddItemDataMaterial("Iron", 2, 7)
 	steelBikeFrame.AddItemDataMaterial("Plastic", 0, 1)
 	s.junkList = append(s.junkList, *steelBikeFrame)
@@ -218,14 +218,14 @@ func (s *ScavengeScene) InitJunkList() {
 	s.junkList = append(s.junkList, *toaster)
 
 	steelPipe := &entities.JunkObject{}
-	steelPipe.SetImageFilepath("images/pipe.png")
+	steelPipe.SetImageFilepath("images/steelpipe.png")
 	steelPipe.InitData()
 	steelPipe.SetItemDataName("Steel Pipe")
 	steelPipe.AddItemDataMaterial("Steel", 15, 30)
 	s.junkList = append(s.junkList, *steelPipe)
 
 	belt := &entities.JunkObject{}
-	belt.SetImageFilepath("images/pipe.png")
+	belt.SetImageFilepath("images/belt.png")
 	belt.InitData()
 	belt.SetItemDataName("Belt")
 	belt.AddItemDataMaterial("Cobalt", 1, 7)
@@ -234,14 +234,14 @@ func (s *ScavengeScene) InitJunkList() {
 	s.junkList = append(s.junkList, *belt)
 
 	copperPipe := &entities.JunkObject{}
-	copperPipe.SetImageFilepath("images/pipe.png")
+	copperPipe.SetImageFilepath("images/copperpipe.png")
 	copperPipe.InitData()
 	copperPipe.SetItemDataName("Copper Pipe")
 	copperPipe.AddItemDataMaterial("Copper", 15, 30)
 	s.junkList = append(s.junkList, *copperPipe)
 
 	titaniumBikeFrame := &entities.JunkObject{}
-	titaniumBikeFrame.SetImageFilepath("images/pipe.png")
+	titaniumBikeFrame.SetImageFilepath("images/titaniumbikeframe.png")
 	titaniumBikeFrame.InitData()
 	titaniumBikeFrame.SetItemDataName("Titanium Bike Frame")
 	titaniumBikeFrame.AddItemDataMaterial("Titanium", 15, 25)
@@ -250,7 +250,7 @@ func (s *ScavengeScene) InitJunkList() {
 	s.junkList = append(s.junkList, *titaniumBikeFrame)
 
 	titaniumPipe := &entities.JunkObject{}
-	titaniumPipe.SetImageFilepath("images/pipe.png")
+	titaniumPipe.SetImageFilepath("images/titaniumpipe.png")
 	titaniumPipe.InitData()
 	titaniumPipe.SetItemDataName("Titanium Pipe")
 	titaniumPipe.AddItemDataMaterial("Titanium", 15, 30)
@@ -267,7 +267,7 @@ func (s *ScavengeScene) InitJunkList() {
 	s.junkList = append(s.junkList, *oldPC)
 
 	battery := &entities.JunkObject{}
-	battery.SetImageFilepath("images/oldpc.png")
+	battery.SetImageFilepath("images/battery.png")
 	battery.InitData()
 	battery.SetItemDataName("Battery")
 	battery.AddItemDataMaterial("Cobalt", 10, 15)
