@@ -44,6 +44,7 @@ func (o *OverworldScene) Init() {
 
 	// create a terrain map L, R, U, D - if true, side is open
 	terrain = mapgen.GenerateMap(false, false, false, false)
+	fmt.Printf("%d random seed", globals.GetPlayerData().GetWorldSeed())
 
 	// we create 16 x 16 pixel blocks
 	tempCellSize := cellSize * 4
@@ -78,7 +79,7 @@ func (o *OverworldScene) Init() {
 
 	o.spawnZone.Width = globals.ScreenWidth
 	o.spawnZone.Height = globals.ScreenHeight
-	o.spawnZone.X = o.spawnZone.Width / 2
+	o.spawnZone.X = o.spawnZone.Width/2 + 100
 	o.spawnZone.Y = o.spawnZone.Height / 2
 
 	// create homeBase
@@ -94,7 +95,7 @@ func (o *OverworldScene) Init() {
 	p := &entities.OverworldPlayerObject{}
 	p.Init("images/placeholderOverworldPlayerAssetTransparent.png")
 	o.physSpace.Add(p.GetPhysObj())
-	p.SetPosition(basics.Vector2f{X: o.spawnZone.X, Y: (o.spawnZone.Y + t.GetPhysObj().H)})
+	p.SetPosition(globals.GetPlayerData().GetPlayerPosition())
 	o.entityManager.AddEntity(p)
 	o.player = *p
 }
@@ -128,6 +129,7 @@ func (o *OverworldScene) Update(state *GameState, deltaTime float64) error {
 
 	if o.castAvailable && o.castBtn && o.castDistance < o.player.CastDistanceLimit {
 		s := &ScavengeScene{distanceOfOverworldCast: o.castDistance}
+		globals.GetPlayerData().SetPlayerPosition(basics.Vector2f{X: o.player.GetPhysObj().X, Y: o.player.GetPhysObj().Y})
 		state.SceneManager.GoTo(s, transitionTime)
 	}
 
