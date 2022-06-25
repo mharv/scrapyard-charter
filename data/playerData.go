@@ -1,6 +1,11 @@
 package data
 
-import "github.com/mharv/scrapyard-charter/inventory"
+import (
+	"math/rand"
+
+	"github.com/mharv/scrapyard-charter/basics"
+	"github.com/mharv/scrapyard-charter/inventory"
+)
 
 type PlayerData struct {
 	inventory *inventory.Inventory
@@ -20,6 +25,8 @@ type PlayerData struct {
 	//overworldPlayer
 	overworldMoveSpeedModifier    float64
 	overworldCastDistanceModifier float64
+	InitialOverworldPosition      basics.Vector2f
+	worldSeed                     int
 }
 
 const (
@@ -43,8 +50,21 @@ const (
 
 func (p *PlayerData) Init() {
 	p.inventory = &inventory.Inventory{}
+	p.inventory.InitMaterials()
+	p.worldSeed = rand.Int()
 }
 
+func (p *PlayerData) GetWorldSeed() int {
+	return p.worldSeed
+}
+
+func (p *PlayerData) GetPlayerPosition() basics.Vector2f {
+	return p.InitialOverworldPosition
+}
+
+func (p *PlayerData) SetPlayerPosition(position basics.Vector2f) {
+	p.InitialOverworldPosition = position
+}
 func (p *PlayerData) GetInventory() *inventory.Inventory {
 	return p.inventory
 }

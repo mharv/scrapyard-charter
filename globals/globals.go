@@ -1,6 +1,9 @@
 package globals
 
-import "github.com/mharv/scrapyard-charter/data"
+import (
+	"github.com/mharv/scrapyard-charter/basics"
+	"github.com/mharv/scrapyard-charter/data"
+)
 
 const (
 	ScreenWidth  = 1366
@@ -8,13 +11,23 @@ const (
 	Debug        = false
 )
 
-var playerData = &data.PlayerData{}
+var playerData = &data.PlayerData{InitialOverworldPosition: basics.Vector2f{
+	X: ScreenWidth / 2,
+	Y: ScreenHeight / 2,
+}}
 
 func GetPlayerData() *data.PlayerData {
 	return playerData
 }
 
 var MaterialNamesList []string = []string{
-	"test",
-	"hi",
+	"Iron",
+	"Steel",
+	"Copper",
+	"Rubber",
+	"Plastic",
+	"Nickel",
+	"Cobalt",
+	"Titanium",
+	"Gold",
 }

@@ -40,8 +40,10 @@ func sum(numbers []float64) float64 {
 func applyPerlinNoise(terrain, fallOffMap [w][h]float64) [w][h]float64 {
 	// setup perlin noise gen -- probably wrong useage
 	var iterations int32 = 2
-	perlinNoise := perlin.NewPerlin(2, 3, iterations, int64(rand.Int()))
+	perlinNoise := perlin.NewPerlin(2, 3, iterations, int64(globals.GetPlayerData().GetWorldSeed()))
 	scale := 0.2
+
+	rand.Seed(int64(globals.GetPlayerData().GetWorldSeed()))
 
 	// apply fall off map to perlin noise
 	for x := 0; x < w; x++ {
