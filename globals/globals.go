@@ -8,7 +8,7 @@ import (
 const (
 	ScreenWidth  = 1366
 	ScreenHeight = 768
-	Debug        = true
+	Debug        = false
 )
 
 var playerData = &data.PlayerData{InitialOverworldPosition: basics.Vector2f{

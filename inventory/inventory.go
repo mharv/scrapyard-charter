@@ -47,8 +47,8 @@ func (i *Inventory) RemoveAllItemWithName(name string) {
 	}
 }
 
-func (i *Inventory) RemoveOneItemWithName(name string) map[string]int {
-	var salvagedMaterials map[string]int
+func (i *Inventory) RemoveOneItemWithName(name string) map[string]RawMaterial {
+	var salvagedMaterials map[string]RawMaterial
 	for index, element := range i.items {
 		if element.name == name {
 			salvagedMaterials = i.items[index].GetMaterials()
@@ -62,7 +62,7 @@ func (i *Inventory) RemoveOneItemWithName(name string) map[string]int {
 func (i *Inventory) SalvageOneItem(name string) {
 	salvagedMaterials := i.RemoveOneItemWithName(name)
 	for k, v := range salvagedMaterials {
-		i.AddMaterial(k, v)
+		i.AddMaterial(k, v.GetAmount())
 	}
 }
 

@@ -19,6 +19,9 @@ import (
 
 type ScavengeScene struct {
 	entityManager           entities.EntityManager
+	timerUIboxSprite        *ebiten.Image
+	timerUIglassSprite      *ebiten.Image
+	UIPipeSprite            *ebiten.Image
 	physSpace               *resolv.Space
 	menuBtn                 bool
 	spawnZone               basics.FloatRect
@@ -26,16 +29,46 @@ type ScavengeScene struct {
 	txtRenderer             *etxt.Renderer
 	countdownTimer          float64
 	junkList                []entities.JunkObject
+	UIPosition              basics.Vector2f
 }
 
 const (
 	spawnZoneEdgeBorder = 128
 	defaultTimerStart   = 10
-	timerPositionOffset = 100
+	uiXOffset           = 32
+	uiYOffset           = 32
+	uiGlassXOffset      = 25
+	uiGlassYOffset      = 4
+	textXOffset         = 40
+	textYOffset         = 0
+	fontSize            = 50
+	iconXOffset         = 184
+	iconYOffset         = 66
+	textRedLimit        = 5.0
 )
 
 func (s *ScavengeScene) Init() {
+	fmt.Println(s.distanceOfOverworldCast)
 	s.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, 16, 16)
+	s.UIPosition = basics.Vector2f{X: globals.ScreenWidth - (uiXOffset + iconXOffset), Y: uiYOffset + iconYOffset}
+
+	img, _, imgerr := ebitenutil.NewImageFromFile("images/timerUIBox.png")
+	if imgerr != nil {
+		log.Fatal(imgerr)
+	}
+	s.timerUIboxSprite = img
+
+	glimg, _, glerr := ebitenutil.NewImageFromFile("images/timerUIBoxGlass.png")
+	if glerr != nil {
+		log.Fatal(glerr)
+	}
+	s.timerUIglassSprite = glimg
+
+	pipimg, _, piperr := ebitenutil.NewImageFromFile("images/UIPipes.png")
+	if piperr != nil {
+		log.Fatal(piperr)
+	}
+	s.UIPipeSprite = pipimg
 
 	s.entityManager.Init()
 
@@ -57,7 +90,7 @@ func (s *ScavengeScene) Init() {
 	s.txtRenderer.SetCacheHandler(glyphsCache.NewHandler())
 	s.txtRenderer.SetFont(fontLib.GetFont("Rajdhani Regular"))
 	s.txtRenderer.SetAlign(etxt.Top, etxt.Left)
-	s.txtRenderer.SetSizePx(24)
+	s.txtRenderer.SetSizePx(fontSize)
 
 	s.spawnZone.Width = globals.ScreenWidth - (spawnZoneEdgeBorder * 4)
 	s.spawnZone.Height = globals.ScreenHeight - (spawnZoneEdgeBorder * 2)
@@ -71,16 +104,17 @@ func (s *ScavengeScene) Init() {
 
 	junkLookup := make(map[*resolv.Object]*entities.JunkObject)
 	// Create junk
-	for i := 0; i < 10; i++ {
-		index := rnd.Intn(len(s.junkList))
-
-		j := s.junkList[index]
+	for i := 0; i < 100; i++ {
+		j := s.SelectJunk(s.distanceOfOverworldCast)
+		depth := j.GetItemData().GetDepth()
+		percent := depth/float64(len(s.junkList)) + ((rnd.Float64() * 0.6) - 0.3)
+		percent = basics.FloatClamp(percent, 0, 1)
 		j.Init(j.GetImageFilepath())
 		s.physSpace.Add(j.GetPhysObj())
 
 		x := (rnd.Float64() * (s.spawnZone.Width))
 		x += s.spawnZone.X - float64(j.GetPhysObj().X)
-		y := (rnd.Float64() * (s.spawnZone.Height))
+		y := (percent * (s.spawnZone.Height))
 		y += s.spawnZone.Y - float64(j.GetPhysObj().Y)
 
 		j.SetPosition(basics.Vector2f{X: x, Y: y})
@@ -92,6 +126,7 @@ func (s *ScavengeScene) Init() {
 	m := &entities.MagnetObject{}
 	m.Init("images/magnet.png")
 	m.SetJunkLookup(junkLookup)
+	m.SetUIPos(s.UIPosition)
 	s.physSpace.Add(m.GetPhysObj())
 	s.physSpace.Add(m.GetFieldPhysObj())
 	s.entityManager.AddEntity(m)
@@ -115,6 +150,11 @@ func (s *ScavengeScene) Init() {
 
 	m.SetMagnetStartPos(p.GetFishingRodEndPoint())
 
+	p.Update(0)
+	r.Update(0)
+	m.Update(0)
+	r.Update(0)
+
 	s.menuBtn = false
 }
 
@@ -133,6 +173,7 @@ func (s *ScavengeScene) Update(state *GameState, deltaTime float64) error {
 
 	s.countdownTimer -= deltaTime
 	if s.countdownTimer <= 0 {
+		s.countdownTimer = 0
 		o := &OverworldScene{}
 		state.SceneManager.GoTo(o, transitionTime)
 	}
@@ -156,16 +197,29 @@ func (s *ScavengeScene) Draw(screen *ebiten.Image) {
 
 	timer := fmt.Sprintf("%.2f", s.countdownTimer)
 
+	uipipeop := &ebiten.DrawImageOptions{}
+	uipipeop.GeoM.Translate(globals.ScreenWidth-float64(s.UIPipeSprite.Bounds().Dx()), 0)
+	screen.DrawImage(s.UIPipeSprite, uipipeop)
+
 	s.entityManager.Draw(screen)
 	s.txtRenderer.SetTarget(screen)
-	if s.countdownTimer > 10 {
-		s.txtRenderer.SetColor(color.RGBA{255, 255, 255, 255})
+
+	options := &ebiten.DrawImageOptions{}
+	options.GeoM.Translate(globals.ScreenWidth-(float64(s.timerUIboxSprite.Bounds().Dx())+uiXOffset), uiYOffset)
+	screen.DrawImage(s.timerUIboxSprite, options)
+
+	if s.countdownTimer > textRedLimit {
+		s.txtRenderer.SetColor(color.RGBA{197, 204, 184, 255})
 	} else {
-		s.txtRenderer.SetColor(color.RGBA{255, 0, 0, 255})
+		s.txtRenderer.SetColor(color.RGBA{154, 79, 80, 255})
 	}
-	s.txtRenderer.Draw(timer, globals.ScreenWidth-timerPositionOffset, 0)
+	s.txtRenderer.Draw(timer, int(globals.ScreenWidth-(float64(s.timerUIboxSprite.Bounds().Dx())+uiXOffset)+textXOffset), int(uiYOffset+textYOffset))
 
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("cast available: %f", s.distanceOfOverworldCast))
+
+	glassop := &ebiten.DrawImageOptions{}
+	glassop.GeoM.Translate(globals.ScreenWidth-(float64(s.timerUIboxSprite.Bounds().Dx())+uiXOffset)+uiGlassXOffset, uiYOffset+uiGlassYOffset)
+	screen.DrawImage(s.timerUIglassSprite, glassop)
 }
 
 func (s *ScavengeScene) InitJunkList() {
@@ -173,6 +227,7 @@ func (s *ScavengeScene) InitJunkList() {
 	cog.SetImageFilepath("images/cog.png")
 	cog.InitData()
 	cog.SetItemDataName("Cog")
+	cog.SetItemDataDepthAndRarity(0, 80, 0.1)
 	cog.AddItemDataMaterial("Iron", 5, 10)
 	s.junkList = append(s.junkList, *cog)
 
@@ -180,6 +235,7 @@ func (s *ScavengeScene) InitJunkList() {
 	ironPipe.SetImageFilepath("images/ironpipe.png")
 	ironPipe.InitData()
 	ironPipe.SetItemDataName("Iron Pipe")
+	ironPipe.SetItemDataDepthAndRarity(1, 60, 0.2)
 	ironPipe.AddItemDataMaterial("Iron", 15, 30)
 	s.junkList = append(s.junkList, *ironPipe)
 
@@ -187,6 +243,7 @@ func (s *ScavengeScene) InitJunkList() {
 	tyre.SetImageFilepath("images/tyre.png")
 	tyre.InitData()
 	tyre.SetItemDataName("Tyre")
+	tyre.SetItemDataDepthAndRarity(2, 50, 0.2)
 	tyre.AddItemDataMaterial("Rubber", 15, 25)
 	tyre.AddItemDataMaterial("Iron", 15, 20)
 	s.junkList = append(s.junkList, *tyre)
@@ -195,6 +252,7 @@ func (s *ScavengeScene) InitJunkList() {
 	steelBikeFrame.SetImageFilepath("images/steelbikeframe.png")
 	steelBikeFrame.InitData()
 	steelBikeFrame.SetItemDataName("Steel Bike Frame")
+	steelBikeFrame.SetItemDataDepthAndRarity(3, 40, 0.3)
 	steelBikeFrame.AddItemDataMaterial("Steel", 15, 20)
 	steelBikeFrame.AddItemDataMaterial("Iron", 2, 7)
 	steelBikeFrame.AddItemDataMaterial("Plastic", 0, 1)
@@ -204,6 +262,7 @@ func (s *ScavengeScene) InitJunkList() {
 	monitor.SetImageFilepath("images/monitor.png")
 	monitor.InitData()
 	monitor.SetItemDataName("Monitor")
+	monitor.SetItemDataDepthAndRarity(4, 30, 0.4)
 	monitor.AddItemDataMaterial("Copper", 10, 15)
 	monitor.AddItemDataMaterial("Plastic", 5, 10)
 	monitor.AddItemDataMaterial("Iron", 0, 2)
@@ -213,6 +272,7 @@ func (s *ScavengeScene) InitJunkList() {
 	toaster.SetImageFilepath("images/toaster.png")
 	toaster.InitData()
 	toaster.SetItemDataName("Toaster")
+	toaster.SetItemDataDepthAndRarity(5, 20, 0.5)
 	toaster.AddItemDataMaterial("Nickel", 2, 10)
 	toaster.AddItemDataMaterial("Iron", 1, 5)
 	s.junkList = append(s.junkList, *toaster)
@@ -221,6 +281,7 @@ func (s *ScavengeScene) InitJunkList() {
 	steelPipe.SetImageFilepath("images/steelpipe.png")
 	steelPipe.InitData()
 	steelPipe.SetItemDataName("Steel Pipe")
+	steelPipe.SetItemDataDepthAndRarity(6, 18, 0.6)
 	steelPipe.AddItemDataMaterial("Steel", 15, 30)
 	s.junkList = append(s.junkList, *steelPipe)
 
@@ -228,6 +289,7 @@ func (s *ScavengeScene) InitJunkList() {
 	belt.SetImageFilepath("images/belt.png")
 	belt.InitData()
 	belt.SetItemDataName("Belt")
+	belt.SetItemDataDepthAndRarity(7, 15, 0.7)
 	belt.AddItemDataMaterial("Cobalt", 1, 7)
 	belt.AddItemDataMaterial("Rubber", 3, 8)
 	belt.AddItemDataMaterial("Plastic", 0, 2)
@@ -237,6 +299,7 @@ func (s *ScavengeScene) InitJunkList() {
 	copperPipe.SetImageFilepath("images/copperpipe.png")
 	copperPipe.InitData()
 	copperPipe.SetItemDataName("Copper Pipe")
+	copperPipe.SetItemDataDepthAndRarity(8, 13, 0.9)
 	copperPipe.AddItemDataMaterial("Copper", 15, 30)
 	s.junkList = append(s.junkList, *copperPipe)
 
@@ -244,6 +307,7 @@ func (s *ScavengeScene) InitJunkList() {
 	titaniumBikeFrame.SetImageFilepath("images/titaniumbikeframe.png")
 	titaniumBikeFrame.InitData()
 	titaniumBikeFrame.SetItemDataName("Titanium Bike Frame")
+	titaniumBikeFrame.SetItemDataDepthAndRarity(9, 10, 1.2)
 	titaniumBikeFrame.AddItemDataMaterial("Titanium", 15, 25)
 	titaniumBikeFrame.AddItemDataMaterial("Iron", 0, 2)
 	titaniumBikeFrame.AddItemDataMaterial("Plastic", 2, 4)
@@ -253,6 +317,7 @@ func (s *ScavengeScene) InitJunkList() {
 	titaniumPipe.SetImageFilepath("images/titaniumpipe.png")
 	titaniumPipe.InitData()
 	titaniumPipe.SetItemDataName("Titanium Pipe")
+	titaniumPipe.SetItemDataDepthAndRarity(10, 9, 1.4)
 	titaniumPipe.AddItemDataMaterial("Titanium", 15, 30)
 	s.junkList = append(s.junkList, *titaniumPipe)
 
@@ -260,6 +325,7 @@ func (s *ScavengeScene) InitJunkList() {
 	oldPC.SetImageFilepath("images/oldpc.png")
 	oldPC.InitData()
 	oldPC.SetItemDataName("Old PC")
+	oldPC.SetItemDataDepthAndRarity(11, 8, 1.8)
 	oldPC.AddItemDataMaterial("Copper", 10, 15)
 	oldPC.AddItemDataMaterial("Plastic", 8, 12)
 	oldPC.AddItemDataMaterial("Steel", 3, 7)
@@ -270,7 +336,37 @@ func (s *ScavengeScene) InitJunkList() {
 	battery.SetImageFilepath("images/battery.png")
 	battery.InitData()
 	battery.SetItemDataName("Battery")
+	battery.SetItemDataDepthAndRarity(12, 4, 2.5)
 	battery.AddItemDataMaterial("Cobalt", 10, 15)
 	battery.AddItemDataMaterial("Nickel", 10, 15)
 	s.junkList = append(s.junkList, *battery)
+}
+
+func (s *ScavengeScene) SelectJunk(castDistance float64) entities.JunkObject {
+
+	var junkList []float64
+	var totalRarity float64
+
+	castPercent := (castDistance / globals.GetPlayerData().GetOverworldCastDistance()) * 100
+
+	for _, v := range s.junkList {
+		vRarity := v.GetItemData().GetRarity() * (castPercent * v.GetItemData().GetRarityScale())
+		totalRarity += vRarity
+		junkList = append(junkList, totalRarity)
+	}
+
+	src := rand.NewSource(time.Now().UnixNano())
+	rnd := rand.New(src)
+
+	num := rnd.Intn(int(totalRarity))
+
+	currentChosen := 0
+	for i := range junkList {
+		if num < int(junkList[i]) {
+			currentChosen = i
+			break
+		}
+	}
+
+	return s.junkList[currentChosen]
 }

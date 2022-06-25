@@ -120,3 +120,11 @@ func (p *PlayerData) GetMagnetCastSpeed() float64 {
 func (p *PlayerData) GetMagnetReelSpeed() float64 {
 	return initialMagnetReelSpeed + p.magnetReelSpeedModifier
 }
+
+func (p *PlayerData) HasElectroMagnet() bool {
+	return true
+}
+
+func (p *PlayerData) HasRepulsor() bool {
+	return true
+}
