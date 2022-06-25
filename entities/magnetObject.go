@@ -1,7 +1,6 @@
 package entities
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 	"math"
@@ -17,6 +16,12 @@ import (
 type MagnetObject struct {
 	sprite             *ebiten.Image
 	targetSprite       *ebiten.Image
+	attractIconSprite  *ebiten.Image
+	repulseIconSprite  *ebiten.Image
+	attrepIconBgSprite *ebiten.Image
+	powerOnIconSprite  *ebiten.Image
+	powerOffIconSprite *ebiten.Image
+	powerIconBgSprite  *ebiten.Image
 	physObj            *resolv.Object
 	targetObj          *resolv.Object
 	magFieldPhysObj    *resolv.Object
@@ -32,12 +37,14 @@ type MagnetObject struct {
 	magnetStartPos     *basics.Vector2f
 	magnetEndPos       basics.Vector2f
 	targetPos          basics.Vector2f
+	UIPos              basics.Vector2f
 	touch, connected   bool
 	magnetActive       bool
 	dropConnected      bool
 	retract            bool
 	syncToRod          bool
 	turnedOn           bool
+	repulsor           bool
 	alive              bool
 	dropCounter        float64
 	junkLookup         map[*resolv.Object]*JunkObject
@@ -82,22 +89,16 @@ func (m *MagnetObject) GetSprite() *ebiten.Image {
 
 func (m *MagnetObject) Init(ImageFilepath string) {
 	m.alive = true
-	// Load an image given a filepath
-	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	m.sprite = img
-	m.physObj = resolv.NewObject(0, 0, float64(m.sprite.Bounds().Dx())-magPhysObjSizeDiff, float64(m.sprite.Bounds().Dy())-magPhysObjSizeDiff, "magnet")
-	m.magnetPos = &basics.Vector2f{X: m.physObj.X, Y: m.physObj.Y}
+	//Load Images
+	m.sprite = loadImage(ImageFilepath)
+	m.targetSprite = loadImage("images/target.png")
+	m.LoadUIImages()
 
-	tar, _, err := ebitenutil.NewImageFromFile("images/target.png")
-	if err != nil {
-		log.Fatal(err)
-	}
+	m.magnetStartPos = &basics.Vector2f{X: 0, Y: 0}
+	m.physObj = resolv.NewObject(m.magnetStartPos.X, m.magnetStartPos.Y, float64(m.sprite.Bounds().Dx())-magPhysObjSizeDiff, float64(m.sprite.Bounds().Dy())-magPhysObjSizeDiff, "magnet")
+	m.magnetPos = m.magnetStartPos
 
-	m.targetSprite = tar
 	m.targetObj = resolv.NewObject(0, 0, float64(m.targetSprite.Bounds().Dx()), float64(m.targetSprite.Bounds().Dy()), "target")
 
 	m.magneticFieldSize = globals.GetPlayerData().GetMagneticFieldSize()
@@ -109,6 +110,7 @@ func (m *MagnetObject) Init(ImageFilepath string) {
 	m.magneticPoint.Y = float64(m.sprite.Bounds().Dy() - (magPhysObjSizeDiff))
 
 	m.touch = false
+	m.repulsor = false
 	m.connected = false
 	m.dropConnected = false
 	m.magnetActive = false
@@ -145,6 +147,20 @@ func (m *MagnetObject) ReadInput() {
 		m.dropConnected = false
 	}
 
+	if globals.GetPlayerData().HasElectroMagnet() {
+		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+			m.turnedOn = false
+		}
+		if inpututil.IsKeyJustReleased(ebiten.KeySpace) {
+			m.turnedOn = true
+		}
+	}
+
+	if globals.GetPlayerData().HasRepulsor() {
+		if inpututil.IsKeyJustPressed(ebiten.KeyTab) {
+			m.repulsor = !m.repulsor
+		}
+	}
 }
 
 func (m *MagnetObject) Update(deltaTime float64) {
@@ -199,7 +215,6 @@ func (m *MagnetObject) Update(deltaTime float64) {
 
 				if val, ok := m.junkLookup[m.connectedJunk]; ok {
 					if val.IsAlive() {
-						fmt.Println("Adding " + val.itemData.GetName() + " to the bag")
 						globals.GetPlayerData().GetInventory().AddItem(*val.GetItemData())
 
 						val.Kill()
@@ -224,7 +239,7 @@ func (m *MagnetObject) Update(deltaTime float64) {
 		m.rotation = m.RotateTo(r)
 	}
 
-	if m.magnetActive {
+	if m.magnetActive && m.turnedOn {
 		if collision := m.magFieldPhysObj.Check(dx, dy, "junk"); collision != nil {
 			m.attractedJunk = collision.Objects
 		}
@@ -278,6 +293,27 @@ func (m *MagnetObject) Draw(screen *ebiten.Image) {
 	// Draw the image (comment this out to see the above resolv rect ^^^)
 	screen.DrawImage(m.sprite, sop)
 	screen.DrawImage(m.targetSprite, top)
+
+	uiop := &ebiten.DrawImageOptions{}
+	uiop.GeoM.Translate(m.UIPos.X, m.UIPos.Y)
+	if globals.GetPlayerData().HasElectroMagnet() {
+		screen.DrawImage(m.powerIconBgSprite, uiop)
+		if m.turnedOn {
+			screen.DrawImage(m.powerOnIconSprite, uiop)
+		} else {
+			screen.DrawImage(m.powerOffIconSprite, uiop)
+		}
+	}
+
+	uiop.GeoM.Translate(float64(m.powerIconBgSprite.Bounds().Size().X)+2, 0)
+	if globals.GetPlayerData().HasRepulsor() {
+		screen.DrawImage(m.attrepIconBgSprite, uiop)
+		if m.repulsor {
+			screen.DrawImage(m.repulseIconSprite, uiop)
+		} else {
+			screen.DrawImage(m.attractIconSprite, uiop)
+		}
+	}
 }
 
 func (m *MagnetObject) IsAlive() bool {
@@ -290,6 +326,27 @@ func (m *MagnetObject) Kill() {
 
 func (m *MagnetObject) RemovePhysObj(space *resolv.Space) {
 	space.Remove(m.physObj)
+}
+
+func (m *MagnetObject) LoadUIImages() {
+	m.attractIconSprite = loadImage("images/attracticon.png")
+	m.repulseIconSprite = loadImage("images/repulseicon.png")
+	m.attrepIconBgSprite = loadImage("images/attractioniconborder.png")
+	m.powerOnIconSprite = loadImage("images/onicon.png")
+	m.powerOffIconSprite = loadImage("images/officon.png")
+	m.powerIconBgSprite = loadImage("images/powericonborder.png")
+}
+
+func loadImage(filepath string) *ebiten.Image {
+	img, _, err := ebitenutil.NewImageFromFile(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return img
+}
+
+func (m *MagnetObject) SetUIPos(pos basics.Vector2f) {
+	m.UIPos = pos
 }
 
 func (m *MagnetObject) Drop() {
@@ -312,8 +369,13 @@ func (m *MagnetObject) MoveAttractedJunk(deltaTime float64) {
 					m.attractedJunk = append(m.attractedJunk[:i], m.attractedJunk[i+1:]...)
 				}
 			} else {
-				junk.X = basics.FloatLerp(junk.X, m.magneticPoint.X+m.physObj.X-1, m.attractionStrength*deltaTime)
-				junk.Y = basics.FloatLerp(junk.Y, m.magneticPoint.Y+m.physObj.Y-1, m.attractionStrength*deltaTime)
+				if !m.repulsor {
+					junk.X = basics.FloatLerp(junk.X, m.magneticPoint.X+m.physObj.X-1, m.attractionStrength*deltaTime)
+					junk.Y = basics.FloatLerp(junk.Y, m.magneticPoint.Y+m.physObj.Y-1, m.attractionStrength*deltaTime)
+				} else {
+					junk.X = basics.FloatLerp(junk.X, m.magneticPoint.X+m.physObj.X-1, -m.attractionStrength*deltaTime)
+					junk.Y = basics.FloatLerp(junk.Y, m.magneticPoint.Y+m.physObj.Y-1, -m.attractionStrength*deltaTime)
+				}
 			}
 		}
 	}

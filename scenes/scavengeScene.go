@@ -19,6 +19,9 @@ import (
 
 type ScavengeScene struct {
 	entityManager           entities.EntityManager
+	timerUIboxSprite        *ebiten.Image
+	timerUIglassSprite      *ebiten.Image
+	UIPipeSprite            *ebiten.Image
 	physSpace               *resolv.Space
 	menuBtn                 bool
 	spawnZone               basics.FloatRect
@@ -26,16 +29,45 @@ type ScavengeScene struct {
 	txtRenderer             *etxt.Renderer
 	countdownTimer          float64
 	junkList                []entities.JunkObject
+	UIPosition              basics.Vector2f
 }
 
 const (
 	spawnZoneEdgeBorder = 128
 	defaultTimerStart   = 10
-	timerPositionOffset = 100
+	uiXOffset           = 32
+	uiYOffset           = 32
+	uiGlassXOffset      = 25
+	uiGlassYOffset      = 4
+	textXOffset         = 40
+	textYOffset         = 0
+	fontSize            = 50
+	iconXOffset         = 184
+	iconYOffset         = 66
+	textRedLimit        = 5.0
 )
 
 func (s *ScavengeScene) Init() {
 	s.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, 16, 16)
+	s.UIPosition = basics.Vector2f{X: globals.ScreenWidth - (uiXOffset + iconXOffset), Y: uiYOffset + iconYOffset}
+
+	img, _, imgerr := ebitenutil.NewImageFromFile("images/timerUIBox.png")
+	if imgerr != nil {
+		log.Fatal(imgerr)
+	}
+	s.timerUIboxSprite = img
+
+	glimg, _, glerr := ebitenutil.NewImageFromFile("images/timerUIBoxGlass.png")
+	if glerr != nil {
+		log.Fatal(glerr)
+	}
+	s.timerUIglassSprite = glimg
+
+	pipimg, _, piperr := ebitenutil.NewImageFromFile("images/UIPipes.png")
+	if piperr != nil {
+		log.Fatal(piperr)
+	}
+	s.UIPipeSprite = pipimg
 
 	s.entityManager.Init()
 
@@ -57,7 +89,7 @@ func (s *ScavengeScene) Init() {
 	s.txtRenderer.SetCacheHandler(glyphsCache.NewHandler())
 	s.txtRenderer.SetFont(fontLib.GetFont("Rajdhani Regular"))
 	s.txtRenderer.SetAlign(etxt.Top, etxt.Left)
-	s.txtRenderer.SetSizePx(24)
+	s.txtRenderer.SetSizePx(fontSize)
 
 	s.spawnZone.Width = globals.ScreenWidth - (spawnZoneEdgeBorder * 4)
 	s.spawnZone.Height = globals.ScreenHeight - (spawnZoneEdgeBorder * 2)
@@ -92,6 +124,7 @@ func (s *ScavengeScene) Init() {
 	m := &entities.MagnetObject{}
 	m.Init("images/magnet.png")
 	m.SetJunkLookup(junkLookup)
+	m.SetUIPos(s.UIPosition)
 	s.physSpace.Add(m.GetPhysObj())
 	s.physSpace.Add(m.GetFieldPhysObj())
 	s.entityManager.AddEntity(m)
@@ -115,6 +148,11 @@ func (s *ScavengeScene) Init() {
 
 	m.SetMagnetStartPos(p.GetFishingRodEndPoint())
 
+	p.Update(0)
+	r.Update(0)
+	m.Update(0)
+	r.Update(0)
+
 	s.menuBtn = false
 }
 
@@ -133,6 +171,7 @@ func (s *ScavengeScene) Update(state *GameState, deltaTime float64) error {
 
 	s.countdownTimer -= deltaTime
 	if s.countdownTimer <= 0 {
+		s.countdownTimer = 0
 		o := &OverworldScene{}
 		state.SceneManager.GoTo(o, transitionTime)
 	}
@@ -156,16 +195,29 @@ func (s *ScavengeScene) Draw(screen *ebiten.Image) {
 
 	timer := fmt.Sprintf("%.2f", s.countdownTimer)
 
+	uipipeop := &ebiten.DrawImageOptions{}
+	uipipeop.GeoM.Translate(globals.ScreenWidth-float64(s.UIPipeSprite.Bounds().Dx()), 0)
+	screen.DrawImage(s.UIPipeSprite, uipipeop)
+
 	s.entityManager.Draw(screen)
 	s.txtRenderer.SetTarget(screen)
-	if s.countdownTimer > 10 {
-		s.txtRenderer.SetColor(color.RGBA{255, 255, 255, 255})
+
+	options := &ebiten.DrawImageOptions{}
+	options.GeoM.Translate(globals.ScreenWidth-(float64(s.timerUIboxSprite.Bounds().Dx())+uiXOffset), uiYOffset)
+	screen.DrawImage(s.timerUIboxSprite, options)
+
+	if s.countdownTimer > textRedLimit {
+		s.txtRenderer.SetColor(color.RGBA{197, 204, 184, 255})
 	} else {
-		s.txtRenderer.SetColor(color.RGBA{255, 0, 0, 255})
+		s.txtRenderer.SetColor(color.RGBA{154, 79, 80, 255})
 	}
-	s.txtRenderer.Draw(timer, globals.ScreenWidth-timerPositionOffset, 0)
+	s.txtRenderer.Draw(timer, int(globals.ScreenWidth-(float64(s.timerUIboxSprite.Bounds().Dx())+uiXOffset)+textXOffset), int(uiYOffset+textYOffset))
 
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("cast available: %f", s.distanceOfOverworldCast))
+
+	glassop := &ebiten.DrawImageOptions{}
+	glassop.GeoM.Translate(globals.ScreenWidth-(float64(s.timerUIboxSprite.Bounds().Dx())+uiXOffset)+uiGlassXOffset, uiYOffset+uiGlassYOffset)
+	screen.DrawImage(s.timerUIglassSprite, glassop)
 }
 
 func (s *ScavengeScene) InitJunkList() {
