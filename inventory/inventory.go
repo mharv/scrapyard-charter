@@ -6,6 +6,7 @@ type Inventory struct {
 }
 
 func (i *Inventory) InitMaterials() {
+	i.materials = make(map[string]int)
 	i.materials["Iron"] = 0
 	i.materials["Steel"] = 0
 	i.materials["Copper"] = 0
@@ -52,7 +53,7 @@ func (i *Inventory) RemoveOneItemWithName(name string) map[string]int {
 		if element.name == name {
 			salvagedMaterials = i.items[index].GetMaterials()
 			i.items = append(i.items[:index], i.items[index+1:]...)
-			break
+			return salvagedMaterials
 		}
 	}
 	return salvagedMaterials
@@ -65,5 +66,14 @@ func (i *Inventory) SalvageOneItem(name string) {
 	}
 }
 
-// func (i *Inventory) RemoveMaterial(name string, quantity int) {
+// func (i *Inventory) SalvageAllItems(name string) {
+// 	salvagedMaterials := i.RemoveOneItemWithName(name)
+// 	for k, v := range salvagedMaterials {
+// 		i.AddMaterial(k, v)
+// 	}
 // }
+
+// craft material functions go here
+// Do a check to make sure there is enough raw mateials,
+// if so use above function remove material
+// ten use add item

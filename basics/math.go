@@ -33,6 +33,27 @@ type FloatRect struct {
 	Height float64
 }
 
+// UI elements
+
+type FloatRectUI struct {
+	Name   string
+	X      float64
+	Y      float64
+	Width  float64
+	Height float64
+}
+
+func (f *FloatRectUI) IsClicked(positionOfClick Vector2f) bool {
+	if positionOfClick.X > f.X &&
+		positionOfClick.X < (f.X+f.Width) &&
+		positionOfClick.Y > f.Y &&
+		positionOfClick.Y < (f.Y+f.Height) {
+		return true
+	} else {
+		return false
+	}
+}
+
 //Ints
 type Vector2i struct {
 	X int
