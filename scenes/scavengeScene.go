@@ -48,6 +48,7 @@ const (
 )
 
 func (s *ScavengeScene) Init() {
+	fmt.Println(s.distanceOfOverworldCast)
 	s.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, 16, 16)
 	s.UIPosition = basics.Vector2f{X: globals.ScreenWidth - (uiXOffset + iconXOffset), Y: uiYOffset + iconYOffset}
 
@@ -103,16 +104,17 @@ func (s *ScavengeScene) Init() {
 
 	junkLookup := make(map[*resolv.Object]*entities.JunkObject)
 	// Create junk
-	for i := 0; i < 10; i++ {
-		index := rnd.Intn(len(s.junkList))
-
-		j := s.junkList[index]
+	for i := 0; i < 100; i++ {
+		j := s.SelectJunk(s.distanceOfOverworldCast)
+		depth := j.GetItemData().GetDepth()
+		percent := depth/float64(len(s.junkList)) + ((rnd.Float64() * 0.6) - 0.3)
+		percent = basics.FloatClamp(percent, 0, 1)
 		j.Init(j.GetImageFilepath())
 		s.physSpace.Add(j.GetPhysObj())
 
 		x := (rnd.Float64() * (s.spawnZone.Width))
 		x += s.spawnZone.X - float64(j.GetPhysObj().X)
-		y := (rnd.Float64() * (s.spawnZone.Height))
+		y := (percent * (s.spawnZone.Height))
 		y += s.spawnZone.Y - float64(j.GetPhysObj().Y)
 
 		j.SetPosition(basics.Vector2f{X: x, Y: y})
@@ -225,6 +227,7 @@ func (s *ScavengeScene) InitJunkList() {
 	cog.SetImageFilepath("images/cog.png")
 	cog.InitData()
 	cog.SetItemDataName("Cog")
+	cog.SetItemDataDepthAndRarity(0, 80, 0.1)
 	cog.AddItemDataMaterial("Iron", 5, 10)
 	s.junkList = append(s.junkList, *cog)
 
@@ -232,6 +235,7 @@ func (s *ScavengeScene) InitJunkList() {
 	ironPipe.SetImageFilepath("images/ironpipe.png")
 	ironPipe.InitData()
 	ironPipe.SetItemDataName("Iron Pipe")
+	ironPipe.SetItemDataDepthAndRarity(1, 60, 0.2)
 	ironPipe.AddItemDataMaterial("Iron", 15, 30)
 	s.junkList = append(s.junkList, *ironPipe)
 
@@ -239,6 +243,7 @@ func (s *ScavengeScene) InitJunkList() {
 	tyre.SetImageFilepath("images/tyre.png")
 	tyre.InitData()
 	tyre.SetItemDataName("Tyre")
+	tyre.SetItemDataDepthAndRarity(2, 50, 0.2)
 	tyre.AddItemDataMaterial("Rubber", 15, 25)
 	tyre.AddItemDataMaterial("Iron", 15, 20)
 	s.junkList = append(s.junkList, *tyre)
@@ -247,6 +252,7 @@ func (s *ScavengeScene) InitJunkList() {
 	steelBikeFrame.SetImageFilepath("images/steelbikeframe.png")
 	steelBikeFrame.InitData()
 	steelBikeFrame.SetItemDataName("Steel Bike Frame")
+	steelBikeFrame.SetItemDataDepthAndRarity(3, 40, 0.3)
 	steelBikeFrame.AddItemDataMaterial("Steel", 15, 20)
 	steelBikeFrame.AddItemDataMaterial("Iron", 2, 7)
 	steelBikeFrame.AddItemDataMaterial("Plastic", 0, 1)
@@ -256,6 +262,7 @@ func (s *ScavengeScene) InitJunkList() {
 	monitor.SetImageFilepath("images/monitor.png")
 	monitor.InitData()
 	monitor.SetItemDataName("Monitor")
+	monitor.SetItemDataDepthAndRarity(4, 30, 0.4)
 	monitor.AddItemDataMaterial("Copper", 10, 15)
 	monitor.AddItemDataMaterial("Plastic", 5, 10)
 	monitor.AddItemDataMaterial("Iron", 0, 2)
@@ -265,6 +272,7 @@ func (s *ScavengeScene) InitJunkList() {
 	toaster.SetImageFilepath("images/toaster.png")
 	toaster.InitData()
 	toaster.SetItemDataName("Toaster")
+	toaster.SetItemDataDepthAndRarity(5, 20, 0.5)
 	toaster.AddItemDataMaterial("Nickel", 2, 10)
 	toaster.AddItemDataMaterial("Iron", 1, 5)
 	s.junkList = append(s.junkList, *toaster)
@@ -273,6 +281,7 @@ func (s *ScavengeScene) InitJunkList() {
 	steelPipe.SetImageFilepath("images/steelpipe.png")
 	steelPipe.InitData()
 	steelPipe.SetItemDataName("Steel Pipe")
+	steelPipe.SetItemDataDepthAndRarity(6, 18, 0.6)
 	steelPipe.AddItemDataMaterial("Steel", 15, 30)
 	s.junkList = append(s.junkList, *steelPipe)
 
@@ -280,6 +289,7 @@ func (s *ScavengeScene) InitJunkList() {
 	belt.SetImageFilepath("images/belt.png")
 	belt.InitData()
 	belt.SetItemDataName("Belt")
+	belt.SetItemDataDepthAndRarity(7, 15, 0.7)
 	belt.AddItemDataMaterial("Cobalt", 1, 7)
 	belt.AddItemDataMaterial("Rubber", 3, 8)
 	belt.AddItemDataMaterial("Plastic", 0, 2)
@@ -289,6 +299,7 @@ func (s *ScavengeScene) InitJunkList() {
 	copperPipe.SetImageFilepath("images/copperpipe.png")
 	copperPipe.InitData()
 	copperPipe.SetItemDataName("Copper Pipe")
+	copperPipe.SetItemDataDepthAndRarity(8, 13, 0.9)
 	copperPipe.AddItemDataMaterial("Copper", 15, 30)
 	s.junkList = append(s.junkList, *copperPipe)
 
@@ -296,6 +307,7 @@ func (s *ScavengeScene) InitJunkList() {
 	titaniumBikeFrame.SetImageFilepath("images/titaniumbikeframe.png")
 	titaniumBikeFrame.InitData()
 	titaniumBikeFrame.SetItemDataName("Titanium Bike Frame")
+	titaniumBikeFrame.SetItemDataDepthAndRarity(9, 10, 1.2)
 	titaniumBikeFrame.AddItemDataMaterial("Titanium", 15, 25)
 	titaniumBikeFrame.AddItemDataMaterial("Iron", 0, 2)
 	titaniumBikeFrame.AddItemDataMaterial("Plastic", 2, 4)
@@ -305,6 +317,7 @@ func (s *ScavengeScene) InitJunkList() {
 	titaniumPipe.SetImageFilepath("images/titaniumpipe.png")
 	titaniumPipe.InitData()
 	titaniumPipe.SetItemDataName("Titanium Pipe")
+	titaniumPipe.SetItemDataDepthAndRarity(10, 9, 1.4)
 	titaniumPipe.AddItemDataMaterial("Titanium", 15, 30)
 	s.junkList = append(s.junkList, *titaniumPipe)
 
@@ -312,6 +325,7 @@ func (s *ScavengeScene) InitJunkList() {
 	oldPC.SetImageFilepath("images/oldpc.png")
 	oldPC.InitData()
 	oldPC.SetItemDataName("Old PC")
+	oldPC.SetItemDataDepthAndRarity(11, 8, 1.8)
 	oldPC.AddItemDataMaterial("Copper", 10, 15)
 	oldPC.AddItemDataMaterial("Plastic", 8, 12)
 	oldPC.AddItemDataMaterial("Steel", 3, 7)
@@ -322,7 +336,37 @@ func (s *ScavengeScene) InitJunkList() {
 	battery.SetImageFilepath("images/battery.png")
 	battery.InitData()
 	battery.SetItemDataName("Battery")
+	battery.SetItemDataDepthAndRarity(12, 4, 2.5)
 	battery.AddItemDataMaterial("Cobalt", 10, 15)
 	battery.AddItemDataMaterial("Nickel", 10, 15)
 	s.junkList = append(s.junkList, *battery)
+}
+
+func (s *ScavengeScene) SelectJunk(castDistance float64) entities.JunkObject {
+
+	var junkList []float64
+	var totalRarity float64
+
+	castPercent := (castDistance / globals.GetPlayerData().GetOverworldCastDistance()) * 100
+
+	for _, v := range s.junkList {
+		vRarity := v.GetItemData().GetRarity() * (castPercent * v.GetItemData().GetRarityScale())
+		totalRarity += vRarity
+		junkList = append(junkList, totalRarity)
+	}
+
+	src := rand.NewSource(time.Now().UnixNano())
+	rnd := rand.New(src)
+
+	num := rnd.Intn(int(totalRarity))
+
+	currentChosen := 0
+	for i := range junkList {
+		if num < int(junkList[i]) {
+			currentChosen = i
+			break
+		}
+	}
+
+	return s.junkList[currentChosen]
 }

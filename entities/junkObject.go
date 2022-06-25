@@ -51,6 +51,8 @@ func (j *JunkObject) Init(ImageFilepath string) {
 	src := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(src)
 	j.rot = float64(rnd.Intn(360))
+
+	j.RandomiseAllMaterialValues()
 }
 
 func (j *JunkObject) ReadInput() {
@@ -98,6 +100,12 @@ func (j *JunkObject) SetItemDataName(name string) {
 	j.itemData.SetName(name)
 }
 
+func (j *JunkObject) SetItemDataDepthAndRarity(depth, rarity, rarityScale float64) {
+	j.itemData.SetDepth(depth)
+	j.itemData.SetRarity(rarity)
+	j.itemData.SetRarityScale(rarityScale)
+}
+
 func (j *JunkObject) GetItemData() *inventory.Item {
 	return &j.itemData
 }
@@ -111,8 +119,13 @@ func (j *JunkObject) GetImageFilepath() string {
 }
 
 func (j *JunkObject) AddItemDataMaterial(materialName string, minQuantity, maxQuantity int) {
-	quantity := rand.Intn(maxQuantity-minQuantity) + minQuantity
-	j.itemData.AddRawMaterial(materialName, quantity)
+	j.itemData.AddRawMaterial(materialName, minQuantity, maxQuantity)
+}
+
+func (j *JunkObject) RandomiseAllMaterialValues() {
+	for _, value := range j.itemData.GetMaterials() {
+		value.RandomiseAmount()
+	}
 }
 
 func (j *JunkObject) IsPhysObject(physObjectToCompare *resolv.Object) bool {

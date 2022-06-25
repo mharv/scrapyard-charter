@@ -102,7 +102,7 @@ func (p *PlayerData) GetMagnetReelSpeed() float64 {
 }
 
 func (p *PlayerData) HasElectroMagnet() bool {
-	return false
+	return true
 }
 
 func (p *PlayerData) HasRepulsor() bool {
