@@ -46,7 +46,7 @@ func (o *OverworldScene) Init() {
 	terrain = mapgen.GenerateMap(false, false, false, false)
 	fmt.Printf("%d random seed", globals.GetPlayerData().GetWorldSeed())
 
-	// we create 16 x 16 pixel blocks
+	// we create 32 x 32 pixel blocks
 	tempCellSize := cellSize * 4
 
 	// used for determining if something is scrap or land
@@ -83,15 +83,17 @@ func (o *OverworldScene) Init() {
 	o.spawnZone.Y = o.spawnZone.Height / 2
 
 	// create homeBase
-
 	t := &entities.HomeBaseObject{}
 	t.Init("images/homeBase.png")
 	t.GetPhysObj().AddTags("home", "solid")
 	t.SetPosition(basics.Vector2f{X: o.spawnZone.X, Y: o.spawnZone.Y})
 	o.physSpace.Add(t.GetPhysObj())
 	o.entityManager.AddEntity(t)
-	// Create player
 
+	// create crafting zone around homebase
+	o.physSpace.Add(t.GetCraftZone())
+
+	// Create player
 	p := &entities.OverworldPlayerObject{}
 	p.Init("images/placeholderOverworldPlayerAssetTransparent.png")
 	o.physSpace.Add(p.GetPhysObj())
@@ -161,12 +163,15 @@ func (o *OverworldScene) Draw(screen *ebiten.Image) {
 			drawColor := color.RGBA{60, 60, 60, 255}
 			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
 		}
-		if o.HasTags("beach") {
-			drawColor := color.RGBA{222, 130, 22, 255}
-			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
-		}
 		if o.HasTags("land") {
 			drawColor := color.RGBA{119, 174, 74, 255}
+			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
+		}
+	}
+
+	for _, o := range o.physSpace.Objects() {
+		if o.HasTags("craft") {
+			drawColor := color.RGBA{222, 130, 22, 255}
 			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
 		}
 	}

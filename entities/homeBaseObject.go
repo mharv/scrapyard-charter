@@ -12,18 +12,25 @@ import (
 )
 
 type HomeBaseObject struct {
-	sprite  *ebiten.Image
-	physObj *resolv.Object
-	alive   bool
+	sprite    *ebiten.Image
+	physObj   *resolv.Object
+	craftZone *resolv.Object
+	alive     bool
 }
 
 func (h *HomeBaseObject) GetPhysObj() *resolv.Object {
 	return h.physObj
 }
 
+func (h *HomeBaseObject) GetCraftZone() *resolv.Object {
+	return h.craftZone
+}
+
 func (h *HomeBaseObject) SetPosition(position basics.Vector2f) {
 	h.physObj.X = position.X
 	h.physObj.Y = position.Y
+	h.craftZone.X = position.X - float64(h.sprite.Bounds().Dx())
+	h.craftZone.Y = position.Y - float64(h.sprite.Bounds().Dy())
 }
 
 func (h *HomeBaseObject) Init(ImageFilepath string) {
@@ -38,6 +45,13 @@ func (h *HomeBaseObject) Init(ImageFilepath string) {
 
 	// Setup resolv object to be size of the sprite
 	h.physObj = resolv.NewObject(globals.ScreenWidth/2, globals.ScreenHeight/2, float64(h.sprite.Bounds().Dx()), float64(h.sprite.Bounds().Dy()))
+	h.craftZone = resolv.NewObject(
+		globals.ScreenWidth/2,
+		globals.ScreenHeight/2,
+		float64(h.sprite.Bounds().Dx())*3,
+		float64(h.sprite.Bounds().Dy())*3,
+		"craft",
+	)
 }
 
 func (h *HomeBaseObject) ReadInput() {
