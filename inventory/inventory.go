@@ -1,6 +1,7 @@
 package inventory
 
 type Inventory struct {
+	keyItems  []KeyItem
 	items     []Item
 	materials map[string]int
 }
@@ -16,6 +17,26 @@ func (i *Inventory) InitMaterials() {
 	i.materials["Cobalt"] = 0
 	i.materials["Titanium"] = 0
 	i.materials["Gold"] = 0
+}
+
+func (i *Inventory) ResetMaterials() {
+	i.materials["Iron"] = 0
+	i.materials["Steel"] = 0
+	i.materials["Copper"] = 0
+	i.materials["Rubber"] = 0
+	i.materials["Plastic"] = 0
+	i.materials["Nickel"] = 0
+	i.materials["Cobalt"] = 0
+	i.materials["Titanium"] = 0
+	i.materials["Gold"] = 0
+}
+
+func (i *Inventory) AddKeyItem(keyItem KeyItem) {
+	i.keyItems = append(i.keyItems, keyItem)
+}
+
+func (i *Inventory) GetKeyItems() []KeyItem {
+	return i.keyItems
 }
 
 func (i *Inventory) AddItem(item Item) {
@@ -39,12 +60,20 @@ func (i *Inventory) GetMaterials() map[string]int {
 	return i.materials
 }
 
-func (i *Inventory) RemoveAllItemWithName(name string) {
-	for index, element := range i.items {
-		if element.name == name {
-			i.items = append(i.items[:index], i.items[index+1:]...)
+func (i *Inventory) RemoveAllItemWithName(name string) []map[string]RawMaterial {
+	var salvagedMaterials []map[string]RawMaterial
+
+	tempLength := len(i.items)
+	for j := 0; j < tempLength; j++ {
+		if i.items[j].name == name {
+			salvagedMaterials = append(salvagedMaterials, i.items[j].GetMaterials())
+			i.items = append(i.items[:j], i.items[j+1:]...)
+			// when item is removed, reset loop variables
+			j = 0
+			tempLength = len(i.items)
 		}
 	}
+	return salvagedMaterials
 }
 
 func (i *Inventory) RemoveOneItemWithName(name string) map[string]RawMaterial {
@@ -66,12 +95,14 @@ func (i *Inventory) SalvageOneItem(name string) {
 	}
 }
 
-// func (i *Inventory) SalvageAllItems(name string) {
-// 	salvagedMaterials := i.RemoveOneItemWithName(name)
-// 	for k, v := range salvagedMaterials {
-// 		i.AddMaterial(k, v)
-// 	}
-// }
+func (i *Inventory) SalvageAllItems(name string) {
+	salvagedMaterials := i.RemoveAllItemWithName(name)
+	for _, material := range salvagedMaterials {
+		for k, v := range material {
+			i.AddMaterial(k, v.GetAmount())
+		}
+	}
+}
 
 // craft material functions go here
 // Do a check to make sure there is enough raw mateials,
