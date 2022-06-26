@@ -117,7 +117,7 @@ func (u *Ui) Update() error {
 
 	for _, v := range u.inventoryItems {
 		if v.SalvageAllButton.IsClicked(u.cursorClickPos) && u.mouseClick {
-			globals.GetPlayerData().GetInventory().SalvageOneItem(v.ItemName)
+			globals.GetPlayerData().GetInventory().SalvageAllItems(v.ItemName)
 			u.mouseClick = false
 		}
 	}

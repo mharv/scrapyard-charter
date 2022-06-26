@@ -39,12 +39,20 @@ func (i *Inventory) GetMaterials() map[string]int {
 	return i.materials
 }
 
-func (i *Inventory) RemoveAllItemWithName(name string) {
-	for index, element := range i.items {
-		if element.name == name {
-			i.items = append(i.items[:index], i.items[index+1:]...)
+func (i *Inventory) RemoveAllItemWithName(name string) []map[string]RawMaterial {
+	var salvagedMaterials []map[string]RawMaterial
+
+	tempLength := len(i.items)
+	for j := 0; j < tempLength; j++ {
+		if i.items[j].name == name {
+			salvagedMaterials = append(salvagedMaterials, i.items[j].GetMaterials())
+			i.items = append(i.items[:j], i.items[j+1:]...)
+			// when item is removed, reset loop variables
+			j = 0
+			tempLength = len(i.items)
 		}
 	}
+	return salvagedMaterials
 }
 
 func (i *Inventory) RemoveOneItemWithName(name string) map[string]RawMaterial {
@@ -66,12 +74,14 @@ func (i *Inventory) SalvageOneItem(name string) {
 	}
 }
 
-// func (i *Inventory) SalvageAllItems(name string) {
-// 	salvagedMaterials := i.RemoveOneItemWithName(name)
-// 	for k, v := range salvagedMaterials {
-// 		i.AddMaterial(k, v)
-// 	}
-// }
+func (i *Inventory) SalvageAllItems(name string) {
+	salvagedMaterials := i.RemoveAllItemWithName(name)
+	for _, material := range salvagedMaterials {
+		for k, v := range material {
+			i.AddMaterial(k, v.GetAmount())
+		}
+	}
+}
 
 // craft material functions go here
 // Do a check to make sure there is enough raw mateials,
