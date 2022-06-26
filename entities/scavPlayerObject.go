@@ -2,18 +2,18 @@ package entities
 
 import (
 	"image/color"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/mharv/scrapyard-charter/animation"
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/solarlune/resolv"
 )
 
 type ScavPlayerObject struct {
-	sprite               *ebiten.Image
+	animator             animation.Animator
 	physObj              *resolv.Object
 	magnet               *MagnetObject
 	left, right          bool
@@ -23,6 +23,10 @@ type ScavPlayerObject struct {
 	currentRodEndPoint   *basics.Vector2f
 	alive                bool
 }
+
+const (
+	frameSize = 128
+)
 
 func (s *ScavPlayerObject) SetMagnet(m *MagnetObject) {
 	s.magnet = m
@@ -46,16 +50,26 @@ func (s *ScavPlayerObject) SetFishingRodEndPoint(rodEndPoint *basics.Vector2f) {
 
 func (s *ScavPlayerObject) Init(ImageFilepath string) {
 	s.alive = true
-	// Load an image given a filepath
-	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	s.sprite = img
+	s.physObj = resolv.NewObject(globals.ScreenWidth/2, globals.ScreenHeight/2, frameSize, frameSize, "player")
 
-	// Setup resolv object to be size of the sprite
-	s.physObj = resolv.NewObject(globals.ScreenWidth/2, globals.ScreenHeight/2, float64(s.sprite.Bounds().Dx()), float64(s.sprite.Bounds().Dy()), "player")
+	s.animator.Init(ImageFilepath, basics.Vector2i{X: frameSize, Y: frameSize}, basics.Vector2f{X: 1, Y: 1}, basics.Vector2f{X: s.physObj.X, Y: s.physObj.Y}, 5)
+	s.animator.AddAnimation(animation.Animation{
+		FrameCount:         6,
+		FrameStartPosition: basics.Vector2i{X: 0, Y: 0},
+		Loop:               true,
+	}, "moveLeft")
+	s.animator.AddAnimation(animation.Animation{
+		FrameCount:         6,
+		FrameStartPosition: basics.Vector2i{X: 0, Y: frameSize},
+		Loop:               true,
+	}, "moveRight")
+	s.animator.AddAnimation(animation.Animation{
+		FrameCount:         1,
+		FrameStartPosition: basics.Vector2i{X: 0, Y: frameSize * 2},
+		Loop:               true,
+	}, "idle")
+	s.animator.SetAnimation("idle", false)
 
 	s.left = false
 	s.right = false
@@ -88,10 +102,22 @@ func (s *ScavPlayerObject) ReadInput() {
 func (s *ScavPlayerObject) Update(deltaTime float64) {
 	if s.left {
 		s.physObj.X -= s.moveSpeed * deltaTime
+		if !(s.animator.IsLooping() && s.animator.IsAnimation("moveLeft")) {
+			s.animator.SetAnimation("moveLeft", false)
+		}
 	}
 
 	if s.right {
 		s.physObj.X += s.moveSpeed * deltaTime
+		if !(s.animator.IsLooping() && s.animator.IsAnimation("moveRight")) {
+			s.animator.SetAnimation("moveRight", false)
+		}
+	}
+
+	if !s.right && !s.left {
+		if !(s.animator.IsLooping() && s.animator.IsAnimation("idle")) {
+			s.animator.SetAnimation("idle", false)
+		}
 	}
 
 	s.fishingRodEndPoint.X = globals.GetPlayerData().GetRodEndX() + s.physObj.X
@@ -101,13 +127,10 @@ func (s *ScavPlayerObject) Update(deltaTime float64) {
 	s.fishingRodStartPoint.Y = globals.GetPlayerData().GetRodStartY() + s.physObj.Y
 
 	s.physObj.Update()
+	s.animator.Update(basics.Vector2f{X: s.physObj.X, Y: s.physObj.Y}, deltaTime)
 }
 
 func (s *ScavPlayerObject) Draw(screen *ebiten.Image) {
-	options := &ebiten.DrawImageOptions{}
-	// Sprite is put over the top of the phys object
-	options.GeoM.Translate(s.physObj.X, s.physObj.Y)
-
 	// Debug drawing of the physics object
 	if globals.Debug {
 		ebitenutil.DrawRect(screen, s.physObj.X, s.physObj.Y, s.physObj.W, s.physObj.H, color.RGBA{0, 80, 255, 64})
@@ -116,7 +139,7 @@ func (s *ScavPlayerObject) Draw(screen *ebiten.Image) {
 	ebitenutil.DrawLine(screen, s.currentRodEndPoint.X, s.currentRodEndPoint.Y, s.magnet.GetFishingLinePoint().X, s.magnet.GetFishingLinePoint().Y, color.RGBA{197, 204, 184, 255})
 
 	// Draw the image (comment this out to see the above resolv rect ^^^)
-	screen.DrawImage(s.sprite, options)
+	s.animator.Draw(screen)
 }
 
 func (s *ScavPlayerObject) IsAlive() bool {

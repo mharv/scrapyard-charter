@@ -45,10 +45,10 @@ type PlayerData struct {
 const (
 	//ScavPlayerObject
 	initialScavMoveSpeed = 250
-	initialRodEndX       = 150
+	initialRodEndX       = 200
 	initialRodEndY       = 25
-	initialRodStartX     = 52
-	initialRodStartY     = 52
+	initialRodStartX     = 82
+	initialRodStartY     = 54
 	//MagnetObject
 	initialDropReactivationTimer = 1
 	initialMagneticFieldSize     = 100
@@ -149,9 +149,9 @@ func (p *PlayerData) GetMagnetReelSpeed() float64 {
 }
 
 func (p *PlayerData) HasElectroMagnet() bool {
-	return true
+	return false
 }
 
 func (p *PlayerData) HasRepulsor() bool {
-	return true
+	return false
 }
