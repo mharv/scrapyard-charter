@@ -182,5 +182,13 @@ func (o *OverworldScene) Draw(screen *ebiten.Image) {
 
 	// draw the mouse to character distance check line
 	ebitenutil.DrawLine(screen, float64(cx)*cellSize, float64(cy)*cellSize, float64(mx)*cellSize, float64(my)*cellSize, drawColor)
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("cast available: %t", o.castAvailable))
+	// ebitenutil.DebugPrint(screen, fmt.Sprintf("cast available: %t", o.castAvailable))
+
+	if globals.GetPlayerData().CheckIfInCraftZone() {
+		ebitenutil.DebugPrint(screen, fmt.Sprint("IN CRAFT ZONE"))
+	} else {
+
+		ebitenutil.DebugPrint(screen, fmt.Sprint("NOT IN CRAFT ZONE"))
+	}
+
 }

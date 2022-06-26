@@ -27,6 +27,7 @@ type PlayerData struct {
 	overworldCastDistanceModifier float64
 	InitialOverworldPosition      basics.Vector2f
 	worldSeed                     int
+	overworldIsInCraftZone        bool
 }
 
 const (
@@ -52,6 +53,14 @@ func (p *PlayerData) Init() {
 	p.inventory = &inventory.Inventory{}
 	p.inventory.InitMaterials()
 	p.worldSeed = rand.Int()
+}
+
+func (p *PlayerData) CheckIfInCraftZone() bool {
+	return p.overworldIsInCraftZone
+}
+
+func (p *PlayerData) SetInCraftZoneStatus(status bool) {
+	p.overworldIsInCraftZone = status
 }
 
 func (p *PlayerData) GetWorldSeed() int {
