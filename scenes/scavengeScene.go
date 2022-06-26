@@ -20,6 +20,8 @@ import (
 type ScavengeScene struct {
 	entityManager           entities.EntityManager
 	timerUIboxSprite        *ebiten.Image
+	background              *ebiten.Image
+	bgwalls                 *ebiten.Image
 	timerUIglassSprite      *ebiten.Image
 	UIPipeSprite            *ebiten.Image
 	physSpace               *resolv.Space
@@ -51,6 +53,18 @@ func (s *ScavengeScene) Init() {
 	fmt.Println(s.distanceOfOverworldCast)
 	s.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, 16, 16)
 	s.UIPosition = basics.Vector2f{X: globals.ScreenWidth - (uiXOffset + iconXOffset), Y: uiYOffset + iconYOffset}
+
+	bg, _, bgerr := ebitenutil.NewImageFromFile("images/scavbackground.png")
+	if bgerr != nil {
+		log.Fatal(bgerr)
+	}
+	s.background = bg
+
+	bgwall, _, bgwerr := ebitenutil.NewImageFromFile("images/bgwalls.png")
+	if bgwerr != nil {
+		log.Fatal(bgwerr)
+	}
+	s.bgwalls = bgwall
 
 	img, _, imgerr := ebitenutil.NewImageFromFile("images/timerUIBox.png")
 	if imgerr != nil {
@@ -100,6 +114,13 @@ func (s *ScavengeScene) Init() {
 	src := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(src)
 
+	// Create player
+	p := &entities.ScavPlayerObject{}
+	p.Init("images/player.png")
+	s.physSpace.Add(p.GetPhysObj())
+	p.SetPosition(basics.Vector2f{X: s.spawnZone.X, Y: (s.spawnZone.Y - p.GetPhysObj().H)})
+	s.entityManager.AddEntity(p)
+
 	s.InitJunkList()
 
 	junkLookup := make(map[*resolv.Object]*entities.JunkObject)
@@ -130,14 +151,7 @@ func (s *ScavengeScene) Init() {
 	s.physSpace.Add(m.GetPhysObj())
 	s.physSpace.Add(m.GetFieldPhysObj())
 	s.entityManager.AddEntity(m)
-
-	// Create player
-	p := &entities.ScavPlayerObject{}
-	p.Init("images/player.png")
 	p.SetMagnet(m)
-	s.physSpace.Add(p.GetPhysObj())
-	p.SetPosition(basics.Vector2f{X: s.spawnZone.X, Y: (s.spawnZone.Y - p.GetPhysObj().H)})
-	s.entityManager.AddEntity(p)
 
 	r := &entities.ScavRodObject{}
 	r.Init("images/rodSection.png")
@@ -191,6 +205,10 @@ func (s *ScavengeScene) Update(state *GameState, deltaTime float64) error {
 func (s *ScavengeScene) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{0, 0, 0, 255})
 
+	bgop := &ebiten.DrawImageOptions{}
+	bgop.GeoM.Translate(0, 0)
+	screen.DrawImage(s.background, bgop)
+
 	if globals.Debug {
 		ebitenutil.DrawRect(screen, s.spawnZone.X, s.spawnZone.Y, s.spawnZone.Width, s.spawnZone.Height, color.RGBA{128, 96, 64, 255})
 	}
@@ -215,7 +233,9 @@ func (s *ScavengeScene) Draw(screen *ebiten.Image) {
 	}
 	s.txtRenderer.Draw(timer, int(globals.ScreenWidth-(float64(s.timerUIboxSprite.Bounds().Dx())+uiXOffset)+textXOffset), int(uiYOffset+textYOffset))
 
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("cast available: %f", s.distanceOfOverworldCast))
+	bgwallop := &ebiten.DrawImageOptions{}
+	bgwallop.GeoM.Translate(0, 0)
+	screen.DrawImage(s.bgwalls, bgwallop)
 
 	glassop := &ebiten.DrawImageOptions{}
 	glassop.GeoM.Translate(globals.ScreenWidth-(float64(s.timerUIboxSprite.Bounds().Dx())+uiXOffset)+uiGlassXOffset, uiYOffset+uiGlassYOffset)

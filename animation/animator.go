@@ -10,9 +10,9 @@ import (
 )
 
 type Animation struct {
-	frameCount         int
-	frameStartPosition basics.Vector2i
-	loop               bool
+	FrameCount         int
+	FrameStartPosition basics.Vector2i
+	Loop               bool
 }
 
 type Animator struct {
@@ -52,7 +52,7 @@ func (a *Animator) SetAnimation(name string, queue bool) {
 }
 
 func (a *Animator) IsLooping() bool {
-	return a.currentAnimation.loop
+	return a.currentAnimation.Loop
 }
 
 func (a *Animator) IsAnimation(name string) bool {
@@ -80,11 +80,13 @@ func (a *Animator) Init(ImageFilepath string, frameSize basics.Vector2i, scale, 
 	a.animations = make(map[string]Animation)
 }
 
-func (a *Animator) Update(deltaTime float64) {
+func (a *Animator) Update(position basics.Vector2f, deltaTime float64) {
 	a.counter++
-	currentFrame = (a.counter / a.speed) % a.currentAnimation.frameCount
+	currentFrame = (a.counter / a.speed) % a.currentAnimation.FrameCount
 
-	if !a.currentAnimation.loop {
+	a.position = position
+
+	if !a.currentAnimation.Loop {
 		if (a.nextAnimations[0] != Animation{}) {
 			if currentFrame < previousFrame {
 				a.currentAnimation = a.nextAnimations[0]
@@ -100,9 +102,9 @@ func (a *Animator) Draw(screen *ebiten.Image) {
 	options := &ebiten.DrawImageOptions{}
 
 	options.GeoM.Scale(a.scale.X, a.scale.Y)
-	options.GeoM.Translate((-float64(a.frameSize.X)*a.scale.X)/2, (-float64(a.frameSize.Y)*a.scale.Y)/2)
+	//options.GeoM.Translate((-float64(a.frameSize.X)*a.scale.X)/2, (-float64(a.frameSize.Y)*a.scale.Y)/2)
 	options.GeoM.Translate(a.position.X, a.position.Y)
 
-	sx, sy := a.currentAnimation.frameStartPosition.X+currentFrame*a.frameSize.X, a.currentAnimation.frameStartPosition.Y
+	sx, sy := a.currentAnimation.FrameStartPosition.X+currentFrame*a.frameSize.X, a.currentAnimation.FrameStartPosition.Y
 	screen.DrawImage(a.spritesheet.SubImage(image.Rect(sx, sy, sx+a.frameSize.X, sy+a.frameSize.Y)).(*ebiten.Image), options)
 }
