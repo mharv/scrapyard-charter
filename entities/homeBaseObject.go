@@ -2,20 +2,25 @@ package entities
 
 import (
 	"image/color"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/mharv/scrapyard-charter/animation"
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/solarlune/resolv"
 )
 
 type HomeBaseObject struct {
-	sprite  *ebiten.Image
-	physObj *resolv.Object
-	alive   bool
+	animator animation.Animator
+	physObj  *resolv.Object
+	alive    bool
 }
+
+const (
+	homeFrameSize     = 128
+	homePhysObjOffset = 32
+)
 
 func (h *HomeBaseObject) GetPhysObj() *resolv.Object {
 	return h.physObj
@@ -28,34 +33,33 @@ func (h *HomeBaseObject) SetPosition(position basics.Vector2f) {
 
 func (h *HomeBaseObject) Init(ImageFilepath string) {
 	h.alive = true
-	// Load an image given a filepath
-	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	h.sprite = img
+	h.physObj = resolv.NewObject(globals.ScreenWidth/2, globals.ScreenHeight/2, homeFrameSize-homePhysObjOffset, homeFrameSize-homePhysObjOffset)
 
-	// Setup resolv object to be size of the sprite
-	h.physObj = resolv.NewObject(globals.ScreenWidth/2, globals.ScreenHeight/2, float64(h.sprite.Bounds().Dx()), float64(h.sprite.Bounds().Dy()))
+	h.animator = animation.Animator{}
+	h.animator.Init(ImageFilepath, basics.Vector2i{X: homeFrameSize, Y: homeFrameSize}, basics.Vector2f{X: 1, Y: 1}, basics.Vector2f{X: h.physObj.X, Y: h.physObj.Y}, 0.07)
+	h.animator.AddAnimation(animation.Animation{
+		FrameCount:         6,
+		FrameStartPosition: basics.Vector2i{X: 0, Y: 0},
+		Loop:               true,
+	}, "idle")
+	h.animator.SetAnimation("idle", false)
 }
 
 func (h *HomeBaseObject) ReadInput() {
 }
 
 func (h *HomeBaseObject) Update(deltaTime float64) {
+	h.animator.Update(basics.Vector2f{X: h.physObj.X - (homePhysObjOffset / 2), Y: h.physObj.Y - (homePhysObjOffset / 2)}, deltaTime)
 }
 
 func (h *HomeBaseObject) Draw(screen *ebiten.Image) {
-	options := &ebiten.DrawImageOptions{}
-	// Sprite is put over the top of the phys object
-	options.GeoM.Translate(h.physObj.X, h.physObj.Y)
-
 	// Debug drawing of the physics object
-	ebitenutil.DrawRect(screen, h.physObj.X, h.physObj.Y, h.physObj.W, h.physObj.H, color.RGBA{0, 80, 255, 255})
+	if globals.Debug {
+		ebitenutil.DrawRect(screen, h.physObj.X, h.physObj.Y, h.physObj.W, h.physObj.H, color.RGBA{0, 80, 255, 128})
+	}
 
-	// Draw the image (comment this out to see the above resolv rect ^^^)
-	screen.DrawImage(h.sprite, options)
+	h.animator.Draw(screen)
 }
 
 func (h *HomeBaseObject) IsAlive() bool {
