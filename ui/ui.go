@@ -10,6 +10,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/mharv/scrapyard-charter/basics"
+	"github.com/mharv/scrapyard-charter/crafting"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/tinne26/etxt"
 )
@@ -26,6 +27,8 @@ type Ui struct {
 	cursorClickPos         basics.Vector2f
 	mouseClick             bool
 	inventoryItems         []InventorySlotUi
+	craftButton            basics.FloatRectUI
+	craftingBench          *crafting.CraftingBench
 }
 
 func (u *Ui) Init() {
@@ -37,6 +40,16 @@ func (u *Ui) Init() {
 	u.currentItemStoreLength = 0
 	u.sortedItemKeys = []string{}
 	u.inventoryItems = []InventorySlotUi{}
+	u.craftButton = basics.FloatRectUI{
+		Name:   "CRAFT",
+		X:      (globals.ScreenWidth/3 + globals.ScreenWidth/3 + float64(u.xOffset)),
+		Y:      (0 + float64(u.yOffset+500)),
+		Width:  (globals.ScreenWidth / 3) - float64(2*u.xOffset),
+		Height: 100,
+	}
+
+	u.craftingBench = &crafting.CraftingBench{}
+	u.craftingBench.Init()
 
 	fontLib := etxt.NewFontLibrary()
 
@@ -122,12 +135,16 @@ func (u *Ui) Update() error {
 		}
 	}
 
+	if u.craftButton.IsClicked(u.cursorClickPos) && globals.GetPlayerData().CheckIfInCraftZone() {
+		u.craftingBench.CraftItem()
+	}
+
 	return nil
 }
 
 func (u *Ui) Draw(screen *ebiten.Image) {
 	if u.openButton {
-		screen.Fill(color.RGBA{0, 0, 0, 255})
+		// screen.Fill(color.RGBA{0, 0, 0, 255})
 
 		// draw item list
 		drawColor := color.RGBA{222, 130, 22, 255}
@@ -159,6 +176,11 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 			u.txtRenderer.Draw(fmt.Sprintf("%d x %s", v.ItemCount, v.ItemName), int(v.X), int(v.Y))
 		}
 
+		for _, v := range globals.GetPlayerData().GetInventory().GetKeyItems() {
+
+			u.txtRenderer.Draw(fmt.Sprintf("%s", v.GetKeyItemName()), int(globals.ScreenWidth/3), int(0+float64(u.yOffset)))
+		}
+
 		for i, v := range globals.MaterialNamesList {
 			tempVal := 0
 
@@ -167,6 +189,19 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 			}
 
 			u.txtRenderer.Draw(fmt.Sprintf("%d x %s", tempVal, v), ((globals.ScreenWidth/3 + globals.ScreenWidth/3) + u.xOffset*2), (0 + u.yOffset*2 + u.characterOffset*(i+2)))
+		}
+
+		// draw craft button
+		if globals.GetPlayerData().CheckIfInCraftZone() {
+			buttonDrawColor := color.RGBA{12, 159, 7, 255}
+			ebitenutil.DrawRect(
+				screen,
+				u.craftButton.X,
+				u.craftButton.Y,
+				u.craftButton.Width,
+				u.craftButton.Height,
+				buttonDrawColor,
+			)
 		}
 
 		// u.txtRenderer.Draw("globals.GetPlayerData().GetInventory().GetItems()[0].GetName()", globals.ScreenWidth/2, globals.ScreenHeight/2)

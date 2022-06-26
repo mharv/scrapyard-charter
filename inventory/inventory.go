@@ -1,6 +1,7 @@
 package inventory
 
 type Inventory struct {
+	keyItems  []KeyItem
 	items     []Item
 	materials map[string]int
 }
@@ -16,6 +17,26 @@ func (i *Inventory) InitMaterials() {
 	i.materials["Cobalt"] = 0
 	i.materials["Titanium"] = 0
 	i.materials["Gold"] = 0
+}
+
+func (i *Inventory) ResetMaterials() {
+	i.materials["Iron"] = 0
+	i.materials["Steel"] = 0
+	i.materials["Copper"] = 0
+	i.materials["Rubber"] = 0
+	i.materials["Plastic"] = 0
+	i.materials["Nickel"] = 0
+	i.materials["Cobalt"] = 0
+	i.materials["Titanium"] = 0
+	i.materials["Gold"] = 0
+}
+
+func (i *Inventory) AddKeyItem(keyItem KeyItem) {
+	i.keyItems = append(i.keyItems, keyItem)
+}
+
+func (i *Inventory) GetKeyItems() []KeyItem {
+	return i.keyItems
 }
 
 func (i *Inventory) AddItem(item Item) {
