@@ -12,9 +12,10 @@ import (
 )
 
 type HomeBaseObject struct {
-	animator animation.Animator
-	physObj  *resolv.Object
-	alive    bool
+	animator  animation.Animator
+	physObj   *resolv.Object
+	craftZone *resolv.Object
+	alive     bool
 }
 
 const (
@@ -26,9 +27,15 @@ func (h *HomeBaseObject) GetPhysObj() *resolv.Object {
 	return h.physObj
 }
 
+func (h *HomeBaseObject) GetCraftZone() *resolv.Object {
+	return h.craftZone
+}
+
 func (h *HomeBaseObject) SetPosition(position basics.Vector2f) {
 	h.physObj.X = position.X
 	h.physObj.Y = position.Y
+	h.craftZone.X = position.X - homeFrameSize
+	h.craftZone.Y = position.Y - homeFrameSize
 }
 
 func (h *HomeBaseObject) Init(ImageFilepath string) {
@@ -44,6 +51,14 @@ func (h *HomeBaseObject) Init(ImageFilepath string) {
 		Loop:               true,
 	}, "idle")
 	h.animator.SetAnimation("idle", false)
+
+	h.craftZone = resolv.NewObject(
+		globals.ScreenWidth/2,
+		globals.ScreenHeight/2,
+		float64(homeFrameSize*3),
+		float64(homeFrameSize*3),
+		"craft",
+	)
 }
 
 func (h *HomeBaseObject) ReadInput() {

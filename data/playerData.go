@@ -27,6 +27,19 @@ type PlayerData struct {
 	overworldCastDistanceModifier float64
 	InitialOverworldPosition      basics.Vector2f
 	worldSeed                     int
+	overworldIsInCraftZone        bool
+	// itemSlots
+	reel   inventory.KeyItem
+	rod    inventory.KeyItem
+	line   inventory.KeyItem
+	magnet inventory.KeyItem
+	boots  inventory.KeyItem
+
+	isReelEquipped   bool
+	isRodEquipped    bool
+	isLineEquipped   bool
+	isMagnetEquipped bool
+	isBootsEquipped  bool
 }
 
 const (
@@ -46,12 +59,26 @@ const (
 	//overworldPlayer
 	initialOverworldMoveSpeed    = 200
 	initialOverworldCastDistance = 200
+	// itemslots
+	initialIsReelEquipped   = false
+	initialIsRodEquipped    = false
+	initialIsLineEquipped   = false
+	initialIsMagnetEquipped = false
+	initialIsBootsEquipped  = false
 )
 
 func (p *PlayerData) Init() {
 	p.inventory = &inventory.Inventory{}
 	p.inventory.InitMaterials()
 	p.worldSeed = rand.Int()
+}
+
+func (p *PlayerData) CheckIfInCraftZone() bool {
+	return p.overworldIsInCraftZone
+}
+
+func (p *PlayerData) SetInCraftZoneStatus(status bool) {
+	p.overworldIsInCraftZone = status
 }
 
 func (p *PlayerData) GetWorldSeed() int {

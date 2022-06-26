@@ -163,6 +163,18 @@ func (p *OverworldPlayerObject) Update(deltaTime float64) {
 		}
 	}
 
+	if col := p.physObj.Check(dx, 0, "craft"); col != nil {
+		globals.GetPlayerData().SetInCraftZoneStatus(true)
+	} else {
+		globals.GetPlayerData().SetInCraftZoneStatus(false)
+	}
+
+	if col := p.physObj.Check(dy, 0, "craft"); col != nil {
+		globals.GetPlayerData().SetInCraftZoneStatus(true)
+	} else {
+		globals.GetPlayerData().SetInCraftZoneStatus(false)
+	}
+
 	if col := p.physObj.Check(dx, 0, "solid"); col != nil {
 		dx = 0
 	}
