@@ -1,7 +1,6 @@
 package scenes
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"log"

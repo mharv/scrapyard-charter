@@ -37,6 +37,13 @@ type Ui struct {
 	craftButtonUnpressed   *ebiten.Image
 	craftButtonUnavailable *ebiten.Image
 	craftPressedCounter    float64
+	rodEquip               EquippableSlot
+	reelEquip              EquippableSlot
+	lineEquip              EquippableSlot
+	magEquip               EquippableSlot
+	bootEquip              EquippableSlot
+	elecEquip              EquippableSlot
+	repEquip               EquippableSlot
 }
 
 const (
@@ -54,7 +61,7 @@ const (
 	lineX, lineY                           = 381, 299
 	magX, magY                             = 350, 418
 	bootX, bootY                           = 103, 534
-	elecX, elecY                           = 29, 361
+	elecX, elecY                           = 29, 316
 	repX, repY                             = 69, 243
 	invSlotW, invSlotH                     = 62, 62
 )
@@ -75,6 +82,22 @@ func (u *Ui) Init() {
 		Width:  cbW,
 		Height: cbH,
 	}
+
+	u.rodEquip = EquippableSlot{}
+	u.reelEquip = EquippableSlot{}
+	u.lineEquip = EquippableSlot{}
+	u.magEquip = EquippableSlot{}
+	u.bootEquip = EquippableSlot{}
+	u.elecEquip = EquippableSlot{}
+	u.repEquip = EquippableSlot{}
+
+	u.rodEquip.InitEquibbaleSlot(equX+rodX, equY+rodY, invSlotW, invSlotH, "Rod")
+	u.reelEquip.InitEquibbaleSlot(equX+reelX, equY+reelY, invSlotW, invSlotH, "Reel")
+	u.lineEquip.InitEquibbaleSlot(equX+lineX, equY+lineY, invSlotW, invSlotH, "Line")
+	u.magEquip.InitEquibbaleSlot(equX+magX, equY+magY, invSlotW, invSlotH, "Magnet")
+	u.bootEquip.InitEquibbaleSlot(equX+bootX, equY+bootY, invSlotW, invSlotH, "Boot")
+	u.elecEquip.InitEquibbaleSlot(equX+elecX, equY+elecY, invSlotW, invSlotH, "Electromagnet")
+	u.repEquip.InitEquibbaleSlot(equX+repX, equY+repY, invSlotW, invSlotH, "Reverse Polarity")
 
 	u.craftingBench = &crafting.CraftingBench{}
 	u.craftingBench.Init()
@@ -213,6 +236,46 @@ func (u *Ui) Update(deltaTime float64) error {
 		}
 	}
 
+	if u.rodEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+		fmt.Printf("%s equipment slot has been pressed\n", u.rodEquip.ItemName)
+		u.mouseClick = false
+	}
+
+	if u.lineEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+		fmt.Printf("%s equipment slot has been pressed\n", u.lineEquip.ItemName)
+		u.mouseClick = false
+	}
+
+	if u.reelEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+		fmt.Printf("%s equipment slot has been pressed\n", u.reelEquip.ItemName)
+		u.mouseClick = false
+	}
+
+	if u.magEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+		fmt.Printf("%s equipment slot has been pressed\n", u.magEquip.ItemName)
+		u.mouseClick = false
+	}
+
+	if u.bootEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+		fmt.Printf("%s equipment slot has been pressed\n", u.bootEquip.ItemName)
+		u.mouseClick = false
+	}
+
+	if u.rodEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+		fmt.Printf("%s equipment slot has been pressed\n", u.rodEquip.ItemName)
+		u.mouseClick = false
+	}
+
+	if u.elecEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+		fmt.Printf("%s equipment slot has been pressed\n", u.elecEquip.ItemName)
+		u.mouseClick = false
+	}
+
+	if u.repEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+		fmt.Printf("%s equipment slot has been pressed\n", u.repEquip.ItemName)
+		u.mouseClick = false
+	}
+
 	if u.craftButton.IsClicked(u.cursorClickPos) && globals.GetPlayerData().CheckIfInCraftZone() && u.mouseClick {
 		u.craftPressedCounter = craftPressedDuration
 		u.craftingBench.CraftItem()
@@ -223,7 +286,7 @@ func (u *Ui) Update(deltaTime float64) error {
 		u.craftPressedCounter -= deltaTime
 	}
 
-	fmt.Println(u.craftPressedCounter)
+	// fmt.Println(u.craftPressedCounter)
 
 	return nil
 }
@@ -309,6 +372,16 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 				buttonDrawColor,
 			)
 		}
+
+		// for debugging equippable slot buttons
+		// buttonDrawColor := color.RGBA{12, 159, 7, 255}
+		// ebitenutil.DrawRect(screen, u.rodEquip.X, u.rodEquip.Y, u.rodEquip.Width, u.rodEquip.Height, buttonDrawColor)
+		// ebitenutil.DrawRect(screen, u.reelEquip.X, u.reelEquip.Y, u.reelEquip.Width, u.reelEquip.Height, buttonDrawColor)
+		// ebitenutil.DrawRect(screen, u.lineEquip.X, u.lineEquip.Y, u.lineEquip.Width, u.lineEquip.Height, buttonDrawColor)
+		// ebitenutil.DrawRect(screen, u.magEquip.X, u.magEquip.Y, u.magEquip.Width, u.magEquip.Height, buttonDrawColor)
+		// ebitenutil.DrawRect(screen, u.elecEquip.X, u.elecEquip.Y, u.elecEquip.Width, u.elecEquip.Height, buttonDrawColor)
+		// ebitenutil.DrawRect(screen, u.repEquip.X, u.repEquip.Y, u.repEquip.Width, u.repEquip.Height, buttonDrawColor)
+		// ebitenutil.DrawRect(screen, u.bootEquip.X, u.bootEquip.Y, u.bootEquip.Width, u.bootEquip.Height, buttonDrawColor)
 
 		// u.txtRenderer.Draw("globals.GetPlayerData().GetInventory().GetItems()[0].GetName()", globals.ScreenWidth/2, globals.ScreenHeight/2)
 

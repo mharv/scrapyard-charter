@@ -52,3 +52,30 @@ func (i *InventorySlotUi) InitSlot(invX, invY, invW, invH float64, slotNo, itemC
 }
 
 // func (i *InventorySlotUi) GetPosition()
+
+type EquippableSlot struct {
+	X                     float64
+	Y                     float64
+	Width                 float64
+	Height                float64
+	OpenKeyItemListButton basics.FloatRectUI
+	ItemCount             int
+	ItemName              string
+	SlotNumber            int
+}
+
+func (e *EquippableSlot) InitEquibbaleSlot(invX, invY, invW, invH float64, itemName string) {
+	e.X = invX
+	e.Y = invY
+	e.Width = invW
+	e.Height = invH
+	e.ItemName = itemName
+
+	e.OpenKeyItemListButton = basics.FloatRectUI{
+		Name:   itemName,
+		X:      e.X,
+		Y:      e.Y,
+		Height: e.Height,
+		Width:  e.Width,
+	}
+}
