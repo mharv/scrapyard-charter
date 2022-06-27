@@ -17,7 +17,7 @@ func (k *KeyItem) GetCraftingRecipe() map[string]float64 {
 
 func (k *KeyItem) Init(name, keyItemType string, modifiers, materialsRequiredForCraft map[string]float64) {
 	k.name = name
-	k.keyItemType = name
+	k.keyItemType = keyItemType
 	k.modifiers = modifiers
 	k.materialsRequiredForCraft = materialsRequiredForCraft
 }
