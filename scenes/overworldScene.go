@@ -210,7 +210,7 @@ func (o *OverworldScene) ReadInput() {
 
 func (o *OverworldScene) Update(state *GameState, deltaTime float64) error {
 	o.entityManager.Update(deltaTime)
-	o.ui.Update()
+	o.ui.Update(deltaTime)
 
 	if o.menuBtn {
 		t := &TitleScene{}
