@@ -49,6 +49,14 @@ const (
 	matTextSize                            = 50
 	cbX, cbY, cbW, cbH                     = 118, 590, 119, 72
 	craftPressedDuration                   = 0.25
+	rodX, rodY                             = 233, 165
+	reelX, reelY                           = 171, 317
+	lineX, lineY                           = 381, 299
+	magX, magY                             = 350, 418
+	bootX, bootY                           = 103, 534
+	elecX, elecY                           = 29, 361
+	repX, repY                             = 69, 243
+	invSlotW, invSlotH                     = 62, 62
 )
 
 func (u *Ui) Init() {
