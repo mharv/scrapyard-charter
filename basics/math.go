@@ -54,6 +54,17 @@ func (f *FloatRectUI) IsClicked(positionOfClick Vector2f) bool {
 	}
 }
 
+func (f *FloatRectUI) IsHoveredOver(positionOfMouse Vector2f) bool {
+	if positionOfMouse.X > f.X &&
+		positionOfMouse.X < (f.X+f.Width) &&
+		positionOfMouse.Y > f.Y &&
+		positionOfMouse.Y < (f.Y+f.Height) {
+		return true
+	} else {
+		return false
+	}
+}
+
 //Ints
 type Vector2i struct {
 	X int

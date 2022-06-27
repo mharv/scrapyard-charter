@@ -373,12 +373,61 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 			)
 		}
 
+		if u.openButton {
+
+			if u.reelEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
+
+				// key item stats display on hover
+				buttonDrawColor := color.RGBA{12, 159, 7, 255}
+				ebitenutil.DrawRect(screen, u.cursorPos.X+10, u.cursorPos.Y-100, 100, 100, buttonDrawColor)
+			}
+			if u.rodEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
+
+				// key item stats display on hover
+				buttonDrawColor := color.RGBA{12, 159, 7, 255}
+				ebitenutil.DrawRect(screen, u.cursorPos.X+10, u.cursorPos.Y-100, 100, 100, buttonDrawColor)
+			}
+			if u.lineEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
+
+				// key item stats display on hover
+				buttonDrawColor := color.RGBA{12, 159, 7, 255}
+				ebitenutil.DrawRect(screen, u.cursorPos.X+10, u.cursorPos.Y-100, 100, 100, buttonDrawColor)
+			}
+			if u.magEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
+
+				// key item stats display on hover
+				buttonDrawColor := color.RGBA{12, 159, 7, 255}
+				ebitenutil.DrawRect(screen, u.cursorPos.X+10, u.cursorPos.Y-100, 100, 100, buttonDrawColor)
+			}
+			if u.bootEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
+
+				// key item stats display on hover
+				buttonDrawColor := color.RGBA{12, 159, 7, 255}
+				ebitenutil.DrawRect(screen, u.cursorPos.X+10, u.cursorPos.Y-100, 100, 100, buttonDrawColor)
+			}
+			if u.elecEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
+
+				// key item stats display on hover
+				buttonDrawColor := color.RGBA{12, 159, 7, 255}
+				ebitenutil.DrawRect(screen, u.cursorPos.X+10, u.cursorPos.Y-100, 100, 100, buttonDrawColor)
+			}
+			if u.repEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
+
+				// key item stats display on hover
+				buttonDrawColor := color.RGBA{12, 159, 7, 255}
+				ebitenutil.DrawRect(screen, u.cursorPos.X+10, u.cursorPos.Y-100, 100, 100, buttonDrawColor)
+			}
+
+		}
+
 		// for debugging equippable slot buttons
-		// buttonDrawColor := color.RGBA{12, 159, 7, 255}
+		buttonDrawColor := color.RGBA{12, 159, 7, 255}
 		// ebitenutil.DrawRect(screen, u.rodEquip.X, u.rodEquip.Y, u.rodEquip.Width, u.rodEquip.Height, buttonDrawColor)
 		// ebitenutil.DrawRect(screen, u.reelEquip.X, u.reelEquip.Y, u.reelEquip.Width, u.reelEquip.Height, buttonDrawColor)
 		// ebitenutil.DrawRect(screen, u.lineEquip.X, u.lineEquip.Y, u.lineEquip.Width, u.lineEquip.Height, buttonDrawColor)
-		// ebitenutil.DrawRect(screen, u.magEquip.X, u.magEquip.Y, u.magEquip.Width, u.magEquip.Height, buttonDrawColor)
+		if globals.GetPlayerData().CheckKeyItemTypeSlotIfOccupied("Magnet") {
+			ebitenutil.DrawRect(screen, u.magEquip.X, u.magEquip.Y, u.magEquip.Width, u.magEquip.Height, buttonDrawColor)
+		}
 		// ebitenutil.DrawRect(screen, u.elecEquip.X, u.elecEquip.Y, u.elecEquip.Width, u.elecEquip.Height, buttonDrawColor)
 		// ebitenutil.DrawRect(screen, u.repEquip.X, u.repEquip.Y, u.repEquip.Width, u.repEquip.Height, buttonDrawColor)
 		// ebitenutil.DrawRect(screen, u.bootEquip.X, u.bootEquip.Y, u.bootEquip.Width, u.bootEquip.Height, buttonDrawColor)
