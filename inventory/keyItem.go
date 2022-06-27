@@ -11,6 +11,10 @@ func (k *KeyItem) GetKeyItemName() string {
 	return k.name
 }
 
+func (k *KeyItem) GetKeyItemType() string {
+	return k.keyItemType
+}
+
 func (k *KeyItem) GetCraftingRecipe() map[string]float64 {
 	return k.materialsRequiredForCraft
 }
