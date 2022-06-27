@@ -19,6 +19,7 @@ type Ui struct {
 	openButton             bool
 	xOffset, yOffset       int
 	txtRenderer            *etxt.Renderer
+	headingTxt             *etxt.Renderer
 	characterOffset        int
 	itemsByCount           map[string]int
 	currentItemStoreLength int
@@ -29,7 +30,34 @@ type Ui struct {
 	inventoryItems         []InventorySlotUi
 	craftButton            basics.FloatRectUI
 	craftingBench          *crafting.CraftingBench
+	inventoryBgSprite      *ebiten.Image
+	equipmentBgSprite      *ebiten.Image
+	materialsBgSprite      *ebiten.Image
+	craftButtonPressed     *ebiten.Image
+	craftButtonUnpressed   *ebiten.Image
+	craftButtonUnavailable *ebiten.Image
+	craftPressedCounter    float64
 }
+
+const (
+	invX, invY                             = 50, 50
+	equX, equY                             = (globals.ScreenWidth / 3), 50
+	matX, matY                             = (globals.ScreenWidth/3 + globals.ScreenWidth/3 + 50), 50
+	headingOffsetX, headingOffsetY         = 30, 5
+	matItemOffsetY                         = 55
+	matItemListOffsetX, matItemListOffsetY = 32, 91
+	matTextSize                            = 50
+	cbX, cbY, cbW, cbH                     = 118, 590, 119, 72
+	craftPressedDuration                   = 0.25
+	rodX, rodY                             = 233, 165
+	reelX, reelY                           = 171, 317
+	lineX, lineY                           = 381, 299
+	magX, magY                             = 350, 418
+	bootX, bootY                           = 103, 534
+	elecX, elecY                           = 29, 361
+	repX, repY                             = 69, 243
+	invSlotW, invSlotH                     = 62, 62
+)
 
 func (u *Ui) Init() {
 	u.xOffset = 50
@@ -42,14 +70,56 @@ func (u *Ui) Init() {
 	u.inventoryItems = []InventorySlotUi{}
 	u.craftButton = basics.FloatRectUI{
 		Name:   "CRAFT",
-		X:      (globals.ScreenWidth/3 + globals.ScreenWidth/3 + float64(u.xOffset)),
-		Y:      (0 + float64(u.yOffset+500)),
-		Width:  (globals.ScreenWidth / 3) - float64(2*u.xOffset),
-		Height: 100,
+		X:      matX + cbX,
+		Y:      matY + cbY,
+		Width:  cbW,
+		Height: cbH,
 	}
 
 	u.craftingBench = &crafting.CraftingBench{}
 	u.craftingBench.Init()
+
+	invbg, _, inverr := ebitenutil.NewImageFromFile("images/inventorypanel.png")
+	if inverr != nil {
+		log.Fatal(inverr)
+	} else {
+		u.inventoryBgSprite = invbg
+	}
+
+	equbg, _, equerr := ebitenutil.NewImageFromFile("images/inventorycenterpanel.png")
+	if equerr != nil {
+		log.Fatal(equerr)
+	} else {
+		u.equipmentBgSprite = equbg
+	}
+
+	matbg, _, materr := ebitenutil.NewImageFromFile("images/materialspanel.png")
+	if materr != nil {
+		log.Fatal(materr)
+	} else {
+		u.materialsBgSprite = matbg
+	}
+
+	cbu, _, cbuerr := ebitenutil.NewImageFromFile("images/craftButtonUnavailable.png")
+	if cbuerr != nil {
+		log.Fatal(cbuerr)
+	} else {
+		u.craftButtonUnavailable = cbu
+	}
+
+	cbup, _, cbuperr := ebitenutil.NewImageFromFile("images/craftButtonUnpressed.png")
+	if cbuperr != nil {
+		log.Fatal(cbuperr)
+	} else {
+		u.craftButtonUnpressed = cbup
+	}
+
+	cbp, _, cbperr := ebitenutil.NewImageFromFile("images/craftButtonPressed.png")
+	if cbperr != nil {
+		log.Fatal(cbperr)
+	} else {
+		u.craftButtonPressed = cbp
+	}
 
 	fontLib := etxt.NewFontLibrary()
 
@@ -68,10 +138,18 @@ func (u *Ui) Init() {
 	u.txtRenderer.SetFont(fontLib.GetFont("Rajdhani Regular"))
 	u.txtRenderer.SetAlign(etxt.Top, etxt.Left)
 	u.txtRenderer.SetSizePx(u.characterOffset)
+	u.txtRenderer.SetColor(color.RGBA{197, 204, 184, 255})
+
+	u.headingTxt = etxt.NewStdRenderer()
+	u.headingTxt.SetCacheHandler(glyphsCache.NewHandler())
+	u.headingTxt.SetFont(fontLib.GetFont("Rajdhani Regular"))
+	u.headingTxt.SetAlign(etxt.Top, etxt.Left)
+	u.headingTxt.SetSizePx(70)
+	u.headingTxt.SetColor(color.RGBA{110, 105, 98, 255})
+
 }
 
 func (u *Ui) ReadInput() {
-
 	x, y := ebiten.CursorPosition()
 	u.cursorPos.X = float64(x)
 	u.cursorPos.Y = float64(y)
@@ -87,7 +165,7 @@ func (u *Ui) ReadInput() {
 	}
 }
 
-func (u *Ui) Update() error {
+func (u *Ui) Update(deltaTime float64) error {
 
 	if len(globals.GetPlayerData().GetInventory().GetItems()) != u.currentItemStoreLength {
 
@@ -135,29 +213,40 @@ func (u *Ui) Update() error {
 		}
 	}
 
-	if u.craftButton.IsClicked(u.cursorClickPos) && globals.GetPlayerData().CheckIfInCraftZone() {
+	if u.craftButton.IsClicked(u.cursorClickPos) && globals.GetPlayerData().CheckIfInCraftZone() && u.mouseClick {
+		u.craftPressedCounter = craftPressedDuration
 		u.craftingBench.CraftItem()
+		u.mouseClick = false
 	}
+
+	if u.craftPressedCounter > 0 {
+		u.craftPressedCounter -= deltaTime
+	}
+
+	fmt.Println(u.craftPressedCounter)
 
 	return nil
 }
 
 func (u *Ui) Draw(screen *ebiten.Image) {
 	if u.openButton {
-		// screen.Fill(color.RGBA{0, 0, 0, 255})
-
-		// draw item list
-		drawColor := color.RGBA{222, 130, 22, 255}
 		// inventory
-		ebitenutil.DrawRect(screen, (0 + float64(u.xOffset)), (0 + float64(u.yOffset)), (globals.ScreenWidth/3)-float64(2*u.xOffset), globals.ScreenHeight-float64(u.yOffset*2), drawColor)
+		invop := &ebiten.DrawImageOptions{}
+		invop.GeoM.Translate(invX, invY)
+		screen.DrawImage(u.inventoryBgSprite, invop)
+
 		// character equip
-		ebitenutil.DrawRect(screen, (globals.ScreenWidth / 3), (0 + float64(u.yOffset)), (globals.ScreenWidth / 3), globals.ScreenHeight-float64(u.yOffset*2), drawColor)
+		equop := &ebiten.DrawImageOptions{}
+		equop.GeoM.Translate(equX, equY)
+		screen.DrawImage(u.equipmentBgSprite, equop)
+
 		// materials
-		ebitenutil.DrawRect(screen, (globals.ScreenWidth/3 + globals.ScreenWidth/3 + float64(u.xOffset)), (0 + float64(u.yOffset)), (globals.ScreenWidth/3)-float64(2*u.xOffset), globals.ScreenHeight-float64(u.yOffset*2), drawColor)
+		matop := &ebiten.DrawImageOptions{}
+		matop.GeoM.Translate(matX, matY)
+		screen.DrawImage(u.materialsBgSprite, matop)
 
 		// display inv items
 		u.txtRenderer.SetTarget(screen)
-		u.txtRenderer.SetColor(color.RGBA{255, 255, 255, 255})
 
 		// salvage button test
 		for _, v := range u.inventoryItems {
@@ -176,8 +265,12 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 			u.txtRenderer.Draw(fmt.Sprintf("%d x %s", v.ItemCount, v.ItemName), int(v.X), int(v.Y))
 		}
 
-		for _, v := range globals.GetPlayerData().GetInventory().GetKeyItems() {
+		u.headingTxt.SetTarget(screen)
+		u.headingTxt.Draw("INVENTORY", invX+headingOffsetX, invY+headingOffsetY)
+		u.headingTxt.Draw("EQUIPMENT", equX+headingOffsetX, equY+headingOffsetY)
+		u.headingTxt.Draw("MATERIALS", matX+headingOffsetX, matY+headingOffsetY)
 
+		for _, v := range globals.GetPlayerData().GetInventory().GetKeyItems() {
 			u.txtRenderer.Draw(fmt.Sprintf("%s", v.GetKeyItemName()), int(globals.ScreenWidth/3), int(0+float64(u.yOffset)))
 		}
 
@@ -188,11 +281,24 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 				tempVal = val
 			}
 
-			u.txtRenderer.Draw(fmt.Sprintf("%d x %s", tempVal, v), ((globals.ScreenWidth/3 + globals.ScreenWidth/3) + u.xOffset*2), (0 + u.yOffset*2 + u.characterOffset*(i+2)))
+			u.txtRenderer.SetSizePx(matTextSize)
+			u.txtRenderer.Draw(fmt.Sprintf("%d x %s", tempVal, v), (matX + matItemListOffsetX), (matY+matItemListOffsetY)+matItemOffsetY*(i))
 		}
 
+		cbop := &ebiten.DrawImageOptions{}
+		cbop.GeoM.Translate(matX+cbX, matY+cbY)
 		// draw craft button
 		if globals.GetPlayerData().CheckIfInCraftZone() {
+			if u.craftPressedCounter > 0 {
+				screen.DrawImage(u.craftButtonPressed, cbop)
+			} else {
+				screen.DrawImage(u.craftButtonUnpressed, cbop)
+			}
+
+		} else {
+			screen.DrawImage(u.craftButtonUnavailable, cbop)
+		}
+		if globals.Debug {
 			buttonDrawColor := color.RGBA{12, 159, 7, 255}
 			ebitenutil.DrawRect(
 				screen,
