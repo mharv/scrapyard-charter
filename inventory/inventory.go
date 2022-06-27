@@ -74,16 +74,6 @@ func (i *Inventory) RemoveAllItemWithName(name string) []map[string]RawMaterial 
 			return salvagedMaterials
 		}
 	}
-
-	// for j := 0; j < tempLength; j++ {
-	// 	if i.items[j].name == name {
-	// 		salvagedMaterials = append(salvagedMaterials, i.items[j].GetMaterials())
-	// 		i.items = append(i.items[:j], i.items[j+1:]...)
-	// 		// when item is removed, reset loop variables
-	// 		j = 0
-	// 		tempLength = len(i.items)
-	// 	}
-	// }
 	return salvagedMaterials
 }
 
