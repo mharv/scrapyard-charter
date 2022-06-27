@@ -72,6 +72,7 @@ func (cb *CraftingBench) Init() {
 	NEWMAGNET := &inventory.KeyItem{}
 	NEWMAGNET.Init(
 		"NEW MAGNET",
+		"Magnet",
 		map[string]float64{"castSpeed": 350},
 		map[string]float64{"Iron": 100, "Steel": 100},
 	)
