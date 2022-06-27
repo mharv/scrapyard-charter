@@ -322,7 +322,7 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 			ebitenutil.DrawRect(screen, v.SalvageAllButton.X, v.SalvageAllButton.Y, v.SalvageAllButton.Width, v.SalvageAllButton.Height, buttonDrawColor)
 
 			// draw button labels
-			u.txtRenderer.Draw(fmt.Sprintf("%s", v.ItemName), int(v.SalvageOneButton.X), int(v.SalvageOneButton.Y))
+			// u.txtRenderer.Draw(fmt.Sprintf("%s", v.ItemName), int(v.SalvageOneButton.X), int(v.SalvageOneButton.Y))
 
 			// draw button count and name
 			u.txtRenderer.Draw(fmt.Sprintf("%d x %s", v.ItemCount, v.ItemName), int(v.X), int(v.Y))

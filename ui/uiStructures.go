@@ -59,9 +59,7 @@ type EquippableSlot struct {
 	Width                 float64
 	Height                float64
 	OpenKeyItemListButton basics.FloatRectUI
-	ItemCount             int
 	ItemName              string
-	SlotNumber            int
 }
 
 func (e *EquippableSlot) InitEquibbaleSlot(invX, invY, invW, invH float64, itemName string) {
