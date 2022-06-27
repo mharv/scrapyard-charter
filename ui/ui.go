@@ -223,60 +223,60 @@ func (u *Ui) Update(deltaTime float64) error {
 	}
 
 	for _, v := range u.inventoryItems {
-		if v.SalvageOneButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+		if v.SalvageOneButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 			globals.GetPlayerData().GetInventory().SalvageOneItem(v.ItemName)
 			u.mouseClick = false
 		}
 	}
 
 	for _, v := range u.inventoryItems {
-		if v.SalvageAllButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+		if v.SalvageAllButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 			globals.GetPlayerData().GetInventory().SalvageAllItems(v.ItemName)
 			u.mouseClick = false
 		}
 	}
 
-	if u.rodEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+	if u.rodEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 		fmt.Printf("%s equipment slot has been pressed\n", u.rodEquip.ItemName)
 		u.mouseClick = false
 	}
 
-	if u.lineEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+	if u.lineEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 		fmt.Printf("%s equipment slot has been pressed\n", u.lineEquip.ItemName)
 		u.mouseClick = false
 	}
 
-	if u.reelEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+	if u.reelEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 		fmt.Printf("%s equipment slot has been pressed\n", u.reelEquip.ItemName)
 		u.mouseClick = false
 	}
 
-	if u.magEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+	if u.magEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 		fmt.Printf("%s equipment slot has been pressed\n", u.magEquip.ItemName)
 		u.mouseClick = false
 	}
 
-	if u.bootEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+	if u.bootEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 		fmt.Printf("%s equipment slot has been pressed\n", u.bootEquip.ItemName)
 		u.mouseClick = false
 	}
 
-	if u.rodEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+	if u.rodEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 		fmt.Printf("%s equipment slot has been pressed\n", u.rodEquip.ItemName)
 		u.mouseClick = false
 	}
 
-	if u.elecEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+	if u.elecEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 		fmt.Printf("%s equipment slot has been pressed\n", u.elecEquip.ItemName)
 		u.mouseClick = false
 	}
 
-	if u.repEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick {
+	if u.repEquip.OpenKeyItemListButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 		fmt.Printf("%s equipment slot has been pressed\n", u.repEquip.ItemName)
 		u.mouseClick = false
 	}
 
-	if u.craftButton.IsClicked(u.cursorClickPos) && globals.GetPlayerData().CheckIfInCraftZone() && u.mouseClick {
+	if u.craftButton.IsClicked(u.cursorClickPos) && globals.GetPlayerData().CheckIfInCraftZone() && u.mouseClick && u.openButton {
 		u.craftPressedCounter = craftPressedDuration
 		u.craftingBench.CraftItem()
 		u.mouseClick = false
