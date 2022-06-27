@@ -1,7 +1,6 @@
 package scenes
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -46,6 +45,8 @@ type OverworldScene struct {
 	scrapspritesheet                *ebiten.Image
 	overlayspritesheet              *ebiten.Image
 	landspritesheet                 *ebiten.Image
+	cursorNo                        *ebiten.Image
+	cursorYes                       *ebiten.Image
 	spawnZone                       basics.FloatRect
 	player                          entities.OverworldPlayerObject
 	castDistance                    float64
@@ -72,7 +73,6 @@ func (o *OverworldScene) Init() {
 
 	// create a terrain map L, R, U, D - if true, side is open
 	terrain = mapgen.GenerateMap(false, false, false, false)
-	fmt.Printf("%d random seed", globals.GetPlayerData().GetWorldSeed())
 
 	// we create 32 x 32 pixel blocks
 	tempCellSize := cellSize * 4
@@ -141,26 +141,11 @@ func (o *OverworldScene) Init() {
 
 	o.terrain = *newTerrain
 
-	scrp, _, serr := ebitenutil.NewImageFromFile("images/junkTileset.png")
-	if serr != nil {
-		log.Fatal(serr)
-	} else {
-		o.scrapspritesheet = scrp
-	}
-
-	over, _, oerr := ebitenutil.NewImageFromFile("images/junktileset2.png")
-	if oerr != nil {
-		log.Fatal(oerr)
-	} else {
-		o.overlayspritesheet = over
-	}
-
-	land, _, lerr := ebitenutil.NewImageFromFile("images/dirttileset.png")
-	if lerr != nil {
-		log.Fatal(lerr)
-	} else {
-		o.landspritesheet = land
-	}
+	o.scrapspritesheet = LoadImage("images/junkTileset.png")
+	o.overlayspritesheet = LoadImage("images/junktileset2.png")
+	o.landspritesheet = LoadImage("images/dirttileset.png")
+	o.cursorNo = LoadImage("images/owCursorNo.png")
+	o.cursorYes = LoadImage("images/owCursorYes.png")
 
 	// add generated objects to scene space
 	o.physSpace.Add(geometry...)
@@ -343,11 +328,24 @@ func (o *OverworldScene) Draw(screen *ebiten.Image) {
 
 	o.entityManager.Draw(screen)
 	o.DrawOverlay(screen)
-
 	o.ui.Draw(screen)
 
+	if !o.ui.IsOpen() {
+		mop := &ebiten.DrawImageOptions{}
+		mop.GeoM.Translate(float64(mx)*cellSize, float64(my)*cellSize)
+		if o.castAvailable {
+			mop.GeoM.Translate(-float64(o.cursorYes.Bounds().Dx())/2, -float64(o.cursorYes.Bounds().Dy())/2)
+			screen.DrawImage(o.cursorYes, mop)
+		} else {
+			mop.GeoM.Translate(-float64(o.cursorNo.Bounds().Dx())/2, -float64(o.cursorNo.Bounds().Dy())/2)
+			screen.DrawImage(o.cursorNo, mop)
+		}
+	}
+
 	// draw the mouse to character distance check line
-	ebitenutil.DrawLine(screen, float64(cx)*cellSize, float64(cy)*cellSize, float64(mx)*cellSize, float64(my)*cellSize, drawColor)
+	if globals.Debug {
+		ebitenutil.DrawLine(screen, float64(cx)*cellSize, float64(cy)*cellSize, float64(mx)*cellSize, float64(my)*cellSize, drawColor)
+	}
 }
 
 func (o *OverworldScene) DrawOverlay(screen *ebiten.Image) {
@@ -372,4 +370,12 @@ func (o *OverworldScene) DrawOverlay(screen *ebiten.Image) {
 			}
 		}
 	}
+}
+
+func LoadImage(filepath string) *ebiten.Image {
+	img, _, err := ebitenutil.NewImageFromFile(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return img
 }
