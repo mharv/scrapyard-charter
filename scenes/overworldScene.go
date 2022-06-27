@@ -69,7 +69,6 @@ func (o *OverworldScene) Init() {
 
 	// create a terrain map L, R, U, D - if true, side is open
 	terrain = mapgen.GenerateMap(false, false, false, false)
-	fmt.Printf("%d random seed", globals.GetPlayerData().GetWorldSeed())
 
 	// we create 32 x 32 pixel blocks
 	tempCellSize := cellSize * 4
