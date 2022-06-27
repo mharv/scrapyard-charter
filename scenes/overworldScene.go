@@ -26,7 +26,8 @@ type Tile struct {
 }
 
 type TileMap struct {
-	Tiles []Tile
+	Xmax, Ymax int
+	Tiles      []Tile
 }
 
 func (t *TileMap) GetTile(X, Y int) float64 {
@@ -43,11 +44,13 @@ type OverworldScene struct {
 	menuBtn, castBtn, castAvailable bool
 	physSpace                       *resolv.Space
 	scrapspritesheet                *ebiten.Image
+	overlayspritesheet              *ebiten.Image
 	landspritesheet                 *ebiten.Image
 	spawnZone                       basics.FloatRect
 	player                          entities.OverworldPlayerObject
 	castDistance                    float64
 	ui                              ui.Ui
+	terrain                         TileMap
 }
 
 const (
@@ -88,6 +91,9 @@ func (o *OverworldScene) Init() {
 		}
 		i++
 	}
+
+	newTerrain.Xmax = i
+	newTerrain.Ymax = j
 
 	// create objects based off smoothed map
 	for x := 0; x < i; x++ {
@@ -133,11 +139,20 @@ func (o *OverworldScene) Init() {
 		}
 	}
 
+	o.terrain = *newTerrain
+
 	scrp, _, serr := ebitenutil.NewImageFromFile("images/junkTileset.png")
 	if serr != nil {
 		log.Fatal(serr)
 	} else {
 		o.scrapspritesheet = scrp
+	}
+
+	over, _, oerr := ebitenutil.NewImageFromFile("images/junktileset2.png")
+	if oerr != nil {
+		log.Fatal(oerr)
+	} else {
+		o.overlayspritesheet = over
 	}
 
 	land, _, lerr := ebitenutil.NewImageFromFile("images/dirttileset.png")
@@ -195,7 +210,7 @@ func (o *OverworldScene) ReadInput() {
 
 func (o *OverworldScene) Update(state *GameState, deltaTime float64) error {
 	o.entityManager.Update(deltaTime)
-	o.ui.Update()
+	o.ui.Update(deltaTime)
 
 	if o.menuBtn {
 		t := &TitleScene{}
@@ -326,26 +341,35 @@ func (o *OverworldScene) Draw(screen *ebiten.Image) {
 		}
 	}
 
-	for _, o := range o.physSpace.Objects() {
-		if o.HasTags("craft") {
-			drawColor := color.RGBA{222, 130, 22, 255}
-			ebitenutil.DrawRect(screen, o.X, o.Y, o.W, o.H, drawColor)
-		}
-	}
-
 	o.entityManager.Draw(screen)
+	o.DrawOverlay(screen)
 
 	o.ui.Draw(screen)
 
 	// draw the mouse to character distance check line
 	ebitenutil.DrawLine(screen, float64(cx)*cellSize, float64(cy)*cellSize, float64(mx)*cellSize, float64(my)*cellSize, drawColor)
-	// ebitenutil.DebugPrint(screen, fmt.Sprintf("cast available: %t", o.castAvailable))
+}
 
-	if globals.GetPlayerData().CheckIfInCraftZone() {
-		ebitenutil.DebugPrint(screen, fmt.Sprint("IN CRAFT ZONE"))
-	} else {
+func (o *OverworldScene) DrawOverlay(screen *ebiten.Image) {
+	src := rand.NewSource(int64(globals.GetPlayerData().GetWorldSeed()))
+	rnd := rand.New(src)
 
-		ebitenutil.DebugPrint(screen, fmt.Sprint("NOT IN CRAFT ZONE"))
+	for _, tile := range o.physSpace.Objects() {
+		if tile.HasTags("scrap") {
+			if rnd.Intn(2) != 0 {
+				continue
+			} else {
+				index := rnd.Intn(13)
+				sx := index % tilesetcellsX
+				sy := (index - sx) / tilesetcellsY
+
+				sx *= 32
+				sy *= 32
+
+				options := &ebiten.DrawImageOptions{}
+				options.GeoM.Translate(tile.X, tile.Y-float64(rnd.Intn(16)))
+				screen.DrawImage(o.overlayspritesheet.SubImage(image.Rect(sx, sy, sx+32, sy+32)).(*ebiten.Image), options)
+			}
+		}
 	}
-
 }
