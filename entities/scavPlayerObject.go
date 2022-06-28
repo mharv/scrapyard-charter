@@ -53,7 +53,7 @@ func (s *ScavPlayerObject) Init(ImageFilepath string) {
 
 	s.physObj = resolv.NewObject(globals.ScreenWidth/2, globals.ScreenHeight/2, frameSize, frameSize, "player")
 
-	s.animator.Init(ImageFilepath, basics.Vector2i{X: frameSize, Y: frameSize}, basics.Vector2f{X: 1, Y: 1}, basics.Vector2f{X: s.physObj.X, Y: s.physObj.Y}, 0.8)
+	s.animator.Init(ImageFilepath, basics.Vector2i{X: frameSize, Y: frameSize}, basics.Vector2f{X: 1, Y: 1}, basics.Vector2f{X: s.physObj.X, Y: s.physObj.Y}, 0.07)
 	s.animator.AddAnimation(animation.Animation{
 		FrameCount:         6,
 		FrameStartPosition: basics.Vector2i{X: 0, Y: 0},

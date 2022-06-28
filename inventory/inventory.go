@@ -82,14 +82,15 @@ func (i *Inventory) GetMaterials() map[string]int {
 func (i *Inventory) RemoveAllItemWithName(name string) []map[string]RawMaterial {
 	var salvagedMaterials []map[string]RawMaterial
 
-	tempLength := len(i.items)
-	for j := 0; j < tempLength; j++ {
-		if i.items[j].name == name {
-			salvagedMaterials = append(salvagedMaterials, i.items[j].GetMaterials())
-			i.items = append(i.items[:j], i.items[j+1:]...)
-			// when item is removed, reset loop variables
-			j = 0
-			tempLength = len(i.items)
+	for index, element := range i.items {
+		if element.name == name {
+			salvagedMaterials = append(salvagedMaterials, i.items[index].GetMaterials())
+			i.items = append(i.items[:index], i.items[index+1:]...)
+
+			otherMaterials := i.RemoveAllItemWithName(name)
+			salvagedMaterials = append(salvagedMaterials, otherMaterials...)
+
+			return salvagedMaterials
 		}
 	}
 	return salvagedMaterials

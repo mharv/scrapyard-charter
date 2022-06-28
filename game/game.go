@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/mharv/scrapyard-charter/gameAudio"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/mharv/scrapyard-charter/scenes"
 )
@@ -15,6 +16,7 @@ var (
 
 type Game struct {
 	sceneManager *scenes.SceneManager
+	audioPlayer  *gameAudio.Audio
 }
 
 func (g *Game) Update() error {
@@ -49,4 +51,14 @@ func (g *Game) Init() {
 	ebiten.SetWindowSize(globals.ScreenWidth, globals.ScreenHeight)
 	ebiten.SetWindowTitle("Scrapyard Charter")
 	globals.GetPlayerData().Init()
+
+	g.audioPlayer = &gameAudio.Audio{}
+	g.audioPlayer.Init()
+	g.audioPlayer.LoadFiles("audio")
+	g.audioPlayer.LoadFile("audio/menu.mp3")
+	g.audioPlayer.PlayFile("audio/menu.mp3")
+}
+
+func (g *Game) GetAudioPlayer() *gameAudio.Audio {
+	return g.audioPlayer
 }

@@ -27,6 +27,7 @@ type Ui struct {
 	cursorPos              basics.Vector2f
 	cursorClickPos         basics.Vector2f
 	mouseClick             bool
+	open                   bool
 	inventoryItems         []InventorySlotUi
 	craftButton            basics.FloatRectUI
 	craftingBench          *crafting.CraftingBench
@@ -36,6 +37,10 @@ type Ui struct {
 	craftButtonPressed     *ebiten.Image
 	craftButtonUnpressed   *ebiten.Image
 	craftButtonUnavailable *ebiten.Image
+	salvageOnePressed      *ebiten.Image
+	salvageOneUnpressed    *ebiten.Image
+	salvageAllPressed      *ebiten.Image
+	salvageAllUnpressed    *ebiten.Image
 	craftPressedCounter    float64
 	rodEquip               EquippableSlot
 	reelEquip              EquippableSlot
@@ -51,9 +56,12 @@ const (
 	equX, equY                             = (globals.ScreenWidth / 3), 50
 	matX, matY                             = (globals.ScreenWidth/3 + globals.ScreenWidth/3 + 50), 50
 	headingOffsetX, headingOffsetY         = 30, 5
+	invItemOffsetY                         = 41
+	invItemListOffsetX, invItemListOffsetY = 30, 100
 	matItemOffsetY                         = 55
 	matItemListOffsetX, matItemListOffsetY = 32, 91
-	matTextSize                            = 50
+	salvageOffsetX, salvageOffsetY         = 327, 97
+	matTextSize, invTextSize               = 50, 25
 	cbX, cbY, cbW, cbH                     = 118, 590, 119, 72
 	craftPressedDuration                   = 0.25
 	rodX, rodY                             = 233, 165
@@ -64,12 +72,18 @@ const (
 	elecX, elecY                           = 29, 316
 	repX, repY                             = 69, 243
 	invSlotW, invSlotH                     = 62, 62
+	salvageSize                            = 36
 )
+
+func (u *Ui) IsOpen() bool {
+	return u.open
+}
 
 func (u *Ui) Init() {
 	u.xOffset = 50
 	u.yOffset = 50
 	u.characterOffset = 20
+	u.open = false
 
 	u.itemsByCount = make(map[string]int)
 	u.currentItemStoreLength = 0
@@ -158,47 +172,7 @@ func (u *Ui) Init() {
 	u.craftingBench = &crafting.CraftingBench{}
 	u.craftingBench.Init()
 
-	invbg, _, inverr := ebitenutil.NewImageFromFile("images/inventorypanel.png")
-	if inverr != nil {
-		log.Fatal(inverr)
-	} else {
-		u.inventoryBgSprite = invbg
-	}
-
-	equbg, _, equerr := ebitenutil.NewImageFromFile("images/inventorycenterpanel.png")
-	if equerr != nil {
-		log.Fatal(equerr)
-	} else {
-		u.equipmentBgSprite = equbg
-	}
-
-	matbg, _, materr := ebitenutil.NewImageFromFile("images/materialspanel.png")
-	if materr != nil {
-		log.Fatal(materr)
-	} else {
-		u.materialsBgSprite = matbg
-	}
-
-	cbu, _, cbuerr := ebitenutil.NewImageFromFile("images/craftButtonUnavailable.png")
-	if cbuerr != nil {
-		log.Fatal(cbuerr)
-	} else {
-		u.craftButtonUnavailable = cbu
-	}
-
-	cbup, _, cbuperr := ebitenutil.NewImageFromFile("images/craftButtonUnpressed.png")
-	if cbuperr != nil {
-		log.Fatal(cbuperr)
-	} else {
-		u.craftButtonUnpressed = cbup
-	}
-
-	cbp, _, cbperr := ebitenutil.NewImageFromFile("images/craftButtonPressed.png")
-	if cbperr != nil {
-		log.Fatal(cbperr)
-	} else {
-		u.craftButtonPressed = cbp
-	}
+	u.LoadImages()
 
 	fontLib := etxt.NewFontLibrary()
 
@@ -225,7 +199,6 @@ func (u *Ui) Init() {
 	u.headingTxt.SetAlign(etxt.Top, etxt.Left)
 	u.headingTxt.SetSizePx(70)
 	u.headingTxt.SetColor(color.RGBA{110, 105, 98, 255})
-
 }
 
 func (u *Ui) ReadInput() {
@@ -250,6 +223,7 @@ func (u *Ui) ReadInput() {
 			globals.GetPlayerData().GetInventory().NewRepAcquired = false
 			globals.GetPlayerData().GetInventory().NewRodAcquired = false
 		}
+		u.open = !u.open
 	}
 }
 
@@ -274,11 +248,12 @@ func (u *Ui) Update(deltaTime float64) error {
 
 		u.inventoryItems = []InventorySlotUi{}
 
-		i := 1
+		i := 0
 		for k := range u.itemsByCount {
 			u.sortedItemKeys = append(u.sortedItemKeys, k)
 			tempInvItem := InventorySlotUi{}
-			tempInvItem.InitSlot(70, 40, 40, 40, i, u.itemsByCount[k], k)
+
+			tempInvItem.InitSlot(invX+salvageOffsetX-(salvageSize*2), invY+salvageOffsetY, salvageSize, salvageSize, invItemOffsetY, salvageOffsetX, salvageOffsetY, i, u.itemsByCount[k], k)
 			u.inventoryItems = append(u.inventoryItems, tempInvItem)
 			i++
 		}
@@ -288,15 +263,19 @@ func (u *Ui) Update(deltaTime float64) error {
 	}
 
 	for _, v := range u.inventoryItems {
+		v.SalvageOnePressed = false
 		if v.SalvageOneButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 			globals.GetPlayerData().GetInventory().SalvageOneItem(v.ItemName)
+			v.SalvageOnePressed = true
 			u.mouseClick = false
 		}
 	}
 
 	for _, v := range u.inventoryItems {
+		v.SalvageAllPressed = false
 		if v.SalvageAllButton.IsClicked(u.cursorClickPos) && u.mouseClick && u.openButton {
 			globals.GetPlayerData().GetInventory().SalvageAllItems(v.ItemName)
+			v.SalvageAllPressed = true
 			u.mouseClick = false
 		}
 	}
@@ -363,8 +342,6 @@ func (u *Ui) Update(deltaTime float64) error {
 		u.craftPressedCounter -= deltaTime
 	}
 
-	// fmt.Println(u.craftPressedCounter)
-
 	return nil
 }
 
@@ -389,20 +366,28 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 		u.txtRenderer.SetTarget(screen)
 
 		// salvage button test
-		for _, v := range u.inventoryItems {
+
+		u.txtRenderer.SetSizePx(invTextSize)
+		for i, v := range u.inventoryItems {
 			// draw salvageOne buttons
-			buttonDrawColor := color.RGBA{240, 17, 17, 255}
-			ebitenutil.DrawRect(screen, v.SalvageOneButton.X, v.SalvageOneButton.Y, v.SalvageOneButton.Width, v.SalvageOneButton.Height, buttonDrawColor)
 
-			// draw salvageAll buttons
-			buttonDrawColor = color.RGBA{12, 159, 7, 255}
-			ebitenutil.DrawRect(screen, v.SalvageAllButton.X, v.SalvageAllButton.Y, v.SalvageAllButton.Width, v.SalvageAllButton.Height, buttonDrawColor)
+			soop := &ebiten.DrawImageOptions{}
+			soop.GeoM.Translate(invX+salvageOffsetX-(salvageSize*2), float64(invY+salvageOffsetY+(invItemOffsetY*i)))
+			if v.SalvageOnePressed {
+				screen.DrawImage(u.salvageOnePressed, soop)
+			} else {
+				screen.DrawImage(u.salvageOneUnpressed, soop)
+			}
 
-			// draw button labels
-			// u.txtRenderer.Draw(fmt.Sprintf("%s", v.ItemName), int(v.SalvageOneButton.X), int(v.SalvageOneButton.Y))
+			saop := &ebiten.DrawImageOptions{}
+			saop.GeoM.Translate(1+invX+salvageOffsetX-(salvageSize), float64(invY+salvageOffsetY+(invItemOffsetY*i)))
+			if v.SalvageAllPressed {
+				screen.DrawImage(u.salvageAllPressed, saop)
+			} else {
+				screen.DrawImage(u.salvageAllUnpressed, saop)
+			}
 
-			// draw button count and name
-			u.txtRenderer.Draw(fmt.Sprintf("%d x %s", v.ItemCount, v.ItemName), int(v.X), int(v.Y))
+			u.txtRenderer.Draw(fmt.Sprintf("%d x %s", v.ItemCount, v.ItemName), invX+invItemListOffsetX, invY+invItemListOffsetY+(invItemOffsetY*i))
 		}
 
 		u.headingTxt.SetTarget(screen)
@@ -415,6 +400,7 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 		// 	u.txtRenderer.Draw(fmt.Sprintf("%s", v.GetKeyItemName()), int(globals.ScreenWidth/3), int(0+float64(u.yOffset)))
 		// }
 
+		u.txtRenderer.SetSizePx(matTextSize)
 		for i, v := range globals.MaterialNamesList {
 			tempVal := 0
 
@@ -422,7 +408,6 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 				tempVal = val
 			}
 
-			u.txtRenderer.SetSizePx(matTextSize)
 			u.txtRenderer.Draw(fmt.Sprintf("%d x %s", tempVal, v), (matX + matItemListOffsetX), (matY+matItemListOffsetY)+matItemOffsetY*(i))
 		}
 
@@ -640,4 +625,24 @@ func equipKeyItem(keyItemType string, slot *EquippableSlot) {
 			globals.GetPlayerData().EquipItem(slot.KeyItem)
 		}
 	}
+}
+func (u *Ui) LoadImages() {
+	u.inventoryBgSprite = LoadImage("images/inventorypanel.png")
+	u.equipmentBgSprite = LoadImage("images/inventorycenterpanel.png")
+	u.materialsBgSprite = LoadImage("images/materialspanel.png")
+	u.craftButtonUnavailable = LoadImage("images/craftButtonUnavailable.png")
+	u.craftButtonUnpressed = LoadImage("images/craftButtonUnpressed.png")
+	u.craftButtonPressed = LoadImage("images/craftButtonPressed.png")
+	u.salvageAllPressed = LoadImage("images/salvageallpressed.png")
+	u.salvageAllUnpressed = LoadImage("images/salvageallunpressed.png")
+	u.salvageOnePressed = LoadImage("images/salvageonepressed.png")
+	u.salvageOneUnpressed = LoadImage("images/salvageoneunpressed.png")
+}
+
+func LoadImage(filepath string) *ebiten.Image {
+	img, _, err := ebitenutil.NewImageFromFile(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return img
 }

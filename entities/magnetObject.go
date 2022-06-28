@@ -127,7 +127,7 @@ func (m *MagnetObject) ReadInput() {
 	m.targetPos.X = float64(x)
 	m.targetPos.Y = float64(y)
 
-	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && m.syncToRod {
 		end := basics.Vector2f{X: m.targetPos.X - m.magnetStartPos.X, Y: m.targetPos.Y - m.magnetStartPos.Y}
 		basics.FloatNormalise(end)
 		end.X *= globals.GetPlayerData().GetLineLength()
@@ -277,7 +277,7 @@ func (m *MagnetObject) Draw(screen *ebiten.Image) {
 	// Sprite is put over the top of the phys object
 	sop.GeoM.Translate(m.physObj.X-(magPhysObjSizeDiff/2), m.physObj.Y-(magPhysObjSizeDiff/2))
 
-	if m.touch {
+	if m.touch && globals.Debug {
 		sop.ColorM.Scale(0.5, 1, 1, 1)
 	}
 
