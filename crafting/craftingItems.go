@@ -59,7 +59,6 @@ func (cb *CraftingBench) CraftItem() {
 		randomIndex := rand.Intn(amountItemsCraftable)
 		// remove all materials here
 		globals.GetPlayerData().GetInventory().ResetMaterials()
-
 		globals.GetPlayerData().GetInventory().AddKeyItem(tempKeyItems[randomIndex])
 	}
 
@@ -74,10 +73,20 @@ func (cb *CraftingBench) Init() {
 		"NEW MAGNET",
 		"Magnet",
 		map[string]float64{"castSpeed": 350},
-		map[string]float64{"Iron": 100, "Steel": 100},
+		map[string]float64{"Iron": 100, "Steel": 50},
 	)
 
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *NEWMAGNET)
+
+	NEWMAGNET2 := &inventory.KeyItem{}
+	NEWMAGNET2.Init(
+		"BETTER MAGNET",
+		"Magnet",
+		map[string]float64{"castSpeed": 450},
+		map[string]float64{"Rubber": 20, "Iron": 20},
+	)
+
+	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *NEWMAGNET2)
 
 }
 
