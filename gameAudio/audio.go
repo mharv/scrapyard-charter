@@ -67,3 +67,12 @@ func (a *Audio) PlayFile(filepath string) {
 		a.audioPlayer[filepath].Play()
 	}
 }
+
+func (a *Audio) StopAllAudio() {
+	for _, v := range a.audioPlayer {
+		if v.IsPlaying() {
+			v.Pause()
+			v.Rewind()
+		}
+	}
+}

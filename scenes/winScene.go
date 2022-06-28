@@ -37,6 +37,7 @@ func (w *WinScene) ReadInput() {
 }
 
 func (w *WinScene) Update(state *GameState, deltaTime float64) error {
+	globals.GetAudioPlayer().PlayFile("audio/victory.mp3")
 	return nil
 }
 
