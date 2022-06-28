@@ -32,6 +32,8 @@ func (g *Game) Update() error {
 		return err
 	}
 
+	// globals.GetPlayerData().Update()
+
 	return nil
 }
 

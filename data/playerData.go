@@ -1,6 +1,8 @@
 package data
 
 import (
+	"errors"
+	"fmt"
 	"math/rand"
 
 	"github.com/mharv/scrapyard-charter/basics"
@@ -34,12 +36,16 @@ type PlayerData struct {
 	line   inventory.KeyItem
 	magnet inventory.KeyItem
 	boots  inventory.KeyItem
+	elec   inventory.KeyItem
+	rep    inventory.KeyItem
 
 	isReelEquipped   bool
 	isRodEquipped    bool
 	isLineEquipped   bool
 	isMagnetEquipped bool
 	isBootsEquipped  bool
+	isElecEquipped   bool
+	isRepEquipped    bool
 }
 
 const (
@@ -59,19 +65,109 @@ const (
 	//overworldPlayer
 	initialOverworldMoveSpeed    = 200
 	initialOverworldCastDistance = 200
-	// itemslots
-	initialIsReelEquipped   = false
-	initialIsRodEquipped    = false
-	initialIsLineEquipped   = false
-	initialIsMagnetEquipped = false
-	initialIsBootsEquipped  = false
 )
+
+func (p *PlayerData) EquipItem(item inventory.KeyItem) {
+	switch item.GetKeyItemType() {
+	case "Reel":
+		p.reel = item
+		p.isReelEquipped = true
+	case "Rod":
+		p.rod = item
+		p.isRodEquipped = true
+	case "Line":
+		p.line = item
+		p.isLineEquipped = true
+	case "Magnet":
+		p.magnet = item
+		p.isMagnetEquipped = true
+	case "Boots":
+		p.boots = item
+		p.isBootsEquipped = true
+	case "Repulsor":
+		p.rep = item
+		p.isRepEquipped = true
+	case "Electromagnet":
+		p.elec = item
+		p.isElecEquipped = true
+	}
+}
+
+func (p *PlayerData) GetEquippedItem(slotName string) (inventory.KeyItem, error) {
+	switch slotName {
+	case "Reel":
+		return p.reel, nil
+	case "Rod":
+		return p.rod, nil
+	case "Line":
+		return p.line, nil
+	case "Magnet":
+		return p.magnet, nil
+	case "Boots":
+		return p.boots, nil
+	case "Repulsor":
+		return p.rep, nil
+	case "Electromagnet":
+		return p.elec, nil
+	}
+
+	return inventory.KeyItem{}, errors.New("slotName does not exist")
+}
+
+func (p *PlayerData) CheckKeyItemTypeSlotIfOccupied(keyItemType string) bool {
+	switch keyItemType {
+	case "Reel":
+		return p.isReelEquipped
+	case "Rod":
+		return p.isRodEquipped
+	case "Line":
+		return p.isLineEquipped
+	case "Magnet":
+		return p.isMagnetEquipped
+	case "Boots":
+		return p.isBootsEquipped
+	case "Repulsor":
+		return p.isRepEquipped
+	case "Electromagnet":
+		return p.isElecEquipped
+	}
+	return false
+}
+
+func (p *PlayerData) GetIndexOfEquippedKeyItem(keyItem inventory.KeyItem) int {
+	getIndexOfEquippedItem := -1
+	for i, v := range p.inventory.GetKeyItemsByType(keyItem.GetKeyItemType()) {
+		itemInSlot, err := p.GetEquippedItem("Magnet")
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			if v.GetKeyItemName() == itemInSlot.GetKeyItemName() {
+				getIndexOfEquippedItem = i
+				break
+			}
+		}
+	}
+	return getIndexOfEquippedItem
+}
 
 func (p *PlayerData) Init() {
 	p.inventory = &inventory.Inventory{}
 	p.inventory.InitMaterials()
 	p.worldSeed = rand.Int()
 }
+
+// func (p *PlayerData) Update() error {
+// 	if p.inventory.NewKeyItemAcquired {
+// 		length := len(p.inventory.GetKeyItems())
+// 		if length > 0 {
+// 			if p.CheckKeyItemTypeSlotIfOccupied(p.inventory.GetKeyItems()[length-1].GetKeyItemType()) {
+// 				p.EquipItem(p.inventory.GetKeyItems()[length-1])
+// 			}
+// 		}
+// 		p.inventory.NewKeyItemAcquired = false
+// 	}
+// 	return nil
+// }
 
 func (p *PlayerData) CheckIfInCraftZone() bool {
 	return p.overworldIsInCraftZone
