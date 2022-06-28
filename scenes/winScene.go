@@ -13,6 +13,7 @@ type WinScene struct {
 }
 
 func (w *WinScene) Init() {
+	globals.GetAudioPlayer().PlayFile("audio/victory.mp3")
 	fontLib := etxt.NewFontLibrary()
 
 	_, _, err := fontLib.ParseDirFonts("fonts")
@@ -31,12 +32,10 @@ func (w *WinScene) ReadInput() {
 }
 
 func (w *WinScene) Update(state *GameState, deltaTime float64) error {
-	globals.GetAudioPlayer().PlayFile("audio/victory.mp3")
 	return nil
 }
 
 func (w *WinScene) Draw(screen *ebiten.Image) {
-
 	imageOptions := &ebiten.DrawImageOptions{}
 	imageOptions.GeoM.Translate(0, 0)
 	screen.DrawImage(w.victory, imageOptions)
