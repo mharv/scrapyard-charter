@@ -3,6 +3,7 @@ package globals
 import (
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/data"
+	"github.com/mharv/scrapyard-charter/gameAudio"
 )
 
 const (
@@ -15,6 +16,17 @@ var playerData = &data.PlayerData{InitialOverworldPosition: basics.Vector2f{
 	X: ScreenWidth / 2,
 	Y: ScreenHeight / 2,
 }}
+
+var audioPlayer = &gameAudio.Audio{}
+
+func InitAudioPlayer() {
+	audioPlayer.Init()
+	audioPlayer.LoadFiles("audio")
+}
+
+func GetAudioPlayer() *gameAudio.Audio {
+	return audioPlayer
+}
 
 func GetPlayerData() *data.PlayerData {
 	return playerData

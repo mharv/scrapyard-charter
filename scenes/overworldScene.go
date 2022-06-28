@@ -61,6 +61,8 @@ const (
 )
 
 func (o *OverworldScene) Init() {
+	globals.GetAudioPlayer().StopAllAudio()
+
 	o.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, cellSize, cellSize)
 	o.entityManager.Init()
 	o.ui = ui.Ui{}
@@ -194,6 +196,8 @@ func (o *OverworldScene) ReadInput() {
 }
 
 func (o *OverworldScene) Update(state *GameState, deltaTime float64) error {
+	globals.GetAudioPlayer().PlayFile("audio/overworld.mp3")
+
 	o.entityManager.Update(deltaTime)
 	o.ui.Update(deltaTime)
 
