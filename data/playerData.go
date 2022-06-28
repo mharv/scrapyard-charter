@@ -24,6 +24,8 @@ type PlayerData struct {
 	lineLengthModifier            float64
 	magnetCastSpeedModifier       float64
 	magnetReelSpeedModifier       float64
+	HasElectroMagnetFlag          bool
+	HasRepulsorFlag               bool
 	//overworldPlayer
 	overworldMoveSpeedModifier    float64
 	overworldCastDistanceModifier float64
@@ -72,24 +74,33 @@ func (p *PlayerData) EquipItem(item inventory.KeyItem) {
 	case "Reel":
 		p.reel = item
 		p.isReelEquipped = true
+		p.magnetReelSpeedModifier = item.GetKeyItemModifiers().ModifierValue
 	case "Rod":
 		p.rod = item
 		p.isRodEquipped = true
+		p.magnetCastSpeedModifier = item.GetKeyItemModifiers().ModifierValue
 	case "Line":
 		p.line = item
 		p.isLineEquipped = true
+		p.lineLengthModifier = item.GetKeyItemModifiers().ModifierValue
+		p.overworldCastDistanceModifier = item.GetKeyItemModifiers().ModifierValue
 	case "Magnet":
 		p.magnet = item
 		p.isMagnetEquipped = true
+		p.magneticFieldSizeModifier = item.GetKeyItemModifiers().ModifierValue
 	case "Boots":
 		p.boots = item
 		p.isBootsEquipped = true
+		p.overworldMoveSpeedModifier = item.GetKeyItemModifiers().ModifierValue
+		p.scavMoveSpeedModifier = item.GetKeyItemModifiers().ModifierValue
 	case "Repulsor":
 		p.rep = item
 		p.isRepEquipped = true
+		p.HasRepulsorFlag = true
 	case "Electromagnet":
 		p.elec = item
 		p.isElecEquipped = true
+		p.HasElectroMagnetFlag = true
 	}
 }
 
@@ -245,9 +256,9 @@ func (p *PlayerData) GetMagnetReelSpeed() float64 {
 }
 
 func (p *PlayerData) HasElectroMagnet() bool {
-	return false
+	return p.HasElectroMagnetFlag
 }
 
 func (p *PlayerData) HasRepulsor() bool {
-	return false
+	return p.HasRepulsorFlag
 }
