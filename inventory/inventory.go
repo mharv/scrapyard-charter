@@ -1,10 +1,16 @@
 package inventory
 
 type Inventory struct {
-	keyItems  []KeyItem
-	items     []Item
-	materials map[string]int
-	// NewKeyItemAcquired bool
+	keyItems          []KeyItem
+	items             []Item
+	materials         map[string]int
+	NewRodAcquired    bool
+	NewReelAcquired   bool
+	NewLineAcquired   bool
+	NewMagnetAcquired bool
+	NewBootsAcquired  bool
+	NewElecAcquired   bool
+	NewRepAcquired    bool
 }
 
 func (i *Inventory) InitMaterials() {

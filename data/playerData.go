@@ -137,7 +137,7 @@ func (p *PlayerData) CheckKeyItemTypeSlotIfOccupied(keyItemType string) bool {
 func (p *PlayerData) GetIndexOfEquippedKeyItem(keyItem inventory.KeyItem) int {
 	getIndexOfEquippedItem := -1
 	for i, v := range p.inventory.GetKeyItemsByType(keyItem.GetKeyItemType()) {
-		itemInSlot, err := p.GetEquippedItem("Magnet")
+		itemInSlot, err := p.GetEquippedItem(keyItem.GetKeyItemType())
 		if err != nil {
 			fmt.Println(err)
 		} else {

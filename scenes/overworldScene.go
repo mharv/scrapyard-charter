@@ -221,6 +221,14 @@ func (o *OverworldScene) Update(state *GameState, deltaTime float64) error {
 		state.SceneManager.GoTo(s, transitionTime)
 	}
 
+	winCondition, err := globals.GetPlayerData().GetEquippedItem("Magnet")
+	if err == nil {
+		if winCondition.GetKeyItemName() == "GOLDENMAGNET" {
+			w := &WinScene{}
+			state.SceneManager.GoTo(w, transitionTime)
+		}
+	}
+
 	return nil
 }
 

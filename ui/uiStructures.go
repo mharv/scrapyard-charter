@@ -3,6 +3,7 @@ package ui
 import (
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/globals"
+	"github.com/mharv/scrapyard-charter/inventory"
 )
 
 type InventorySlotUi struct {
@@ -60,6 +61,7 @@ type EquippableSlot struct {
 	Height                float64
 	OpenKeyItemListButton basics.FloatRectUI
 	ItemName              string
+	KeyItem               inventory.KeyItem
 }
 
 func (e *EquippableSlot) InitEquibbaleSlot(invX, invY, invW, invH float64, itemName string) {
