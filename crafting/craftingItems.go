@@ -96,30 +96,30 @@ func (cb *CraftingBench) Init() {
 	// MAGNETS
 	magnet1 := &inventory.KeyItem{}
 	magnet1.Init(
-		"NEW MAGNET",
+		"THE CLASSIC",
 		"Magnet",
-		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 350},
-		map[string]float64{"Iron": 100, "Steel": 50},
+		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 250},
+		map[string]float64{"Iron": 100, "Nickel": 50, "Cobalt": 50},
 		LoadImage("images/iconmagnet1.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *magnet1)
 
 	magnet2 := &inventory.KeyItem{}
 	magnet2.Init(
-		"BETTER MAGNET",
+		"BABY BOY BLUE",
 		"Magnet",
-		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 450},
-		map[string]float64{"Rubber": 20, "Iron": 20},
+		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 400},
+		map[string]float64{"Steel": 150, "Nickel": 75, "Cobalt": 75},
 		LoadImage("images/iconmagnet2.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *magnet2)
 
 	magnet3 := &inventory.KeyItem{}
 	magnet3.Init(
-		"BETTER MAGNET",
+		"TITAN",
 		"Magnet",
-		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 450},
-		map[string]float64{"Rubber": 20, "Iron": 20},
+		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 600},
+		map[string]float64{"Steel": 150, "Iron": 150, "Nickel": 75, "Cobalt": 75},
 		LoadImage("images/iconmagnet3.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *magnet3)
@@ -128,7 +128,7 @@ func (cb *CraftingBench) Init() {
 	goldenMagnet.Init(
 		"GOLDENMAGNET",
 		"Magnet",
-		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 450},
+		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 999},
 		map[string]float64{"Gold": 100},
 		LoadImage("images/iconmagnetgold.png"),
 	)
@@ -138,30 +138,30 @@ func (cb *CraftingBench) Init() {
 
 	boots1 := &inventory.KeyItem{}
 	boots1.Init(
-		"BOOTZ",
+		"GUM BOOTS",
 		"Boots",
-		inventory.KeyItemModifiers{ModifierName: "Move speed", ModifierValue: 450},
-		map[string]float64{"Rubber": 20, "Iron": 20},
+		inventory.KeyItemModifiers{ModifierName: "Move Speed", ModifierValue: 100},
+		map[string]float64{"Rubber": 100, "Iron": 100, "Plastic": 20},
 		LoadImage("images/iconboots1.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *boots1)
 
 	boots2 := &inventory.KeyItem{}
 	boots2.Init(
-		"BOOTZ",
+		"TIM'S",
 		"Boots",
-		inventory.KeyItemModifiers{ModifierName: "Move speed", ModifierValue: 450},
-		map[string]float64{"Rubber": 20, "Iron": 20},
+		inventory.KeyItemModifiers{ModifierName: "Move Speed", ModifierValue: 200},
+		map[string]float64{"Rubber": 200, "Iron": 150, "Plastic": 40},
 		LoadImage("images/iconboots2.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *boots2)
 
 	boots3 := &inventory.KeyItem{}
 	boots3.Init(
-		"BOOTZ",
+		"CUTE REDS",
 		"Boots",
-		inventory.KeyItemModifiers{ModifierName: "Move speed", ModifierValue: 450},
-		map[string]float64{"Rubber": 20, "Iron": 20},
+		inventory.KeyItemModifiers{ModifierName: "Move Speed", ModifierValue: 300},
+		map[string]float64{"Rubber": 300, "Iron": 200, "Plastic": 100},
 		LoadImage("images/iconboots3.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *boots3)
@@ -172,28 +172,28 @@ func (cb *CraftingBench) Init() {
 	rod1.Init(
 		"RODGER",
 		"Rod",
-		inventory.KeyItemModifiers{ModifierName: "Cast speed", ModifierValue: 450},
-		map[string]float64{"Steel": 20, "Iron": 20},
+		inventory.KeyItemModifiers{ModifierName: "Cast Speed", ModifierValue: 200},
+		map[string]float64{"Rubber": 100, "Iron": 50, "Plastic": 20},
 		LoadImage("images/iconrod1.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *rod1)
 
 	rod2 := &inventory.KeyItem{}
 	rod2.Init(
-		"RODGER",
+		"RED ROCKET",
 		"Rod",
-		inventory.KeyItemModifiers{ModifierName: "Cast speed", ModifierValue: 450},
-		map[string]float64{"Steel": 20, "Iron": 20},
+		inventory.KeyItemModifiers{ModifierName: "Cast Speed", ModifierValue: 400},
+		map[string]float64{"Rubber": 200, "Steel": 100, "Plastic": 40},
 		LoadImage("images/iconrod2.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *rod2)
 
 	rod3 := &inventory.KeyItem{}
 	rod3.Init(
-		"RODGER",
+		"PURPLE WHIP",
 		"Rod",
-		inventory.KeyItemModifiers{ModifierName: "Cast speed", ModifierValue: 450},
-		map[string]float64{"Steel": 20, "Iron": 20},
+		inventory.KeyItemModifiers{ModifierName: "Cast Speed", ModifierValue: 600},
+		map[string]float64{"Rubber": 300, "Titanium": 100, "Plastic": 60},
 		LoadImage("images/iconrod3.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *rod3)
@@ -204,28 +204,28 @@ func (cb *CraftingBench) Init() {
 	reel1.Init(
 		"REELY",
 		"Reel",
-		inventory.KeyItemModifiers{ModifierName: "Reel Speed", ModifierValue: 450},
-		map[string]float64{"Rubber": 20, "Steel": 20},
+		inventory.KeyItemModifiers{ModifierName: "Reel Speed", ModifierValue: 100},
+		map[string]float64{"Iron": 300},
 		LoadImage("images/iconreel1.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *reel1)
 
 	reel2 := &inventory.KeyItem{}
 	reel2.Init(
-		"REELY",
+		"WHITE WONDER",
 		"Reel",
-		inventory.KeyItemModifiers{ModifierName: "Reel Speed", ModifierValue: 450},
-		map[string]float64{"Rubber": 20, "Steel": 20},
+		inventory.KeyItemModifiers{ModifierName: "Reel Speed", ModifierValue: 200},
+		map[string]float64{"Steel": 300},
 		LoadImage("images/iconreel2.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *reel2)
 
 	reel3 := &inventory.KeyItem{}
 	reel3.Init(
-		"REELY",
+		"REALTY",
 		"Reel",
-		inventory.KeyItemModifiers{ModifierName: "Reel Speed", ModifierValue: 450},
-		map[string]float64{"Rubber": 20, "Steel": 20},
+		inventory.KeyItemModifiers{ModifierName: "Reel Speed", ModifierValue: 300},
+		map[string]float64{"Titanium": 300},
 		LoadImage("images/iconreel3.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *reel3)
@@ -233,30 +233,30 @@ func (cb *CraftingBench) Init() {
 	// LINES
 	line1 := &inventory.KeyItem{}
 	line1.Init(
-		"linedUP",
+		"LINE 'EM UP",
 		"Line",
-		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 450},
-		map[string]float64{"Rubber": 20, "Iron": 20},
+		inventory.KeyItemModifiers{ModifierName: "Line Length", ModifierValue: 150},
+		map[string]float64{"Rubber": 400},
 		LoadImage("images/iconline1.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *line1)
 
 	line2 := &inventory.KeyItem{}
 	line2.Init(
-		"linedUP",
+		"FAIRY FLOSS",
 		"Line",
-		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 450},
-		map[string]float64{"Rubber": 20, "Iron": 20},
+		inventory.KeyItemModifiers{ModifierName: "Line Length", ModifierValue: 300},
+		map[string]float64{"Steel": 400},
 		LoadImage("images/iconline2.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *line2)
 
 	line3 := &inventory.KeyItem{}
 	line3.Init(
-		"linedUP",
+		"LINE DANCER",
 		"Line",
-		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 450},
-		map[string]float64{"Rubber": 20, "Iron": 20},
+		inventory.KeyItemModifiers{ModifierName: "Line Length", ModifierValue: 450},
+		map[string]float64{"Copper": 300},
 		LoadImage("images/iconline3.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *line3)
@@ -265,10 +265,10 @@ func (cb *CraftingBench) Init() {
 
 	Electrom := &inventory.KeyItem{}
 	Electrom.Init(
-		"Electrom",
+		"ELECTRIFY",
 		"Electromagnet",
 		inventory.KeyItemModifiers{ModifierName: "Hold down 'Space'", ModifierValue: 1337},
-		map[string]float64{"Rubber": 20, "Iron": 20},
+		map[string]float64{"Copper": 100},
 		LoadImage("images/iconelectromagnet.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *Electrom)
@@ -277,10 +277,10 @@ func (cb *CraftingBench) Init() {
 
 	revpol := &inventory.KeyItem{}
 	revpol.Init(
-		"revpol",
+		"THE FUTURE",
 		"Repulsor",
 		inventory.KeyItemModifiers{ModifierName: "Use with 'Tab'", ModifierValue: 420},
-		map[string]float64{"Rubber": 20, "Iron": 20},
+		map[string]float64{"Nickel": 50, "Cobalt": 50},
 		LoadImage("images/iconrepulsor.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *revpol)
