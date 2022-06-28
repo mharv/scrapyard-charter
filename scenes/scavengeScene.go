@@ -250,6 +250,11 @@ func (s *ScavengeScene) InitJunkList() {
 	cog.SetItemDataName("Cog")
 	cog.SetItemDataDepthAndRarity(0, 80, 0.1)
 	cog.AddItemDataMaterial("Iron", 5, 10)
+	cog.AddAudioFile("audio/mom1.mp3")
+	cog.AddAudioFile("audio/mom2.mp3")
+	cog.AddAudioFile("audio/mom3.mp3")
+	cog.AddAudioFile("audio/mom4.mp3")
+	cog.AddAudioFile("audio/mom12.mp3")
 	s.junkList = append(s.junkList, *cog)
 
 	ironPipe := &entities.JunkObject{}
@@ -258,6 +263,8 @@ func (s *ScavengeScene) InitJunkList() {
 	ironPipe.SetItemDataName("Iron Pipe")
 	ironPipe.SetItemDataDepthAndRarity(1, 60, 0.2)
 	ironPipe.AddItemDataMaterial("Iron", 15, 30)
+	ironPipe.AddAudioFile("audio/mop1.mp3")
+	ironPipe.AddAudioFile("audio/mop2.mp3")
 	s.junkList = append(s.junkList, *ironPipe)
 
 	tyre := &entities.JunkObject{}
@@ -267,6 +274,10 @@ func (s *ScavengeScene) InitJunkList() {
 	tyre.SetItemDataDepthAndRarity(2, 50, 0.2)
 	tyre.AddItemDataMaterial("Rubber", 15, 25)
 	tyre.AddItemDataMaterial("Iron", 15, 20)
+	tyre.AddAudioFile("audio/mor1.mp3")
+	tyre.AddAudioFile("audio/mor2.mp3")
+	tyre.AddAudioFile("audio/mor3.mp3")
+	tyre.AddAudioFile("audio/mor4.mp3")
 	s.junkList = append(s.junkList, *tyre)
 
 	steelBikeFrame := &entities.JunkObject{}
@@ -277,6 +288,11 @@ func (s *ScavengeScene) InitJunkList() {
 	steelBikeFrame.AddItemDataMaterial("Steel", 15, 20)
 	steelBikeFrame.AddItemDataMaterial("Iron", 2, 7)
 	steelBikeFrame.AddItemDataMaterial("Plastic", 0, 1)
+	steelBikeFrame.AddAudioFile("audio/mom5.mp3")
+	steelBikeFrame.AddAudioFile("audio/mom6.mp3")
+	steelBikeFrame.AddAudioFile("audio/mom7.mp3")
+	steelBikeFrame.AddAudioFile("audio/mom8.mp3")
+	steelBikeFrame.AddAudioFile("audio/mom9.mp3")
 	s.junkList = append(s.junkList, *steelBikeFrame)
 
 	monitor := &entities.JunkObject{}
@@ -287,6 +303,8 @@ func (s *ScavengeScene) InitJunkList() {
 	monitor.AddItemDataMaterial("Copper", 10, 15)
 	monitor.AddItemDataMaterial("Plastic", 5, 10)
 	monitor.AddItemDataMaterial("Iron", 0, 2)
+	monitor.AddAudioFile("audio/mor5.mp3")
+	monitor.AddAudioFile("audio/mor6.mp3")
 	s.junkList = append(s.junkList, *monitor)
 
 	toaster := &entities.JunkObject{}
@@ -296,6 +314,10 @@ func (s *ScavengeScene) InitJunkList() {
 	toaster.SetItemDataDepthAndRarity(5, 20, 0.5)
 	toaster.AddItemDataMaterial("Nickel", 2, 10)
 	toaster.AddItemDataMaterial("Iron", 1, 5)
+	toaster.AddAudioFile("audio/mom8.mp3")
+	toaster.AddAudioFile("audio/mom9.mp3")
+	toaster.AddAudioFile("audio/mom10.mp3")
+	toaster.AddAudioFile("audio/mom11.mp3")
 	s.junkList = append(s.junkList, *toaster)
 
 	steelPipe := &entities.JunkObject{}
@@ -304,6 +326,8 @@ func (s *ScavengeScene) InitJunkList() {
 	steelPipe.SetItemDataName("Steel Pipe")
 	steelPipe.SetItemDataDepthAndRarity(6, 18, 0.6)
 	steelPipe.AddItemDataMaterial("Steel", 15, 30)
+	steelPipe.AddAudioFile("audio/mop3.mp3")
+	steelPipe.AddAudioFile("audio/mop4.mp3")
 	s.junkList = append(s.junkList, *steelPipe)
 
 	belt := &entities.JunkObject{}
@@ -314,6 +338,8 @@ func (s *ScavengeScene) InitJunkList() {
 	belt.AddItemDataMaterial("Cobalt", 1, 7)
 	belt.AddItemDataMaterial("Rubber", 3, 8)
 	belt.AddItemDataMaterial("Plastic", 0, 2)
+	belt.AddAudioFile("audio/belt1.mp3")
+	belt.AddAudioFile("audio/belt1.mp3")
 	s.junkList = append(s.junkList, *belt)
 
 	copperPipe := &entities.JunkObject{}
@@ -322,6 +348,8 @@ func (s *ScavengeScene) InitJunkList() {
 	copperPipe.SetItemDataName("Copper Pipe")
 	copperPipe.SetItemDataDepthAndRarity(8, 13, 0.9)
 	copperPipe.AddItemDataMaterial("Copper", 15, 30)
+	copperPipe.AddAudioFile("audio/mop5.mp3")
+	copperPipe.AddAudioFile("audio/mop6.mp3")
 	s.junkList = append(s.junkList, *copperPipe)
 
 	titaniumBikeFrame := &entities.JunkObject{}
@@ -332,6 +360,8 @@ func (s *ScavengeScene) InitJunkList() {
 	titaniumBikeFrame.AddItemDataMaterial("Titanium", 15, 25)
 	titaniumBikeFrame.AddItemDataMaterial("Iron", 0, 2)
 	titaniumBikeFrame.AddItemDataMaterial("Plastic", 2, 4)
+	titaniumBikeFrame.AddAudioFile("audio/mom9.mp3")
+	titaniumBikeFrame.AddAudioFile("audio/mom10.mp3")
 	s.junkList = append(s.junkList, *titaniumBikeFrame)
 
 	titaniumPipe := &entities.JunkObject{}
@@ -340,6 +370,8 @@ func (s *ScavengeScene) InitJunkList() {
 	titaniumPipe.SetItemDataName("Titanium Pipe")
 	titaniumPipe.SetItemDataDepthAndRarity(10, 9, 1.4)
 	titaniumPipe.AddItemDataMaterial("Titanium", 15, 30)
+	titaniumPipe.AddAudioFile("audio/mop6.mp3")
+	titaniumPipe.AddAudioFile("audio/mop7.mp3")
 	s.junkList = append(s.junkList, *titaniumPipe)
 
 	oldPC := &entities.JunkObject{}
@@ -351,6 +383,8 @@ func (s *ScavengeScene) InitJunkList() {
 	oldPC.AddItemDataMaterial("Plastic", 8, 12)
 	oldPC.AddItemDataMaterial("Steel", 3, 7)
 	oldPC.AddItemDataMaterial("Gold", 1, 3)
+	oldPC.AddAudioFile("audio/mom7.mp3")
+	oldPC.AddAudioFile("audio/mom8.mp3")
 	s.junkList = append(s.junkList, *oldPC)
 
 	battery := &entities.JunkObject{}
@@ -360,6 +394,8 @@ func (s *ScavengeScene) InitJunkList() {
 	battery.SetItemDataDepthAndRarity(12, 4, 2.5)
 	battery.AddItemDataMaterial("Cobalt", 10, 15)
 	battery.AddItemDataMaterial("Nickel", 10, 15)
+	battery.AddAudioFile("audio/belt1.mp3")
+	battery.AddAudioFile("audio/belt1.mp3")
 	s.junkList = append(s.junkList, *battery)
 }
 
