@@ -99,7 +99,7 @@ func (cb *CraftingBench) Init() {
 		"THE CLASSIC",
 		"Magnet",
 		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 250},
-		map[string]float64{"Iron": 100, "Nickel": 50, "Cobalt": 50},
+		map[string]float64{"Iron": 50, "Nickel": 25, "Cobalt": 25},
 		LoadImage("images/iconmagnet1.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *magnet1)
@@ -109,7 +109,7 @@ func (cb *CraftingBench) Init() {
 		"BABY BOY BLUE",
 		"Magnet",
 		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 400},
-		map[string]float64{"Steel": 150, "Nickel": 75, "Cobalt": 75},
+		map[string]float64{"Steel": 75, "Nickel": 40, "Cobalt": 40},
 		LoadImage("images/iconmagnet2.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *magnet2)
@@ -119,7 +119,7 @@ func (cb *CraftingBench) Init() {
 		"TITAN",
 		"Magnet",
 		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 600},
-		map[string]float64{"Steel": 150, "Iron": 150, "Nickel": 75, "Cobalt": 75},
+		map[string]float64{"Steel": 100, "Titanium": 75, "Nickel": 40, "Cobalt": 40},
 		LoadImage("images/iconmagnet3.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *magnet3)
@@ -129,7 +129,7 @@ func (cb *CraftingBench) Init() {
 		"GOLDENMAGNET",
 		"Magnet",
 		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 999},
-		map[string]float64{"Gold": 100},
+		map[string]float64{"Gold": 50},
 		LoadImage("images/iconmagnetgold.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *goldenMagnet)
@@ -236,7 +236,7 @@ func (cb *CraftingBench) Init() {
 		"LINE 'EM UP",
 		"Line",
 		inventory.KeyItemModifiers{ModifierName: "Line Length", ModifierValue: 150},
-		map[string]float64{"Rubber": 400},
+		map[string]float64{"Rubber": 200},
 		LoadImage("images/iconline1.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *line1)
@@ -246,7 +246,7 @@ func (cb *CraftingBench) Init() {
 		"FAIRY FLOSS",
 		"Line",
 		inventory.KeyItemModifiers{ModifierName: "Line Length", ModifierValue: 300},
-		map[string]float64{"Steel": 400},
+		map[string]float64{"Steel": 200},
 		LoadImage("images/iconline2.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *line2)
@@ -256,7 +256,7 @@ func (cb *CraftingBench) Init() {
 		"LINE DANCER",
 		"Line",
 		inventory.KeyItemModifiers{ModifierName: "Line Length", ModifierValue: 450},
-		map[string]float64{"Copper": 300},
+		map[string]float64{"Copper": 200},
 		LoadImage("images/iconline3.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *line3)
@@ -280,7 +280,7 @@ func (cb *CraftingBench) Init() {
 		"THE FUTURE",
 		"Repulsor",
 		inventory.KeyItemModifiers{ModifierName: "Use with 'Tab'", ModifierValue: 420},
-		map[string]float64{"Nickel": 50, "Cobalt": 50},
+		map[string]float64{"Nickel": 30, "Cobalt": 30},
 		LoadImage("images/iconrepulsor.png"),
 	)
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *revpol)
