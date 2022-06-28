@@ -6,29 +6,47 @@ import (
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/tinne26/etxt"
 )
 
 type TitleScene struct {
-	owrld       bool
-	scav        bool
-	esc         bool
-	txtRenderer *etxt.Renderer
+	owrld            bool
+	esc              bool
+	image            *ebiten.Image
+	txtRenderer      *etxt.Renderer
+	titleText        string
+	thoughtText      string
+	instructionsText string
 }
 
 const (
-	transitionTime = 1
+	transitionTime      = 1
+	thoughtOffsetX      = 910
+	thoughtOffsetY      = 112
+	instructionsOffsetX = 126
+	instructionsOffsetY = 382
+	titleOffsetX        = 70
+	titleOffsetY        = 70
 )
 
 func (t *TitleScene) Init() {
-
 	t.owrld = false
-	t.scav = false
 	t.esc = false
 
+	bg, _, bgerr := ebitenutil.NewImageFromFile("images/titlescreen.png")
+	if bgerr != nil {
+		log.Fatal(bgerr)
+	}
+	t.image = bg
+
 	fontLib := etxt.NewFontLibrary()
+
+	t.titleText = "Scrapyard Magnate"
+	t.thoughtText = "I know that golden \nmagnet is out there...\nSomewhere..."
+	t.instructionsText = "Press [Enter] to play"
 
 	_, _, err := fontLib.ParseDirFonts("fonts")
 	if err != nil {
@@ -43,21 +61,15 @@ func (t *TitleScene) Init() {
 	glyphsCache := etxt.NewDefaultCache(10 * 1024 * 1024) // 10MB
 	t.txtRenderer.SetCacheHandler(glyphsCache.NewHandler())
 	t.txtRenderer.SetFont(fontLib.GetFont("Rajdhani Regular"))
-	t.txtRenderer.SetAlign(etxt.YCenter, etxt.XCenter)
+	t.txtRenderer.SetAlign(etxt.Top, etxt.Left)
 	t.txtRenderer.SetSizePx(24)
 }
 
 func (t *TitleScene) ReadInput() {
-	if inpututil.IsKeyJustPressed(ebiten.KeyO) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		t.owrld = true
 	} else {
 		t.owrld = false
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyS) {
-		t.scav = true
-	} else {
-		t.scav = false
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
@@ -74,10 +86,6 @@ func (t *TitleScene) Update(state *GameState, deltaTime float64) error {
 		o := &OverworldScene{}
 		state.SceneManager.GoTo(o, transitionTime)
 	}
-	if t.scav {
-		s := &ScavengeScene{}
-		state.SceneManager.GoTo(s, transitionTime)
-	}
 	if t.esc {
 		os.Exit(0)
 	}
@@ -88,7 +96,21 @@ func (t *TitleScene) Update(state *GameState, deltaTime float64) error {
 func (t *TitleScene) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{0, 0, 0, 255})
 
+	op := &ebiten.DrawImageOptions{}
+	screen.DrawImage(t.image, op)
+
 	t.txtRenderer.SetTarget(screen)
-	t.txtRenderer.SetColor(color.RGBA{255, 255, 255, 255})
-	t.txtRenderer.Draw("Press O to go to the overworld.\nPress S to scavenge\nPress ESC to quit", globals.ScreenWidth/2, globals.ScreenHeight/2)
+	t.txtRenderer.SetSizePx(80)
+	t.txtRenderer.SetColor(color.RGBA{157, 159, 127, 255})
+	t.txtRenderer.Draw(t.titleText, titleOffsetX, titleOffsetY)
+
+	t.txtRenderer.SetTarget(screen)
+	t.txtRenderer.SetSizePx(25)
+	t.txtRenderer.SetColor(color.RGBA{0, 0, 0, 255})
+	t.txtRenderer.Draw(t.thoughtText, thoughtOffsetX, thoughtOffsetY)
+
+	t.txtRenderer.SetTarget(screen)
+	t.txtRenderer.SetSizePx(40)
+	t.txtRenderer.SetColor(color.RGBA{197, 204, 184, 255})
+	t.txtRenderer.Draw(t.instructionsText, instructionsOffsetX, instructionsOffsetY)
 }

@@ -187,6 +187,7 @@ func (m *MagnetObject) Update(deltaTime float64) {
 				m.retract = true
 				v := basics.Vector2f{X: m.connectedJunk.X, Y: m.connectedJunk.Y}
 				m.rotation = m.RotateTo(v)
+				m.junkLookup[m.connectedJunk].PlayAudio()
 			} else {
 				m.touch = false
 			}

@@ -1,7 +1,6 @@
 package scenes
 
 import (
-	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,8 +9,7 @@ import (
 )
 
 type WinScene struct {
-	txtRenderer *etxt.Renderer
-	victory     *ebiten.Image
+	victory *ebiten.Image
 }
 
 func (w *WinScene) Init() {
@@ -25,13 +23,6 @@ func (w *WinScene) Init() {
 	if !fontLib.HasFont("Rajdhani Regular") {
 		log.Fatal("missing font Rajdhani-Regular.ttf")
 	}
-
-	w.txtRenderer = etxt.NewStdRenderer()
-	glyphsCache := etxt.NewDefaultCache(10 * 1024 * 1024) // 10MB
-	w.txtRenderer.SetCacheHandler(glyphsCache.NewHandler())
-	w.txtRenderer.SetFont(fontLib.GetFont("Rajdhani Regular"))
-	w.txtRenderer.SetAlign(etxt.YCenter, etxt.XCenter)
-	w.txtRenderer.SetSizePx(24)
 
 	w.victory = LoadImage("images/victory.png")
 }
@@ -49,10 +40,4 @@ func (w *WinScene) Draw(screen *ebiten.Image) {
 	imageOptions := &ebiten.DrawImageOptions{}
 	imageOptions.GeoM.Translate(0, 0)
 	screen.DrawImage(w.victory, imageOptions)
-
-	// screen.Fill(color.RGBA{0, 0, 0, 255})
-
-	w.txtRenderer.SetTarget(screen)
-	w.txtRenderer.SetColor(color.RGBA{255, 255, 255, 255})
-	w.txtRenderer.Draw("Good work, you got a golden magnet!", globals.ScreenWidth/2, globals.ScreenHeight/2)
 }

@@ -18,6 +18,7 @@ type JunkObject struct {
 	sprite        *ebiten.Image
 	physObj       *resolv.Object
 	itemData      inventory.Item
+	audioFilepath []string
 	imageFilepath string
 	rot           float64
 	alive         bool
@@ -33,6 +34,15 @@ func (j *JunkObject) GetPhysObj() *resolv.Object {
 
 func (j *JunkObject) GetSprite() *ebiten.Image {
 	return j.sprite
+}
+
+func (j *JunkObject) AddAudioFile(AudioFilepath string) {
+	j.audioFilepath = append(j.audioFilepath, AudioFilepath)
+}
+
+func (j *JunkObject) PlayAudio() {
+	rnd := rand.Intn(len(j.audioFilepath))
+	globals.GetAudioPlayer().PlayFile(j.audioFilepath[rnd])
 }
 
 func (j *JunkObject) Init(ImageFilepath string) {
