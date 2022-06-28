@@ -23,6 +23,7 @@ const (
 )
 
 func (t *TitleScene) Init() {
+
 	t.owrld = false
 	t.scav = false
 	t.esc = false
@@ -67,6 +68,8 @@ func (t *TitleScene) ReadInput() {
 }
 
 func (t *TitleScene) Update(state *GameState, deltaTime float64) error {
+	globals.GetAudioPlayer().PlayFile("audio/menu.mp3")
+
 	if t.owrld {
 		o := &OverworldScene{}
 		state.SceneManager.GoTo(o, transitionTime)
@@ -78,6 +81,7 @@ func (t *TitleScene) Update(state *GameState, deltaTime float64) error {
 	if t.esc {
 		os.Exit(0)
 	}
+
 	return nil
 }
 

@@ -36,17 +36,17 @@ type ScavengeScene struct {
 
 const (
 	spawnZoneEdgeBorder = 128
-	defaultTimerStart   = 10
+	defaultTimerStart   = 30
 	uiXOffset           = 32
 	uiYOffset           = 32
 	uiGlassXOffset      = 25
 	uiGlassYOffset      = 4
-	textXOffset         = 40
+	textXOffset         = 35
 	textYOffset         = 0
 	fontSize            = 50
 	iconXOffset         = 184
 	iconYOffset         = 66
-	textRedLimit        = 5.0
+	textRedLimit        = 10.0
 )
 
 func (s *ScavengeScene) Init() {
@@ -182,6 +182,8 @@ func (s *ScavengeScene) ReadInput() {
 }
 
 func (s *ScavengeScene) Update(state *GameState, deltaTime float64) error {
+	globals.GetAudioPlayer().PlayFile("audio/scavenge.mp3")
+
 	s.entityManager.Update(deltaTime)
 
 	s.countdownTimer -= deltaTime

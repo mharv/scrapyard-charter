@@ -73,6 +73,7 @@ func (s *SceneManager) Draw(screen *ebiten.Image) {
 }
 
 func (s *SceneManager) GoTo(scene Scene, fadeTime float64) {
+	globals.GetAudioPlayer().StopAllAudio()
 	scene.Init()
 
 	if s.current == nil {
