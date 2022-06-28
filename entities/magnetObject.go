@@ -40,7 +40,6 @@ type MagnetObject struct {
 	UIPos              basics.Vector2f
 	touch, connected   bool
 	magnetActive       bool
-	dropConnected      bool
 	retract            bool
 	syncToRod          bool
 	turnedOn           bool
@@ -112,7 +111,6 @@ func (m *MagnetObject) Init(ImageFilepath string) {
 	m.touch = false
 	m.repulsor = false
 	m.connected = false
-	m.dropConnected = false
 	m.magnetActive = false
 	m.retract = false
 	m.syncToRod = true
@@ -139,12 +137,6 @@ func (m *MagnetObject) ReadInput() {
 		m.magnetActive = true
 		m.retract = false
 		m.syncToRod = false
-	}
-
-	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
-		m.dropConnected = true
-	} else {
-		m.dropConnected = false
 	}
 
 	if globals.GetPlayerData().HasElectroMagnet() {
@@ -255,10 +247,6 @@ func (m *MagnetObject) Update(deltaTime float64) {
 
 	if m.connected {
 		m.SetObjPos(m.connectedJunk, *m.magnetPos, m.linkDistance)
-	}
-
-	if m.dropConnected {
-		m.Drop()
 	}
 
 	m.physObj.Update()

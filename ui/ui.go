@@ -140,14 +140,14 @@ func (u *Ui) Init() {
 		u.lineEquip.InitEquibbaleSlot(equX+lineX, equY+lineY, invSlotW, invSlotH, "Line")
 	}
 
-	if globals.GetPlayerData().CheckKeyItemTypeSlotIfOccupied("Boot") {
+	if globals.GetPlayerData().CheckKeyItemTypeSlotIfOccupied("Boots") {
 
-		u.bootEquip.InitEquibbaleSlot(equX+bootX, equY+bootY, invSlotW, invSlotH, "Boot")
-		u.bootEquip.KeyItem, _ = globals.GetPlayerData().GetEquippedItem("Boot")
+		u.bootEquip.InitEquibbaleSlot(equX+bootX, equY+bootY, invSlotW, invSlotH, "Boots")
+		u.bootEquip.KeyItem, _ = globals.GetPlayerData().GetEquippedItem("Boots")
 	} else {
 
 		u.bootEquip = EquippableSlot{}
-		u.bootEquip.InitEquibbaleSlot(equX+bootX, equY+bootY, invSlotW, invSlotH, "Boot")
+		u.bootEquip.InitEquibbaleSlot(equX+bootX, equY+bootY, invSlotW, invSlotH, "Boots")
 	}
 
 	if globals.GetPlayerData().CheckKeyItemTypeSlotIfOccupied("Electromagnet") {
