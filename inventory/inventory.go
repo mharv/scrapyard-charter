@@ -1,10 +1,10 @@
 package inventory
 
 type Inventory struct {
-	keyItems           []KeyItem
-	items              []Item
-	materials          map[string]int
-	NewKeyItemAcquired bool
+	keyItems  []KeyItem
+	items     []Item
+	materials map[string]int
+	// NewKeyItemAcquired bool
 }
 
 func (i *Inventory) InitMaterials() {
@@ -34,7 +34,7 @@ func (i *Inventory) ResetMaterials() {
 
 func (i *Inventory) AddKeyItem(keyItem KeyItem) {
 	i.keyItems = append(i.keyItems, keyItem)
-	i.NewKeyItemAcquired = true
+	// i.NewKeyItemAcquired = true
 }
 
 func (i *Inventory) GetKeyItems() []KeyItem {
