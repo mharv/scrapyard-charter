@@ -50,7 +50,6 @@ const (
 )
 
 func (s *ScavengeScene) Init() {
-	fmt.Println(s.distanceOfOverworldCast)
 	s.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, 16, 16)
 	s.UIPosition = basics.Vector2f{X: globals.ScreenWidth - (uiXOffset + iconXOffset), Y: uiYOffset + iconYOffset}
 
