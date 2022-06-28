@@ -34,6 +34,7 @@ type Ui struct {
 	inventoryBgSprite      *ebiten.Image
 	equipmentBgSprite      *ebiten.Image
 	materialsBgSprite      *ebiten.Image
+	tooltipSprite          *ebiten.Image
 	craftButtonPressed     *ebiten.Image
 	craftButtonUnpressed   *ebiten.Image
 	craftButtonUnavailable *ebiten.Image
@@ -52,27 +53,27 @@ type Ui struct {
 }
 
 const (
-	invX, invY                             = 50, 50
-	equX, equY                             = (globals.ScreenWidth / 3), 50
-	matX, matY                             = (globals.ScreenWidth/3 + globals.ScreenWidth/3 + 50), 50
-	headingOffsetX, headingOffsetY         = 30, 5
-	invItemOffsetY                         = 41
-	invItemListOffsetX, invItemListOffsetY = 30, 100
-	matItemOffsetY                         = 55
-	matItemListOffsetX, matItemListOffsetY = 32, 91
-	salvageOffsetX, salvageOffsetY         = 327, 97
-	matTextSize, invTextSize               = 50, 25
-	cbX, cbY, cbW, cbH                     = 118, 590, 119, 72
-	craftPressedDuration                   = 0.25
-	rodX, rodY                             = 233, 165
-	reelX, reelY                           = 171, 317
-	lineX, lineY                           = 381, 299
-	magX, magY                             = 350, 418
-	bootX, bootY                           = 103, 534
-	elecX, elecY                           = 29, 316
-	repX, repY                             = 69, 243
-	invSlotW, invSlotH                     = 62, 62
-	salvageSize                            = 36
+	invX, invY                              = 50, 50
+	equX, equY                              = (globals.ScreenWidth / 3), 50
+	matX, matY                              = (globals.ScreenWidth/3 + globals.ScreenWidth/3 + 50), 50
+	headingOffsetX, headingOffsetY          = 30, 5
+	invItemOffsetY                          = 41
+	invItemListOffsetX, invItemListOffsetY  = 30, 100
+	matItemOffsetY                          = 55
+	matItemListOffsetX, matItemListOffsetY  = 32, 91
+	salvageOffsetX, salvageOffsetY          = 327, 97
+	matTextSize, invTextSize, hoverTextSize = 50, 25, 18
+	cbX, cbY, cbW, cbH                      = 118, 590, 119, 72
+	craftPressedDuration                    = 0.25
+	rodX, rodY                              = 233, 165
+	reelX, reelY                            = 171, 317
+	lineX, lineY                            = 381, 299
+	magX, magY                              = 350, 418
+	bootX, bootY                            = 103, 534
+	elecX, elecY                            = 29, 316
+	repX, repY                              = 69, 243
+	invSlotW, invSlotH                      = 62, 62
+	salvageSize                             = 36
 )
 
 func (u *Ui) IsOpen() bool {
@@ -212,7 +213,7 @@ func (u *Ui) ReadInput() {
 		u.mouseClick = true
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyI) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyI) || (u.open && ebiten.IsKeyPressed(ebiten.KeyEscape)) {
 		u.openButton = !u.openButton
 		if !u.openButton {
 			globals.GetPlayerData().GetInventory().NewBootsAcquired = false
@@ -248,16 +249,21 @@ func (u *Ui) Update(deltaTime float64) error {
 
 		u.inventoryItems = []InventorySlotUi{}
 
-		i := 0
+		// sort itemsByCount here
+
 		for k := range u.itemsByCount {
 			u.sortedItemKeys = append(u.sortedItemKeys, k)
+		}
+		sort.Strings(u.sortedItemKeys)
+
+		i := 0
+		for _, k := range u.sortedItemKeys {
 			tempInvItem := InventorySlotUi{}
 
 			tempInvItem.InitSlot(invX+salvageOffsetX-(salvageSize*2), invY+salvageOffsetY, salvageSize, salvageSize, invItemOffsetY, salvageOffsetX, salvageOffsetY, i, u.itemsByCount[k], k)
 			u.inventoryItems = append(u.inventoryItems, tempInvItem)
 			i++
 		}
-		sort.Strings(u.sortedItemKeys)
 
 		u.currentItemStoreLength = len(globals.GetPlayerData().GetInventory().GetItems())
 	}
@@ -368,6 +374,13 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 		// salvage button test
 
 		u.txtRenderer.SetSizePx(invTextSize)
+
+		// NOT NEEDED BUT GOOD TO KNOW VVV
+
+		// sort.Slice(u.inventoryItems, func(i, j int) bool {
+		// 	return u.inventoryItems[i].ItemName < u.inventoryItems[j].ItemName
+		// })
+
 		for i, v := range u.inventoryItems {
 			// draw salvageOne buttons
 
@@ -530,34 +543,40 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 
 			if u.reelEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
 
-				drawHover("Reel", screen, &u.reelEquip, u.cursorPos, u.txtRenderer)
+				u.txtRenderer.SetSizePx(invTextSize)
+				drawHover("Reel", screen, &u.reelEquip, u.cursorPos, u.txtRenderer, u)
 
 			}
 			if u.rodEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
 
-				drawHover("Rod", screen, &u.rodEquip, u.cursorPos, u.txtRenderer)
+				u.txtRenderer.SetSizePx(invTextSize)
+				drawHover("Rod", screen, &u.rodEquip, u.cursorPos, u.txtRenderer, u)
 			}
 			if u.lineEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
 
-				drawHover("Line", screen, &u.lineEquip, u.cursorPos, u.txtRenderer)
+				u.txtRenderer.SetSizePx(invTextSize)
+				drawHover("Line", screen, &u.lineEquip, u.cursorPos, u.txtRenderer, u)
 			}
 			if u.magEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
 
-				// key item stats display on hover
-				drawHover("Magnet", screen, &u.magEquip, u.cursorPos, u.txtRenderer)
+				u.txtRenderer.SetSizePx(invTextSize)
+				drawHover("Magnet", screen, &u.magEquip, u.cursorPos, u.txtRenderer, u)
 
 			}
 			if u.bootEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
 
-				drawHover("Boots", screen, &u.bootEquip, u.cursorPos, u.txtRenderer)
+				u.txtRenderer.SetSizePx(invTextSize)
+				drawHover("Boots", screen, &u.bootEquip, u.cursorPos, u.txtRenderer, u)
 			}
 			if u.elecEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
 
-				drawHover("Electromagnet", screen, &u.elecEquip, u.cursorPos, u.txtRenderer)
+				u.txtRenderer.SetSizePx(invTextSize)
+				drawHover("Electromagnet", screen, &u.elecEquip, u.cursorPos, u.txtRenderer, u)
 			}
 			if u.repEquip.OpenKeyItemListButton.IsHoveredOver(u.cursorPos) {
 
-				drawHover("Repulsor", screen, &u.repEquip, u.cursorPos, u.txtRenderer)
+				u.txtRenderer.SetSizePx(invTextSize)
+				drawHover("Repulsor", screen, &u.repEquip, u.cursorPos, u.txtRenderer, u)
 			}
 
 		}
@@ -566,13 +585,21 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 
 }
 
-func drawHover(keyItemType string, screen *ebiten.Image, slot *EquippableSlot, cursorPosition basics.Vector2f, txtRenderer *etxt.Renderer) {
+func drawHover(keyItemType string, screen *ebiten.Image, slot *EquippableSlot, cursorPosition basics.Vector2f, txtRenderer *etxt.Renderer, u *Ui) {
 	if globals.GetPlayerData().CheckKeyItemTypeSlotIfOccupied(keyItemType) {
 
-		buttonDrawColor := color.RGBA{12, 159, 7, 255}
-		ebitenutil.DrawRect(screen, cursorPosition.X+10, cursorPosition.Y-100, 100, 100, buttonDrawColor)
+		// buttonDrawColor := color.RGBA{12, 159, 7, 255}
+		// ebitenutil.DrawRect(screen, cursorPosition.X, cursorPosition.Y-110, 100, 100, buttonDrawColor)
+
+		tooltip := &ebiten.DrawImageOptions{}
+		tooltip.GeoM.Translate(cursorPosition.X, cursorPosition.Y-120)
+		screen.DrawImage(u.tooltipSprite, tooltip)
+
+		// change color here
+		// txtRenderer.SetColor(color.RGBA{0, 0, 0, 255})
+
 		// draw u.magEquip key item name and modifier here
-		txtRenderer.Draw(fmt.Sprintf("%s", slot.KeyItem.GetKeyItemName()), int(cursorPosition.X+10), int(cursorPosition.Y-100))
+		txtRenderer.Draw(fmt.Sprintf("%s", slot.KeyItem.GetKeyItemName()), int(cursorPosition.X+25), int(cursorPosition.Y-110))
 		if len(globals.GetPlayerData().GetInventory().GetKeyItemsByType(keyItemType)) > 0 {
 			txtRenderer.Draw(
 				fmt.Sprintf(
@@ -580,15 +607,15 @@ func drawHover(keyItemType string, screen *ebiten.Image, slot *EquippableSlot, c
 					globals.GetPlayerData().GetIndexOfEquippedKeyItem(slot.KeyItem)+1,
 					len(globals.GetPlayerData().GetInventory().GetKeyItemsByType(keyItemType)),
 				),
-				int(cursorPosition.X+10),
+				int(cursorPosition.X+25),
 				int(cursorPosition.Y-70),
 			)
 			txtRenderer.Draw(
 				fmt.Sprintf(
-					"%s: %0.f", slot.KeyItem.GetKeyItemModifiers().ModifierName,
+					"%s +%0.f", slot.KeyItem.GetKeyItemModifiers().ModifierName,
 					slot.KeyItem.GetKeyItemModifiers().ModifierValue,
 				),
-				int(cursorPosition.X+10),
+				int(cursorPosition.X+6),
 				int(cursorPosition.Y-30),
 			)
 		}
@@ -637,6 +664,7 @@ func (u *Ui) LoadImages() {
 	u.salvageAllUnpressed = LoadImage("images/salvageallunpressed.png")
 	u.salvageOnePressed = LoadImage("images/salvageonepressed.png")
 	u.salvageOneUnpressed = LoadImage("images/salvageoneunpressed.png")
+	u.tooltipSprite = LoadImage("images/tooltipbox.png")
 }
 
 func LoadImage(filepath string) *ebiten.Image {

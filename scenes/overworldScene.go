@@ -201,10 +201,16 @@ func (o *OverworldScene) Update(state *GameState, deltaTime float64) error {
 	o.entityManager.Update(deltaTime)
 	o.ui.Update(deltaTime)
 
-	if o.menuBtn {
-		t := &TitleScene{}
-		state.SceneManager.GoTo(t, transitionTime)
-	}
+	// if o.menuBtn {
+	// 	if !o.ui.IsOpen() {
+
+	// 		t := &TitleScene{}
+	// 		state.SceneManager.GoTo(t, transitionTime)
+
+	// 	} else {
+
+	// 	}
+	// }
 
 	if o.castAvailable && o.castBtn && o.castDistance < o.player.CastDistanceLimit {
 		s := &ScavengeScene{distanceOfOverworldCast: o.castDistance}
