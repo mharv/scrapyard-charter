@@ -1,8 +1,11 @@
 package crafting
 
 import (
+	"log"
 	"math/rand"
 
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/mharv/scrapyard-charter/inventory"
 )
@@ -59,10 +62,32 @@ func (cb *CraftingBench) CraftItem() {
 		randomIndex := rand.Intn(amountItemsCraftable)
 		// remove all materials here
 		globals.GetPlayerData().GetInventory().ResetMaterials()
-
 		globals.GetPlayerData().GetInventory().AddKeyItem(tempKeyItems[randomIndex])
-	}
 
+		// set new key item of type in
+		switch tempKeyItems[randomIndex].GetKeyItemType() {
+		case "Magnet":
+
+			globals.GetPlayerData().GetInventory().NewMagnetAcquired = true
+		case "Rod":
+
+			globals.GetPlayerData().GetInventory().NewRodAcquired = true
+		case "Reel":
+
+			globals.GetPlayerData().GetInventory().NewReelAcquired = true
+		case "Electromagnet":
+
+			globals.GetPlayerData().GetInventory().NewElecAcquired = true
+		case "Repulsor":
+
+			globals.GetPlayerData().GetInventory().NewRepAcquired = true
+		case "Boots":
+
+			globals.GetPlayerData().GetInventory().NewBootsAcquired = true
+		case "Line":
+			globals.GetPlayerData().GetInventory().NewLineAcquired = true
+		}
+	}
 }
 
 func (cb *CraftingBench) Init() {
@@ -72,12 +97,109 @@ func (cb *CraftingBench) Init() {
 	NEWMAGNET := &inventory.KeyItem{}
 	NEWMAGNET.Init(
 		"NEW MAGNET",
-		map[string]float64{"castSpeed": 350},
-		map[string]float64{"Iron": 100, "Steel": 100},
+		"Magnet",
+		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 350},
+		map[string]float64{"Iron": 100, "Steel": 50},
+		LoadImage("images/iconmagnet1.png"),
 	)
 
 	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *NEWMAGNET)
 
+	NEWMAGNET2 := &inventory.KeyItem{}
+	NEWMAGNET2.Init(
+		"BETTER MAGNET",
+		"Magnet",
+		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 450},
+		map[string]float64{"Rubber": 20, "Iron": 20},
+		LoadImage("images/iconmagnet2.png"),
+	)
+
+	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *NEWMAGNET2)
+
+	BOOTZ := &inventory.KeyItem{}
+	BOOTZ.Init(
+		"BOOTZ",
+		"Boots",
+		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 450},
+		map[string]float64{"Rubber": 20, "Iron": 20},
+		LoadImage("images/iconboots1.png"),
+	)
+
+	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *BOOTZ)
+
+	RODGER := &inventory.KeyItem{}
+	RODGER.Init(
+		"RODGER",
+		"Rod",
+		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 450},
+		map[string]float64{"Steel": 20, "Iron": 20},
+		LoadImage("images/iconrod1.png"),
+	)
+
+	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *RODGER)
+
+	REELY := &inventory.KeyItem{}
+	REELY.Init(
+		"REELY",
+		"Reel",
+		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 450},
+		map[string]float64{"Rubber": 20, "Steel": 20},
+		LoadImage("images/iconreel1.png"),
+	)
+
+	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *REELY)
+
+	Electrom := &inventory.KeyItem{}
+	Electrom.Init(
+		"Electrom",
+		"Electromagnet",
+		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 450},
+		map[string]float64{"Rubber": 20, "Iron": 20},
+		LoadImage("images/iconelectromagnet.png"),
+	)
+
+	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *Electrom)
+
+	revpol := &inventory.KeyItem{}
+	revpol.Init(
+		"revpol",
+		"Repulsor",
+		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 450},
+		map[string]float64{"Rubber": 20, "Iron": 20},
+		LoadImage("images/iconrepulsor.png"),
+	)
+
+	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *revpol)
+
+	linedUP := &inventory.KeyItem{}
+	linedUP.Init(
+		"linedUP",
+		"Line",
+		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 450},
+		map[string]float64{"Rubber": 20, "Iron": 20},
+		LoadImage("images/iconline1.png"),
+	)
+
+	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *linedUP)
+
+	GOLDENMAGNET := &inventory.KeyItem{}
+	GOLDENMAGNET.Init(
+		"GOLDENMAGNET",
+		"Magnet",
+		inventory.KeyItemModifiers{ModifierName: "castSpeed", ModifierValue: 450},
+		map[string]float64{"Gold": 100},
+		LoadImage("images/icongoldenmagnet.png"),
+	)
+
+	cb.KeyItemsAvailable = append(cb.KeyItemsAvailable, *GOLDENMAGNET)
+}
+
+func LoadImage(filepath string) *ebiten.Image {
+	img, _, err := ebitenutil.NewImageFromFile(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return img
 }
 
 // func (s *ScavengeScene) InitJunkList() {

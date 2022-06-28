@@ -34,6 +34,8 @@ func (g *Game) Update() error {
 		return err
 	}
 
+	// globals.GetPlayerData().Update()
+
 	return nil
 }
 
@@ -53,8 +55,8 @@ func (g *Game) Init() {
 	g.audioPlayer = &gameAudio.Audio{}
 	g.audioPlayer.Init()
 	g.audioPlayer.LoadFiles("audio")
-	g.audioPlayer.LoadFile("audio/music/menu.mp3")
-	g.audioPlayer.PlayFile("audio/music/menu.mp3")
+	g.audioPlayer.LoadFile("audio/menu.mp3")
+	g.audioPlayer.PlayFile("audio/menu.mp3")
 }
 
 func (g *Game) GetAudioPlayer() *gameAudio.Audio {

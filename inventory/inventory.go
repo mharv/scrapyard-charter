@@ -1,9 +1,16 @@
 package inventory
 
 type Inventory struct {
-	keyItems  []KeyItem
-	items     []Item
-	materials map[string]int
+	keyItems          []KeyItem
+	items             []Item
+	materials         map[string]int
+	NewRodAcquired    bool
+	NewReelAcquired   bool
+	NewLineAcquired   bool
+	NewMagnetAcquired bool
+	NewBootsAcquired  bool
+	NewElecAcquired   bool
+	NewRepAcquired    bool
 }
 
 func (i *Inventory) InitMaterials() {
@@ -33,10 +40,22 @@ func (i *Inventory) ResetMaterials() {
 
 func (i *Inventory) AddKeyItem(keyItem KeyItem) {
 	i.keyItems = append(i.keyItems, keyItem)
+	// i.NewKeyItemAcquired = true
 }
 
 func (i *Inventory) GetKeyItems() []KeyItem {
 	return i.keyItems
+}
+
+func (i *Inventory) GetKeyItemsByType(typeOfKeyItemRequired string) []KeyItem {
+	keyItemsByType := []KeyItem{}
+	for _, v := range i.keyItems {
+		if v.keyItemType == typeOfKeyItemRequired {
+			keyItemsByType = append(keyItemsByType, v)
+		}
+	}
+	return keyItemsByType
+
 }
 
 func (i *Inventory) AddItem(item Item) {
@@ -104,8 +123,3 @@ func (i *Inventory) SalvageAllItems(name string) {
 		}
 	}
 }
-
-// craft material functions go here
-// Do a check to make sure there is enough raw mateials,
-// if so use above function remove material
-// ten use add item
