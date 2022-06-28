@@ -23,7 +23,7 @@ func (i *Inventory) InitMaterials() {
 	i.materials["Nickel"] = 0
 	i.materials["Cobalt"] = 0
 	i.materials["Titanium"] = 0
-	i.materials["Gold"] = 0
+	i.materials["Gold"] = 101
 }
 
 func (i *Inventory) ResetMaterials() {

@@ -11,6 +11,7 @@ import (
 
 type WinScene struct {
 	txtRenderer *etxt.Renderer
+	victory     *ebiten.Image
 }
 
 func (w *WinScene) Init() {
@@ -31,6 +32,8 @@ func (w *WinScene) Init() {
 	w.txtRenderer.SetFont(fontLib.GetFont("Rajdhani Regular"))
 	w.txtRenderer.SetAlign(etxt.YCenter, etxt.XCenter)
 	w.txtRenderer.SetSizePx(24)
+
+	w.victory = LoadImage("images/victory.png")
 }
 
 func (w *WinScene) ReadInput() {
@@ -42,7 +45,12 @@ func (w *WinScene) Update(state *GameState, deltaTime float64) error {
 }
 
 func (w *WinScene) Draw(screen *ebiten.Image) {
-	screen.Fill(color.RGBA{0, 0, 0, 255})
+
+	imageOptions := &ebiten.DrawImageOptions{}
+	imageOptions.GeoM.Translate(0, 0)
+	screen.DrawImage(w.victory, imageOptions)
+
+	// screen.Fill(color.RGBA{0, 0, 0, 255})
 
 	w.txtRenderer.SetTarget(screen)
 	w.txtRenderer.SetColor(color.RGBA{255, 255, 255, 255})
