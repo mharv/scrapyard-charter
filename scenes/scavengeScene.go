@@ -187,15 +187,10 @@ func (s *ScavengeScene) Update(state *GameState, deltaTime float64) error {
 	s.entityManager.Update(deltaTime)
 
 	s.countdownTimer -= deltaTime
-	if s.countdownTimer <= 0 {
+	if s.countdownTimer <= 0 || s.menuBtn {
 		s.countdownTimer = 0
 		o := &OverworldScene{}
 		state.SceneManager.GoTo(o, transitionTime)
-	}
-
-	if s.menuBtn {
-		t := &TitleScene{}
-		state.SceneManager.GoTo(t, transitionTime)
 	}
 
 	s.entityManager.RemoveDead(s.physSpace)
