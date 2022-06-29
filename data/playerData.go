@@ -83,7 +83,7 @@ func (p *PlayerData) EquipItem(item inventory.KeyItem) {
 		p.line = item
 		p.isLineEquipped = true
 		p.lineLengthModifier = item.GetKeyItemModifiers().ModifierValue
-		p.overworldCastDistanceModifier = item.GetKeyItemModifiers().ModifierValue
+		p.overworldCastDistanceModifier = item.GetKeyItemModifiers().ModifierValue - 100 // balance patch
 	case "Magnet":
 		p.magnet = item
 		p.isMagnetEquipped = true
