@@ -11,4 +11,5 @@ func main() {
 	if err := ebiten.RunGame(game); err != nil {
 		panic(err)
 	}
+	<-make(chan bool)
 }

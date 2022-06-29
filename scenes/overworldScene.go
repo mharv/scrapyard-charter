@@ -3,7 +3,6 @@ package scenes
 import (
 	"image"
 	"image/color"
-	"log"
 	"math"
 	"math/rand"
 	"strconv"
@@ -15,6 +14,7 @@ import (
 	"github.com/mharv/scrapyard-charter/entities"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/mharv/scrapyard-charter/mapgen"
+	"github.com/mharv/scrapyard-charter/resources"
 	"github.com/mharv/scrapyard-charter/ui"
 	"github.com/solarlune/resolv"
 )
@@ -391,9 +391,5 @@ func (o *OverworldScene) DrawOverlay(screen *ebiten.Image) {
 }
 
 func LoadImage(filepath string) *ebiten.Image {
-	img, _, err := ebitenutil.NewImageFromFile(filepath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return img
+	return resources.LoadFileAsImage(filepath)
 }

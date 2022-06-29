@@ -2,13 +2,12 @@ package scenes
 
 import (
 	"image/color"
-	"log"
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/mharv/scrapyard-charter/globals"
+	"github.com/mharv/scrapyard-charter/resources"
 	"github.com/tinne26/etxt"
 )
 
@@ -36,26 +35,13 @@ func (t *TitleScene) Init() {
 	t.owrld = false
 	t.esc = false
 
-	bg, _, bgerr := ebitenutil.NewImageFromFile("images/titlescreen.png")
-	if bgerr != nil {
-		log.Fatal(bgerr)
-	}
-	t.image = bg
+	t.image = resources.LoadFileAsImage("images/titlescreen.png")
 
-	fontLib := etxt.NewFontLibrary()
+	fontLib := resources.LoadFileAsFont("fonts/Rajdhani-Regular.ttf")
 
 	t.titleText = "Scrapyard Magnate"
 	t.thoughtText = "I know that golden \nmagnet is out there...\nSomewhere..."
 	t.instructionsText = "Press [Enter] to play"
-
-	_, _, err := fontLib.ParseDirFonts("fonts")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if !fontLib.HasFont("Rajdhani Regular") {
-		log.Fatal("missing font Rajdhani-Regular.ttf")
-	}
 
 	t.txtRenderer = etxt.NewStdRenderer()
 	glyphsCache := etxt.NewDefaultCache(10 * 1024 * 1024) // 10MB

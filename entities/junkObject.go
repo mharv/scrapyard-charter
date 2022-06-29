@@ -2,7 +2,6 @@ package entities
 
 import (
 	"image/color"
-	"log"
 	"math/rand"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/mharv/scrapyard-charter/inventory"
+	"github.com/mharv/scrapyard-charter/resources"
 	"github.com/solarlune/resolv"
 )
 
@@ -48,12 +48,8 @@ func (j *JunkObject) PlayAudio() {
 func (j *JunkObject) Init(ImageFilepath string) {
 	j.alive = true
 	// Load an image given a filepath
-	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	j.sprite = img
+	j.sprite = resources.LoadFileAsImage(ImageFilepath)
 
 	// Setup resolv object to be size of the sprite
 	j.physObj = resolv.NewObject(0, 0, float64(j.sprite.Bounds().Dx())-junkPhysObjSizeDiff, float64(j.sprite.Bounds().Dy())-junkPhysObjSizeDiff, "junk")

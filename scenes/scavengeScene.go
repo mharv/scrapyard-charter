@@ -3,7 +3,6 @@ package scenes
 import (
 	"fmt"
 	"image/color"
-	"log"
 	"math/rand"
 	"time"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/entities"
 	"github.com/mharv/scrapyard-charter/globals"
+	"github.com/mharv/scrapyard-charter/resources"
 	"github.com/solarlune/resolv"
 	"github.com/tinne26/etxt"
 )
@@ -53,50 +53,21 @@ func (s *ScavengeScene) Init() {
 	s.physSpace = resolv.NewSpace(globals.ScreenWidth, globals.ScreenHeight, 16, 16)
 	s.UIPosition = basics.Vector2f{X: globals.ScreenWidth - (uiXOffset + iconXOffset), Y: uiYOffset + iconYOffset}
 
-	bg, _, bgerr := ebitenutil.NewImageFromFile("images/scavbackground.png")
-	if bgerr != nil {
-		log.Fatal(bgerr)
-	}
-	s.background = bg
+	s.background = resources.LoadFileAsImage("images/scavbackground.png")
 
-	bgwall, _, bgwerr := ebitenutil.NewImageFromFile("images/bgwalls.png")
-	if bgwerr != nil {
-		log.Fatal(bgwerr)
-	}
-	s.bgwalls = bgwall
+	s.bgwalls = resources.LoadFileAsImage("images/bgwalls.png")
 
-	img, _, imgerr := ebitenutil.NewImageFromFile("images/timerUIBox.png")
-	if imgerr != nil {
-		log.Fatal(imgerr)
-	}
-	s.timerUIboxSprite = img
+	s.timerUIboxSprite = resources.LoadFileAsImage("images/timerUIBox.png")
 
-	glimg, _, glerr := ebitenutil.NewImageFromFile("images/timerUIBoxGlass.png")
-	if glerr != nil {
-		log.Fatal(glerr)
-	}
-	s.timerUIglassSprite = glimg
+	s.timerUIglassSprite = resources.LoadFileAsImage("images/timerUIBoxGlass.png")
 
-	pipimg, _, piperr := ebitenutil.NewImageFromFile("images/UIPipes.png")
-	if piperr != nil {
-		log.Fatal(piperr)
-	}
-	s.UIPipeSprite = pipimg
+	s.UIPipeSprite = resources.LoadFileAsImage("images/UIPipes.png")
 
 	s.entityManager.Init()
 
 	s.countdownTimer = defaultTimerStart
 
-	fontLib := etxt.NewFontLibrary()
-
-	_, _, err := fontLib.ParseDirFonts("fonts")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if !fontLib.HasFont("Rajdhani Regular") {
-		log.Fatal("missing font Rajdhani-Regular.ttf")
-	}
+	fontLib := resources.LoadFileAsFont("fonts/Rajdhani-Regular.ttf")
 
 	s.txtRenderer = etxt.NewStdRenderer()
 	glyphsCache := etxt.NewDefaultCache(10 * 1024 * 1024) // 10MB

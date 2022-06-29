@@ -2,11 +2,11 @@ package entities
 
 import (
 	"image/color"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/mharv/scrapyard-charter/globals"
+	"github.com/mharv/scrapyard-charter/resources"
 	"github.com/solarlune/resolv"
 )
 
@@ -19,12 +19,7 @@ type GameObject struct {
 func (g *GameObject) Init(ImageFilepath string) {
 	g.alive = true
 	// Load an image given a filepath
-	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	g.sprite = img
+	g.sprite = resources.LoadFileAsImage(ImageFilepath)
 
 	// Setup resolv object to be size of the sprite
 	g.physObj = resolv.NewObject(globals.ScreenWidth/2, globals.ScreenHeight/2, float64(g.sprite.Bounds().Dx()), float64(g.sprite.Bounds().Dy()))

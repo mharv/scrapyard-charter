@@ -5,8 +5,7 @@ import (
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2/audio"
-	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/mharv/scrapyard-charter/resources"
 )
 
 const (
@@ -24,15 +23,7 @@ func (a *Audio) Init() {
 }
 
 func (a *Audio) LoadFile(filepath string) {
-	f, err := ebitenutil.OpenFile(filepath)
-	if err != nil {
-		panic("Cannot open file: " + filepath)
-	}
-
-	d, err := mp3.DecodeWithSampleRate(sampleRate, f)
-	if err != nil {
-		panic("Cannot decode file: " + filepath)
-	}
+	d := resources.LoadFileAsAudio(filepath)
 
 	p, err := a.audioContext.NewPlayer(d)
 	if err != nil {
@@ -44,7 +35,7 @@ func (a *Audio) LoadFile(filepath string) {
 
 func (a *Audio) LoadFiles(folder string) {
 
-	f, err := os.Open(folder)
+	f, err := os.Open("resources/" + folder)
 	if err != nil {
 		fmt.Println(err)
 		return

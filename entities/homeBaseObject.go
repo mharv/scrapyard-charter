@@ -2,13 +2,13 @@ package entities
 
 import (
 	"image/color"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/mharv/scrapyard-charter/animation"
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/globals"
+	"github.com/mharv/scrapyard-charter/resources"
 	"github.com/solarlune/resolv"
 )
 
@@ -55,12 +55,7 @@ func (h *HomeBaseObject) Init(ImageFilepath string) {
 	}, "idle")
 	h.animator.SetAnimation("idle", false)
 
-	img, _, err := ebitenutil.NewImageFromFile("images/craftZone.png")
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		h.craftZoneSprite = img
-	}
+	h.craftZoneSprite = resources.LoadFileAsImage("images/craftZone.png")
 
 	h.craftZone = resolv.NewObject(
 		globals.ScreenWidth/2,

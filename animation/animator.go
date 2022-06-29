@@ -2,11 +2,10 @@ package animation
 
 import (
 	"image"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/mharv/scrapyard-charter/basics"
+	"github.com/mharv/scrapyard-charter/resources"
 )
 
 type Animation struct {
@@ -66,11 +65,7 @@ func (a *Animator) IsAnimation(name string) bool {
 }
 
 func (a *Animator) Init(ImageFilepath string, frameSize basics.Vector2i, scale, position basics.Vector2f, speed float64) {
-	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	a.spritesheet = img
+	a.spritesheet = resources.LoadFileAsImage(ImageFilepath)
 	a.frameSize = frameSize
 	a.scale = scale
 	a.position = position

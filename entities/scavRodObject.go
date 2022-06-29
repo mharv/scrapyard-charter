@@ -3,13 +3,13 @@ package entities
 import (
 	"image"
 	"image/color"
-	"log"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/globals"
+	"github.com/mharv/scrapyard-charter/resources"
 	"github.com/solarlune/resolv"
 )
 
@@ -72,12 +72,8 @@ func (s *ScavRodObject) SetMagnetOffset(magnetOffset basics.Vector2f) {
 func (s *ScavRodObject) Init(ImageFilepath string) {
 	s.alive = true
 	// Load an image given a filepath
-	img, _, err := ebitenutil.NewImageFromFile(ImageFilepath)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	s.sprite = img
+	s.sprite = resources.LoadFileAsImage(ImageFilepath)
 	s.lineOffset = float64(s.sprite.Bounds().Dy())
 	s.root = &basics.Vector2f{X: 0, Y: 0}
 	s.initialTipPos = &basics.Vector2f{X: s.root.X, Y: s.root.Y}

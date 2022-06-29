@@ -2,7 +2,6 @@ package entities
 
 import (
 	"image/color"
-	"log"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/globals"
+	"github.com/mharv/scrapyard-charter/resources"
 	"github.com/solarlune/resolv"
 )
 
@@ -327,11 +327,7 @@ func (m *MagnetObject) LoadUIImages() {
 }
 
 func loadImage(filepath string) *ebiten.Image {
-	img, _, err := ebitenutil.NewImageFromFile(filepath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return img
+	return resources.LoadFileAsImage(filepath)
 }
 
 func (m *MagnetObject) SetUIPos(pos basics.Vector2f) {
