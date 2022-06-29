@@ -187,8 +187,8 @@ func (o *OverworldScene) ReadInput() {
 		o.menuBtn = false
 	}
 
-	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) ||
-		inpututil.IsKeyJustPressed(ebiten.Key(ebiten.KeyE)) {
+	if (inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) ||
+		inpututil.IsKeyJustPressed(ebiten.Key(ebiten.KeyE))) && !o.ui.IsOpen() {
 		o.castBtn = true
 	} else {
 		o.castBtn = false
@@ -200,17 +200,6 @@ func (o *OverworldScene) Update(state *GameState, deltaTime float64) error {
 
 	o.entityManager.Update(deltaTime)
 	o.ui.Update(deltaTime)
-
-	// if o.menuBtn {
-	// 	if !o.ui.IsOpen() {
-
-	// 		t := &TitleScene{}
-	// 		state.SceneManager.GoTo(t, transitionTime)
-
-	// 	} else {
-
-	// 	}
-	// }
 
 	if o.castAvailable && o.castBtn && o.castDistance < o.player.CastDistanceLimit {
 		s := &ScavengeScene{distanceOfOverworldCast: o.castDistance}
