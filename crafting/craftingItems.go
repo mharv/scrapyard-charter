@@ -53,13 +53,27 @@ func (cb *CraftingBench) CraftItem() {
 		}
 
 		if !previouslyCrafted && canCraft {
+
 			tempKeyItems = append(tempKeyItems, kia)
 		}
 	}
 	amountItemsCraftable := len(tempKeyItems)
 
 	if amountItemsCraftable > 0 {
-		randomIndex := rand.Intn(amountItemsCraftable)
+		var randomIndex int
+
+		if globals.GetPlayerData().GetInventory().GetMaterials()["Gold"] >= 50 {
+
+			for i, v := range tempKeyItems {
+				if v.GetKeyItemName() == "GOLDENMAGNET" {
+					randomIndex = i
+				}
+			}
+		} else {
+
+			randomIndex = rand.Intn(amountItemsCraftable)
+		}
+
 		// remove all materials here
 		globals.GetPlayerData().GetInventory().ResetMaterials()
 		globals.GetPlayerData().GetInventory().AddKeyItem(tempKeyItems[randomIndex])
@@ -98,7 +112,7 @@ func (cb *CraftingBench) Init() {
 	magnet1.Init(
 		"THE CLASSIC",
 		"Magnet",
-		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 250},
+		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 50},
 		map[string]float64{"Iron": 50, "Nickel": 25, "Cobalt": 25},
 		LoadImage("images/iconmagnet1.png"),
 	)
@@ -108,7 +122,7 @@ func (cb *CraftingBench) Init() {
 	magnet2.Init(
 		"BABY BOY BLUE",
 		"Magnet",
-		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 400},
+		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 100},
 		map[string]float64{"Steel": 75, "Nickel": 40, "Cobalt": 40},
 		LoadImage("images/iconmagnet2.png"),
 	)
@@ -118,7 +132,7 @@ func (cb *CraftingBench) Init() {
 	magnet3.Init(
 		"TITAN",
 		"Magnet",
-		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 600},
+		inventory.KeyItemModifiers{ModifierName: "Magnet field size", ModifierValue: 200},
 		map[string]float64{"Steel": 100, "Titanium": 75, "Nickel": 40, "Cobalt": 40},
 		LoadImage("images/iconmagnet3.png"),
 	)
