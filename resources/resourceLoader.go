@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/tinne26/etxt"
 )
@@ -53,16 +54,34 @@ func LoadFileAsFont(Filename string) *etxt.FontLibrary {
 	return fontLib
 }
 
-func LoadFileAsAudio(Filename string) *mp3.Stream {
-	file, err := AudioFS.Open(Filename)
+func LoadFolderAsAudio(Folder string, context *audio.Context) map[string]*audio.Player {
+
+	streams := map[string]*audio.Player{}
+	//var files embed.FS
+	folder, err := AudioFS.ReadDir(Folder)
 	if err != nil {
 		panic(err)
 	}
 
-	decoded, err := mp3.DecodeWithSampleRate(SampleRate, file)
-	if err != nil {
-		panic(err)
+	for _, v := range folder {
+		name := Folder + "/" + v.Name()
+
+		file, err := AudioFS.Open(name)
+		if err != nil {
+			panic(err)
+		}
+
+		d, err := mp3.DecodeWithSampleRate(SampleRate, file)
+		if err != nil {
+			panic(err)
+		}
+
+		p, err := context.NewPlayer(d)
+		if err != nil {
+			panic("Cannot create player for: " + name)
+		}
+		streams[name] = p
 	}
 
-	return decoded
+	return streams
 }
