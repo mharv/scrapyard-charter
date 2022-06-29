@@ -3,7 +3,6 @@ package ui
 import (
 	"fmt"
 	"image/color"
-	"log"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -12,6 +11,7 @@ import (
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/crafting"
 	"github.com/mharv/scrapyard-charter/globals"
+	"github.com/mharv/scrapyard-charter/resources"
 	"github.com/tinne26/etxt"
 )
 
@@ -175,16 +175,7 @@ func (u *Ui) Init() {
 
 	u.LoadImages()
 
-	fontLib := etxt.NewFontLibrary()
-
-	_, _, err := fontLib.ParseDirFonts("fonts")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if !fontLib.HasFont("Rajdhani Regular") {
-		log.Fatal("missing font Rajdhani-Regular.ttf")
-	}
+	fontLib := resources.LoadFileAsFont("fonts/Rajdhani-Regular.ttf")
 
 	u.txtRenderer = etxt.NewStdRenderer()
 	glyphsCache := etxt.NewDefaultCache(10 * 1024 * 1024) // 10MB
@@ -668,9 +659,5 @@ func (u *Ui) LoadImages() {
 }
 
 func LoadImage(filepath string) *ebiten.Image {
-	img, _, err := ebitenutil.NewImageFromFile(filepath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return img
+	return resources.LoadFileAsImage(filepath)
 }

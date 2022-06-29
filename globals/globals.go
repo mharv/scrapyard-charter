@@ -1,6 +1,8 @@
 package globals
 
 import (
+	_ "embed"
+
 	"github.com/mharv/scrapyard-charter/basics"
 	"github.com/mharv/scrapyard-charter/data"
 	"github.com/mharv/scrapyard-charter/gameAudio"

@@ -1,13 +1,12 @@
 package crafting
 
 import (
-	"log"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/mharv/scrapyard-charter/globals"
 	"github.com/mharv/scrapyard-charter/inventory"
+	"github.com/mharv/scrapyard-charter/resources"
 )
 
 type CraftingBench struct {
@@ -301,27 +300,5 @@ func (cb *CraftingBench) Init() {
 }
 
 func LoadImage(filepath string) *ebiten.Image {
-	img, _, err := ebitenutil.NewImageFromFile(filepath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return img
+	return resources.LoadFileAsImage(filepath)
 }
-
-// func (s *ScavengeScene) InitJunkList() {
-// 	cog := &entities.JunkObject{}
-// 	cog.SetImageFilepath("images/cog.png")
-// 	cog.InitData()
-// 	cog.SetItemDataName("Cog")
-// 	cog.SetItemDataDepthAndRarity(0, 80, 0.1)
-// 	cog.AddItemDataMaterial("Iron", 5, 10)
-// 	s.junkList = append(s.junkList, *cog)
-
-// 	ironPipe := &entities.JunkObject{}
-// 	ironPipe.SetImageFilepath("images/ironpipe.png")
-// 	ironPipe.InitData()
-// 	ironPipe.SetItemDataName("Iron Pipe")
-// 	ironPipe.SetItemDataDepthAndRarity(1, 60, 0.2)
-// 	ironPipe.AddItemDataMaterial("Iron", 15, 30)
-// 	s.junkList = append(s.junkList, *ironPipe)
-// }
