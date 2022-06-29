@@ -14,7 +14,7 @@ Crafting Recipes:
 
     Boots - Rubber Plastic and Iron
     Reel - Iron or Titanium or Steel
-    Rod - Rubber, Plastic and Iron or Titanium or Steel 
+    Rod - Rubber, Plastic and Iron or Titanium or Steel
     Line - Steel or Copper or Rubber
     Magnet - Nickel, Cobalt and Iron or Steel or Titanium or even... Gold? ( ͡° ͜ʖ ͡°)
     Electro Magnet (Hold Spacebar) - Copper
